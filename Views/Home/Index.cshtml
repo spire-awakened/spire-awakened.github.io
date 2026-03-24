@@ -1,0 +1,352 @@
+﻿@using System.IO
+@using System.Text.RegularExpressions
+@using System.Globalization
+@model List<string>
+@{
+    ViewData["Title"] = "Ironclad";
+
+    string FormatCardLabel(string raw)
+    {
+        var withoutPrefix = raw.Replace("StS2_Ironclad-", "");
+        var withSpaces = Regex.Replace(withoutPrefix, "([a-z])([A-Z])", "$1 $2");
+        withSpaces = Regex.Replace(withSpaces, "([A-Z]+)([A-Z][a-z])", "$1 $2");
+        withSpaces = withSpaces.Replace('-', ' ');
+        withSpaces = withSpaces.Replace('_', ' ');
+        var cleaned = withSpaces.Trim();
+        if (string.IsNullOrEmpty(cleaned))
+        {
+            return string.Empty;
+        }
+        var parts = cleaned.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 0)
+        {
+            return string.Empty;
+        }
+        var title = parts[0].ToLowerInvariant();
+        title = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(title);
+        if (parts.Length > 1)
+        {
+            title += " " + string.Join(" ", parts.Skip(1).Select(x => x.ToLowerInvariant()));
+        }
+        return title;
+    }
+}
+
+<style>
+    body {
+        background: linear-gradient(180deg, #0b0f1a 0%, #121724 100%);
+        color: #e7ebf2;
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-header {
+        border-radius: 0.75rem;
+        padding: 1rem 1rem 0.6rem;
+        background-color: rgba(17, 24, 41, 0.84);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(6px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+        margin-bottom: 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.8rem;
+        letter-spacing: 0.7px;
+        margin: 0;
+        color: #f9faff;
+    }
+
+    .page-header .stats {
+        font-size: 0.98rem;
+        color: #bbc4d8;
+    }
+
+    .search-box {
+        border-radius: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.8rem;
+        background-color: rgba(13, 19, 33, 0.8);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .search-box label {
+        color: #cdd3e0;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+        display: block;
+    }
+
+    .search-box input {
+        border-radius: 0.6rem; 
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        background-color: rgba(14, 20, 35, 0.94);
+        color: #f8fbff;
+        caret-color: #ffffff;
+        font-weight: 600;
+        text-shadow: 0 1px 1px rgba(0,0,0,0.35);
+    }
+
+    .search-box input::placeholder {
+        color: rgba(232, 238, 255, 0.63);
+    }
+
+    .search-box input:focus {
+        background-color: rgba(15, 22, 41, 1);
+        border-color: rgba(103, 198, 255, 0.75);
+        color: #ffffff;
+    }
+
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 10px;
+        width: 100%;
+    }
+
+    .card-grid-item {
+        margin: 0;
+    }
+
+    .card-grid-item .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+    }
+
+    .card-grid-item:hover .card {
+        transform: translateY(-6px) scale(1.035);
+        box-shadow: 0 18px 38px rgba(66, 135, 245, 0.42), 0 0 24px rgba(140, 36, 176, 0.72);
+    }
+
+    .card-grid .card {
+        border-radius: 1rem;
+        border: 1px solid rgba(136, 151, 181, 0.2);
+        overflow: hidden;
+        min-height: 280px;
+    }
+
+    .card-grid img {
+        width: 100%;
+        height: 240px;
+        object-fit: contain;
+        background-color: rgba(255,255,255,0.06);
+    }
+
+    .card-body {
+        padding: 0.15rem 0.5rem 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card-body small {
+        font-size: 1.06rem;
+        color: #f4f8ff;
+        margin: 0;
+        line-height: 1.2;
+        font-weight: 700;
+    }
+
+    small.plus-mode {
+        color: #00C853 !important;
+    }
+
+    .no-results {
+        color: #ffbaba;
+        border: 1px solid rgba(255, 100, 100, 0.35);
+    }
+</style>
+
+<div class="container-fluid py-4 min-vh-100">
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <span style="color:#a1b1d7;font-weight:600;">Ironclad</span>
+                <span class="stats">Total cards: <strong>@Model.Count()</strong></span>
+            </div>
+            <div>
+                <span id="upgradeHint" class="stats">Press Q to view upgraded cards</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-box mb-4">
+        <label for="cardSearchInput">Search Card Name</label>
+        <input id="cardSearchInput" type="search" class="form-control" placeholder="Type to filter cards..." aria-label="Search cards" autofocus />
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-warning">No card images found in /images/cards.</div>
+    }
+    else
+    {
+        <div class="card-grid">
+            @foreach (var cardUrl in Model)
+            {
+                var rawName = System.IO.Path.GetFileNameWithoutExtension(cardUrl);
+                var label = FormatCardLabel(rawName);
+                <div class="card-grid-item" data-card-name="@label.ToLowerInvariant()">
+                    <div class="card h-100 border-0" style="background-color: #111821;">
+                        <img src="@cardUrl" alt="Card image" />
+                        <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                            <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                                @label
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<div id="cardOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:9999; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity 0.5s ease; pointer-events:none;">
+    <div style="background:#181e2a; border: 4px solid #42a5f5; border-radius:1.2rem; box-shadow: 0 0 50px rgba(66, 135, 245, 0.8), 0 0 100px rgba(140, 36, 176, 1); padding:2.5rem; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <img id="overlayImg" style="max-width:90vw; max-height:50vh; object-fit:contain; border-radius:0.8rem; background:#222b3a;" />
+        <small id="overlayTitle" class="text-truncate d-block text-light fw-semibold" style="max-width: 100%; font-size: 1.5rem; margin-top: 1rem;"></small>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const input = document.getElementById('cardSearchInput');
+        const items = document.querySelectorAll('.card-grid-item');
+        const overlay = document.getElementById('cardOverlay');
+        const overlayImg = document.getElementById('overlayImg');
+        const overlayTitle = document.getElementById('overlayTitle');
+
+        const plusAvailabilityCache = new Map();
+
+        function getPlusSrc(baseSrc) {
+            return baseSrc.replace(/\.png(?=($|\?))/i, 'Plus.png');
+        }
+
+        function canLoadImage(url) {
+            if (plusAvailabilityCache.has(url)) {
+                return Promise.resolve(plusAvailabilityCache.get(url));
+            }
+
+            return new Promise(resolve => {
+                const probe = new Image();
+                probe.onload = () => {
+                    plusAvailabilityCache.set(url, true);
+                    resolve(true);
+                };
+                probe.onerror = () => {
+                    plusAvailabilityCache.set(url, false);
+                    resolve(false);
+                };
+                probe.src = url;
+            });
+        }
+
+        async function applyCardMode(item, enablePlus) {
+            const img = item.querySelector('img');
+            const small = item.querySelector('small');
+            const baseSrc = img.dataset.baseSrc;
+
+            if (!enablePlus) {
+                img.src = baseSrc;
+                small.classList.remove('plus-mode');
+                small.textContent = small.dataset.originalText;
+                return;
+            }
+
+            const plusSrc = getPlusSrc(baseSrc);
+            const plusExists = await canLoadImage(plusSrc);
+
+            if (plusExists) {
+                img.src = plusSrc;
+                small.classList.add('plus-mode');
+                small.textContent = small.dataset.originalText + '+';
+            } else {
+                img.src = baseSrc;
+                small.classList.remove('plus-mode');
+                small.textContent = small.dataset.originalText;
+            }
+        }
+
+        function syncOverlayFromItem(item) {
+            const img = item.querySelector('img');
+            const small = item.querySelector('small');
+            overlayImg.src = img.src;
+            overlayImg.dataset.baseSrc = img.dataset.baseSrc;
+            overlayTitle.textContent = small.textContent;
+            overlayTitle.className = small.className;
+            overlayTitle.dataset.originalText = small.dataset.originalText;
+        }
+
+        // Initialize base src for all images and original text for titles
+        items.forEach(item => {
+            const img = item.querySelector('img');
+            img.dataset.baseSrc = img.src;
+            const small = item.querySelector('small');
+            small.dataset.originalText = small.textContent.trim();
+        });
+
+        input.addEventListener('input', function () {
+            const term = this.value.trim().toLowerCase();
+
+            items.forEach(item => {
+                const name = item.getAttribute('data-card-name') || '';
+                const match = name.includes(term);
+                item.style.display = match ? 'block' : 'none';
+            });
+        });
+
+        let hoverTimer = null;
+        let showPlus = false;
+        let activeOverlayItem = null;
+        let toggleInProgress = false;
+        items.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                if (hoverTimer) clearTimeout(hoverTimer);
+                activeOverlayItem = this;
+                hoverTimer = setTimeout(() => {
+                    syncOverlayFromItem(this);
+                    overlay.style.opacity = '1';
+                    overlay.style.pointerEvents = 'auto';
+                    overlayImg.style.transform = 'scale(1)';
+                }, 600);
+            });
+            item.addEventListener('mouseleave', function() {
+                if (hoverTimer) clearTimeout(hoverTimer);
+            });
+        });
+
+        overlay.addEventListener('click', function() {
+            overlay.style.opacity = '0';
+            overlay.style.pointerEvents = 'none';
+        });
+
+        // Configurable toggle key: set window.cardPlusToggleKey, defaults to Q
+        const toggleKey = (window.cardPlusToggleKey || 'q').toLowerCase();
+        const upgradeHint = document.getElementById('upgradeHint');
+        if (upgradeHint) {
+            upgradeHint.textContent = `Press ${toggleKey.toUpperCase()} to view upgraded cards`;
+        }
+
+        // Key press to toggle Plus images
+        document.addEventListener('keydown', async function(event) {
+            if ((event.key || '').toLowerCase() === toggleKey) {
+                event.preventDefault();
+                if (toggleInProgress) {
+                    return;
+                }
+
+                toggleInProgress = true;
+                showPlus = !showPlus;
+
+                const updates = Array.from(items).map(item => applyCardMode(item, showPlus));
+                await Promise.all(updates);
+
+                if (overlay.style.opacity === '1' && activeOverlayItem) {
+                    syncOverlayFromItem(activeOverlayItem);
+                }
+
+                toggleInProgress = false;
+            }
+        });
+    })();
+</script>
+
