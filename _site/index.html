@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ironclad - spire-awakened</title>
+    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/site.css" />
+    <style>
+        body {
+            background: linear-gradient(180deg, #0b0f1a 0%, #121724 100%);
+            color: #e7ebf2;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .page-header {
+            border-radius: 0.75rem;
+            padding: 1rem 1rem 0.6rem;
+            background-color: rgba(17, 24, 41, 0.84);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+            margin-bottom: 1rem;
+        }
+
+        .page-header .stats {
+            font-size: 0.98rem;
+            color: #bbc4d8;
+        }
+
+        .search-box {
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.8rem;
+            background-color: rgba(13, 19, 33, 0.8);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        }
+
+        .search-box label {
+            color: #cdd3e0;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            display: block;
+        }
+
+        .search-box input {
+            border-radius: 0.6rem;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background-color: rgba(14, 20, 35, 0.94);
+            color: #f8fbff;
+            caret-color: #ffffff;
+            font-weight: 600;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+            width: 100%;
+        }
+
+        .card-grid-item .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+            border-radius: 1rem;
+            border: 1px solid rgba(136, 151, 181, 0.2);
+            overflow: hidden;
+            min-height: 280px;
+        }
+
+        .card-grid-item:hover .card {
+            transform: translateY(-6px) scale(1.035);
+            box-shadow: 0 18px 38px rgba(66, 135, 245, 0.42), 0 0 24px rgba(140, 36, 176, 0.72);
+        }
+
+        .card-grid img {
+            width: 100%;
+            height: 240px;
+            object-fit: contain;
+            background-color: rgba(255,255,255,0.06);
+        }
+
+        .card-body {
+            padding: 0.15rem 0.5rem 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-body small {
+            font-size: 1.06rem;
+            color: #f4f8ff;
+            margin: 0;
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        small.plus-mode {
+            color: #00C853 !important;
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+    <div class="container-fluid py-4 min-vh-100">
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span style="color:#a1b1d7;font-weight:600;">Ironclad</span>
+                    <span class="stats">Total cards: <strong>90</strong></span>
+                </div>
+                <div>
+                    <span id="upgradeHint" class="stats">Press Q to view upgraded cards</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="search-box mb-4">
+            <label for="cardSearchInput">Search Card Name</label>
+            <input id="cardSearchInput" type="search" class="form-control" placeholder="Type to filter cards..." aria-label="Search cards" autofocus />
+        </div>
+
+        <div class="card-grid">
+            <div class="card-grid-item" data-card-name="aggression">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Aggression.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Aggression
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="anger">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Anger.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Anger
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="armaments">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Armaments.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Armaments
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="ashen strike">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-AshenStrike.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Ashen strike
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="barricade">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Barricade.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Barricade
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="bash">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Bash.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Bash
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="battle trance">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-BattleTrance.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Battle trance
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="bloodletting">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Bloodletting.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Bloodletting
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="blood wall">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-BloodWall.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Blood wall
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="bludgeon">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Bludgeon.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Bludgeon
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="body slam">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-BodySlam.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Body slam
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="brand">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Brand.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Brand
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="break">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Break.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Break
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="breakthrough">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Breakthrough.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Breakthrough
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="bully">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Bully.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Bully
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="burning pact">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-BurningPact.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Burning pact
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="cascade">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Cascade.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Cascade
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="cinder">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Cinder.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Cinder
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="clash">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Clash.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Clash
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="colossus">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Colossus.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Colossus
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="conflagration">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Conflagration.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Conflagration
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="corruption">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Corruption.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Corruption
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="crimson mantle">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-CrimsonMantle.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Crimson mantle
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="cruelty">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Cruelty.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Cruelty
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="dark embrace">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-DarkEmbrace.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Dark embrace
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="defend">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Defend.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Defend
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="demon form">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-DemonForm.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Demon form
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="demonic shield">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-DemonicShield.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Demonic shield
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="dismantle">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Dismantle.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Dismantle
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="dominate">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Dominate.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Dominate
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="drumof battle">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-DrumofBattle.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Drumof battle
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="dual wield">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-DualWield.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Dual wield
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="entrench">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Entrench.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Entrench
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="evil eye">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-EvilEye.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Evil eye
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="expecta fight">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-ExpectaFight.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Expecta fight
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="feed">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Feed.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Feed
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="feel no pain">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-FeelNoPain.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Feel no pain
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="fiend fire">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-FiendFire.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Fiend fire
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="fight me">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-FightMe.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Fight me
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="flame barrier">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-FlameBarrier.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Flame barrier
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="forgotten ritual">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-ForgottenRitual.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Forgotten ritual
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="grapple">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Grapple.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Grapple
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="havoc">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Havoc.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Havoc
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="headbutt">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Headbutt.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Headbutt
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="hellraiser">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Hellraiser.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Hellraiser
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="hemokinesis">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Hemokinesis.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Hemokinesis
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="howlfrom beyond">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-HowlfromBeyond.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Howlfrom beyond
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="impervious">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Impervious.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Impervious
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="infernal blade">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-InfernalBlade.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Infernal blade
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="inferno">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Inferno.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Inferno
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="inflame">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Inflame.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Inflame
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="iron wave">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-IronWave.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Iron wave
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="juggernaut">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Juggernaut.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Juggernaut
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="juggling">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Juggling.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Juggling
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="mangle">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Mangle.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Mangle
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="molten fist">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-MoltenFist.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Molten fist
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="offering">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Offering.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Offering
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="one two punch">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-One-TwoPunch.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            One two punch
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="pacts end">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-PactsEnd.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Pacts end
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="perfected strike">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-PerfectedStrike.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Perfected strike
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="pillage">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Pillage.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Pillage
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="pommel strike">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-PommelStrike.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Pommel strike
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="primal force">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-PrimalForce.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Primal force
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="pyre">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Pyre.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Pyre
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="rage">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Rage.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Rage
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="rampage">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Rampage.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Rampage
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="rupture">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Rupture.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Rupture
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="second wind">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-SecondWind.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Second wind
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="setup strike">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-SetupStrike.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Setup strike
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="shrug it off">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-ShrugItOff.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Shrug it off
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="spite">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Spite.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Spite
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="stampede">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Stampede.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Stampede
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="stoke">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Stoke.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Stoke
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="stomp">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Stomp.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Stomp
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="stone armor">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-StoneArmor.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Stone armor
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="strike">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Strike.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Strike
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="sword boomerang">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-SwordBoomerang.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Sword boomerang
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="tank">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Tank.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Tank
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="taunt">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Taunt.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Taunt
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="tear asunder">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-TearAsunder.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Tear asunder
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="thrash">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Thrash.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Thrash
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="thunderclap">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Thunderclap.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Thunderclap
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="tremble">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Tremble.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Tremble
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="true grit">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-TrueGrit.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            True grit
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="twin strike">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-TwinStrike.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Twin strike
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="unmovable">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Unmovable.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Unmovable
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="unrelenting">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Unrelenting.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Unrelenting
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="uppercut">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Uppercut.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Uppercut
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="vicious">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Vicious.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Vicious
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-grid-item" data-card-name="whirlwind">
+                <div class="card h-100 border-0" style="background-color: #111821;">
+                    <img src="images/cards/StS2_Ironclad-Whirlwind.png" alt="Card image" />
+                    <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
+                        <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">
+                            Whirlwind
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cardOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:9999; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity 0.5s ease; pointer-events:none;">
+        <div style="background:#181e2a; border: 4px solid #42a5f5; border-radius:1.2rem; box-shadow: 0 0 50px rgba(66, 135, 245, 0.8), 0 0 100px rgba(140, 36, 176, 1); padding:2.5rem; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <img id="overlayImg" style="max-width:90vw; max-height:50vh; object-fit:contain; border-radius:0.8rem; background:#222b3a;" />
+            <small id="overlayTitle" class="text-truncate d-block text-light fw-semibold" style="max-width: 100%; font-size: 1.5rem; margin-top: 1rem;"></small>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const input = document.getElementById('cardSearchInput');
+            const items = document.querySelectorAll('.card-grid-item');
+            const overlay = document.getElementById('cardOverlay');
+            const overlayImg = document.getElementById('overlayImg');
+            const overlayTitle = document.getElementById('overlayTitle');
+
+            const plusAvailabilityCache = new Map();
+
+            function getPlusSrc(baseSrc) {
+                return baseSrc.replace(/\.png(?=($|\?))/i, 'Plus.png');
+            }
+
+            function canLoadImage(url) {
+                if (plusAvailabilityCache.has(url)) {
+                    return Promise.resolve(plusAvailabilityCache.get(url));
+                }
+
+                return new Promise(resolve => {
+                    const probe = new Image();
+                    probe.onload = () => {
+                        plusAvailabilityCache.set(url, true);
+                        resolve(true);
+                    };
+                    probe.onerror = () => {
+                        plusAvailabilityCache.set(url, false);
+                        resolve(false);
+                    };
+                    probe.src = url;
+                });
+            }
+
+            async function applyCardMode(item, enablePlus) {
+                const img = item.querySelector('img');
+                const small = item.querySelector('small');
+                const baseSrc = img.dataset.baseSrc;
+
+                if (!enablePlus) {
+                    img.src = baseSrc;
+                    small.classList.remove('plus-mode');
+                    small.textContent = small.dataset.originalText;
+                    return;
+                }
+
+                const plusSrc = getPlusSrc(baseSrc);
+                const plusExists = await canLoadImage(plusSrc);
+
+                if (plusExists) {
+                    img.src = plusSrc;
+                    small.classList.add('plus-mode');
+                    small.textContent = small.dataset.originalText + '+';
+                } else {
+                    img.src = baseSrc;
+                    small.classList.remove('plus-mode');
+                    small.textContent = small.dataset.originalText;
+                }
+            }
+
+            function syncOverlayFromItem(item) {
+                const img = item.querySelector('img');
+                const small = item.querySelector('small');
+                overlayImg.src = img.src;
+                overlayImg.dataset.baseSrc = img.dataset.baseSrc;
+                overlayTitle.textContent = small.textContent;
+                overlayTitle.className = small.className;
+                overlayTitle.dataset.originalText = small.dataset.originalText;
+            }
+
+            items.forEach(item => {
+                const img = item.querySelector('img');
+                img.dataset.baseSrc = img.src;
+                const small = item.querySelector('small');
+                small.dataset.originalText = small.textContent.trim();
+            });
+
+            input.addEventListener('input', function () {
+                const term = this.value.trim().toLowerCase();
+
+                items.forEach(item => {
+                    const name = item.getAttribute('data-card-name') || '';
+                    const match = name.includes(term);
+                    item.style.display = match ? 'block' : 'none';
+                });
+            });
+
+            let hoverTimer = null;
+            let showPlus = false;
+            let activeOverlayItem = null;
+            let toggleInProgress = false;
+
+            items.forEach(item => {
+                item.addEventListener('mouseenter', function () {
+                    if (hoverTimer) clearTimeout(hoverTimer);
+                    activeOverlayItem = this;
+                    hoverTimer = setTimeout(() => {
+                        syncOverlayFromItem(this);
+                        overlay.style.opacity = '1';
+                        overlay.style.pointerEvents = 'auto';
+                    }, 600);
+                });
+
+                item.addEventListener('mouseleave', function () {
+                    if (hoverTimer) clearTimeout(hoverTimer);
+                });
+            });
+
+            overlay.addEventListener('click', function () {
+                overlay.style.opacity = '0';
+                overlay.style.pointerEvents = 'none';
+            });
+
+            const upgradeHint = document.getElementById('upgradeHint');
+            const toggleKey = 'q';
+            if (upgradeHint) {
+                upgradeHint.textContent = `Press ${toggleKey.toUpperCase()} to view upgraded cards`;
+            }
+
+            document.addEventListener('keydown', async function (event) {
+                if ((event.key || '').toLowerCase() === toggleKey) {
+                    event.preventDefault();
+                    if (toggleInProgress) {
+                        return;
+                    }
+
+                    toggleInProgress = true;
+                    showPlus = !showPlus;
+
+                    const updates = Array.from(items).map(item => applyCardMode(item, showPlus));
+                    await Promise.all(updates);
+
+                    if (overlay.style.opacity === '1' && activeOverlayItem) {
+                        syncOverlayFromItem(activeOverlayItem);
+                    }
+
+                    toggleInProgress = false;
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

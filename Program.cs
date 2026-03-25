@@ -1,3 +1,8 @@
+if (StaticSiteExporter.TryExport(args))
+{
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
