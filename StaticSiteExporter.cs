@@ -46,14 +46,15 @@ internal static class StaticSiteExporter
         File.WriteAllText(Path.Combine(outputRoot, ".nojekyll"), string.Empty);
     }
 
-    private static string BuildIndexHtml(List<(string Url, string Label)> cards)
+    private static string BuildIndexHtml(List<(string Url, string Label, string Key)> cards)
     {
         var cardHtml = new StringBuilder();
         foreach (var card in cards)
         {
             var safeLabel = WebUtility.HtmlEncode(card.Label);
             var dataName = WebUtility.HtmlEncode(card.Label.ToLowerInvariant());
-            cardHtml.AppendLine($"            <div class=\"card-grid-item\" data-card-name=\"{dataName}\">");
+            var safeKey = WebUtility.HtmlEncode(card.Key);
+            cardHtml.AppendLine($"            <div class=\"card-grid-item\" data-card-name=\"{dataName}\" data-card-key=\"{safeKey}\">");
             cardHtml.AppendLine("                <div class=\"card h-100 border-0\" style=\"background-color: #111821;\">");
             cardHtml.AppendLine($"                    <img src=\"{card.Url}\" alt=\"Card image\" />");
             cardHtml.AppendLine("                    <div class=\"card-body text-center\" style=\"background-color: rgba(255,255,255,0.06);\">");
@@ -171,6 +172,37 @@ internal static class StaticSiteExporter
         small.plus-mode {
             color: #00C853 !important;
         }
+
+        .overlay-card {
+            background: #181e2a;
+            border: 4px solid #42a5f5;
+            border-radius: 1.2rem;
+            box-shadow: 0 0 50px rgba(66, 135, 245, 0.8), 0 0 100px rgba(140, 36, 176, 1);
+            padding: 1.5rem;
+            display: flex;
+            gap: 1.25rem;
+            align-items: flex-start;
+            max-width: 95vw;
+        }
+
+        .overlay-meta {
+            max-width: 360px;
+            min-width: 240px;
+        }
+
+        .overlay-meta h2 {
+            font-size: 1.5rem;
+            line-height: 1.2;
+            margin-bottom: 0.75rem;
+        }
+
+        .overlay-meta p {
+            margin: 0;
+            color: #d7deef;
+            font-size: 1.04rem;
+            line-height: 1.35;
+            white-space: pre-line;
+        }
     </style>
 </head>
 <body class="bg-dark text-light">
@@ -196,9 +228,12 @@ internal static class StaticSiteExporter
     </div>
 
     <div id="cardOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:9999; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity 0.5s ease; pointer-events:none;">
-        <div style="background:#181e2a; border: 4px solid #42a5f5; border-radius:1.2rem; box-shadow: 0 0 50px rgba(66, 135, 245, 0.8), 0 0 100px rgba(140, 36, 176, 1); padding:2.5rem; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div id="overlayCard" class="overlay-card">
             <img id="overlayImg" style="max-width:90vw; max-height:50vh; object-fit:contain; border-radius:0.8rem; background:#222b3a;" />
-            <small id="overlayTitle" class="text-truncate d-block text-light fw-semibold" style="max-width: 100%; font-size: 1.5rem; margin-top: 1rem;"></small>
+            <div class="overlay-meta">
+                <h2 id="overlayTitle" class="text-light fw-semibold"></h2>
+                <p id="overlayDescription"></p>
+            </div>
         </div>
     </div>
 
@@ -207,8 +242,11 @@ internal static class StaticSiteExporter
             const input = document.getElementById('cardSearchInput');
             const items = document.querySelectorAll('.card-grid-item');
             const overlay = document.getElementById('cardOverlay');
+            const overlayCard = document.getElementById('overlayCard');
             const overlayImg = document.getElementById('overlayImg');
             const overlayTitle = document.getElementById('overlayTitle');
+            const overlayDescription = document.getElementById('overlayDescription');
+            let cardDescriptions = {};
 
             const plusAvailabilityCache = new Map();
 
@@ -261,14 +299,35 @@ internal static class StaticSiteExporter
                 }
             }
 
+            async function loadDescriptions() {
+                try {
+                    const response = await fetch('images/cards/ironclad_card_descriptions.json', { cache: 'no-store' });
+                    if (!response.ok) {
+                        return;
+                    }
+                    cardDescriptions = await response.json();
+                } catch {
+                    cardDescriptions = {};
+                }
+            }
+
+            function getCardDescription(item, fallbackTitle) {
+                const cardKey = item.getAttribute('data-card-key') || '';
+                const entry = cardDescriptions[cardKey];
+                if (entry && typeof entry.description === 'string' && entry.description.trim()) {
+                    return entry.description;
+                }
+                return `No description found for ${fallbackTitle}.`;
+            }
+
             function syncOverlayFromItem(item) {
                 const img = item.querySelector('img');
                 const small = item.querySelector('small');
                 overlayImg.src = img.src;
                 overlayImg.dataset.baseSrc = img.dataset.baseSrc;
                 overlayTitle.textContent = small.textContent;
-                overlayTitle.className = small.className;
                 overlayTitle.dataset.originalText = small.dataset.originalText;
+                overlayDescription.textContent = getCardDescription(item, small.dataset.originalText);
             }
 
             items.forEach(item => {
@@ -288,30 +347,27 @@ internal static class StaticSiteExporter
                 });
             });
 
-            let hoverTimer = null;
+            overlayCard.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
+
             let showPlus = false;
             let activeOverlayItem = null;
             let toggleInProgress = false;
 
             items.forEach(item => {
-                item.addEventListener('mouseenter', function () {
-                    if (hoverTimer) clearTimeout(hoverTimer);
+                item.addEventListener('click', function () {
                     activeOverlayItem = this;
-                    hoverTimer = setTimeout(() => {
-                        syncOverlayFromItem(this);
-                        overlay.style.opacity = '1';
-                        overlay.style.pointerEvents = 'auto';
-                    }, 600);
-                });
-
-                item.addEventListener('mouseleave', function () {
-                    if (hoverTimer) clearTimeout(hoverTimer);
+                    syncOverlayFromItem(this);
+                    overlay.style.opacity = '1';
+                    overlay.style.pointerEvents = 'auto';
                 });
             });
 
             overlay.addEventListener('click', function () {
                 overlay.style.opacity = '0';
                 overlay.style.pointerEvents = 'none';
+                activeOverlayItem = null;
             });
 
             const upgradeHint = document.getElementById('upgradeHint');
@@ -319,6 +375,8 @@ internal static class StaticSiteExporter
             if (upgradeHint) {
                 upgradeHint.textContent = `Press ${toggleKey.toUpperCase()} to view upgraded cards`;
             }
+
+            loadDescriptions();
 
             document.addEventListener('keydown', async function (event) {
                 if ((event.key || '').toLowerCase() === toggleKey) {
@@ -370,7 +428,7 @@ internal static class StaticSiteExporter
 """;
     }
 
-    private static List<(string Url, string Label)> GetCardEntries(string webRoot)
+    private static List<(string Url, string Label, string Key)> GetCardEntries(string webRoot)
     {
         var cardsFolder = Path.Combine(webRoot, "images", "cards");
         if (!Directory.Exists(cardsFolder))
@@ -385,7 +443,7 @@ internal static class StaticSiteExporter
             {
                 var fileName = Path.GetFileName(path);
                 var rawName = Path.GetFileNameWithoutExtension(path);
-                return (Url: $"images/cards/{fileName}", Label: FormatCardLabel(rawName));
+                return (Url: $"images/cards/{fileName}", Label: FormatCardLabel(rawName), Key: rawName);
             })
             .ToList();
     }

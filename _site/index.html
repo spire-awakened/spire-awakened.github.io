@@ -98,6 +98,37 @@
         small.plus-mode {
             color: #00C853 !important;
         }
+
+        .overlay-card {
+            background: #181e2a;
+            border: 4px solid #42a5f5;
+            border-radius: 1.2rem;
+            box-shadow: 0 0 50px rgba(66, 135, 245, 0.8), 0 0 100px rgba(140, 36, 176, 1);
+            padding: 1.5rem;
+            display: flex;
+            gap: 1.25rem;
+            align-items: flex-start;
+            max-width: 95vw;
+        }
+
+        .overlay-meta {
+            max-width: 360px;
+            min-width: 240px;
+        }
+
+        .overlay-meta h2 {
+            font-size: 1.5rem;
+            line-height: 1.2;
+            margin-bottom: 0.75rem;
+        }
+
+        .overlay-meta p {
+            margin: 0;
+            color: #d7deef;
+            font-size: 1.04rem;
+            line-height: 1.35;
+            white-space: pre-line;
+        }
     </style>
 </head>
 <body class="bg-dark text-light">
@@ -120,7 +151,7 @@
         </div>
 
         <div class="card-grid">
-            <div class="card-grid-item" data-card-name="aggression">
+            <div class="card-grid-item" data-card-name="aggression" data-card-key="StS2_Ironclad-Aggression">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Aggression.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -130,7 +161,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="anger">
+            <div class="card-grid-item" data-card-name="anger" data-card-key="StS2_Ironclad-Anger">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Anger.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -140,7 +171,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="armaments">
+            <div class="card-grid-item" data-card-name="armaments" data-card-key="StS2_Ironclad-Armaments">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Armaments.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -150,7 +181,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="ashen strike">
+            <div class="card-grid-item" data-card-name="ashen strike" data-card-key="StS2_Ironclad-AshenStrike">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-AshenStrike.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -160,7 +191,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="barricade">
+            <div class="card-grid-item" data-card-name="barricade" data-card-key="StS2_Ironclad-Barricade">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Barricade.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -170,7 +201,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="bash">
+            <div class="card-grid-item" data-card-name="bash" data-card-key="StS2_Ironclad-Bash">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Bash.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -180,7 +211,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="battle trance">
+            <div class="card-grid-item" data-card-name="battle trance" data-card-key="StS2_Ironclad-BattleTrance">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-BattleTrance.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -190,7 +221,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="bloodletting">
+            <div class="card-grid-item" data-card-name="bloodletting" data-card-key="StS2_Ironclad-Bloodletting">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Bloodletting.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -200,7 +231,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="blood wall">
+            <div class="card-grid-item" data-card-name="blood wall" data-card-key="StS2_Ironclad-BloodWall">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-BloodWall.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -210,7 +241,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="bludgeon">
+            <div class="card-grid-item" data-card-name="bludgeon" data-card-key="StS2_Ironclad-Bludgeon">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Bludgeon.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -220,7 +251,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="body slam">
+            <div class="card-grid-item" data-card-name="body slam" data-card-key="StS2_Ironclad-BodySlam">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-BodySlam.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -230,7 +261,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="brand">
+            <div class="card-grid-item" data-card-name="brand" data-card-key="StS2_Ironclad-Brand">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Brand.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -240,7 +271,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="break">
+            <div class="card-grid-item" data-card-name="break" data-card-key="StS2_Ironclad-Break">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Break.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -250,7 +281,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="breakthrough">
+            <div class="card-grid-item" data-card-name="breakthrough" data-card-key="StS2_Ironclad-Breakthrough">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Breakthrough.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -260,7 +291,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="bully">
+            <div class="card-grid-item" data-card-name="bully" data-card-key="StS2_Ironclad-Bully">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Bully.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -270,7 +301,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="burning pact">
+            <div class="card-grid-item" data-card-name="burning pact" data-card-key="StS2_Ironclad-BurningPact">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-BurningPact.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -280,7 +311,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="cascade">
+            <div class="card-grid-item" data-card-name="cascade" data-card-key="StS2_Ironclad-Cascade">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Cascade.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -290,7 +321,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="cinder">
+            <div class="card-grid-item" data-card-name="cinder" data-card-key="StS2_Ironclad-Cinder">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Cinder.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -300,7 +331,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="clash">
+            <div class="card-grid-item" data-card-name="clash" data-card-key="StS2_Ironclad-Clash">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Clash.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -310,7 +341,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="colossus">
+            <div class="card-grid-item" data-card-name="colossus" data-card-key="StS2_Ironclad-Colossus">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Colossus.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -320,7 +351,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="conflagration">
+            <div class="card-grid-item" data-card-name="conflagration" data-card-key="StS2_Ironclad-Conflagration">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Conflagration.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -330,7 +361,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="corruption">
+            <div class="card-grid-item" data-card-name="corruption" data-card-key="StS2_Ironclad-Corruption">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Corruption.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -340,7 +371,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="crimson mantle">
+            <div class="card-grid-item" data-card-name="crimson mantle" data-card-key="StS2_Ironclad-CrimsonMantle">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-CrimsonMantle.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -350,7 +381,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="cruelty">
+            <div class="card-grid-item" data-card-name="cruelty" data-card-key="StS2_Ironclad-Cruelty">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Cruelty.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -360,7 +391,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="dark embrace">
+            <div class="card-grid-item" data-card-name="dark embrace" data-card-key="StS2_Ironclad-DarkEmbrace">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-DarkEmbrace.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -370,7 +401,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="defend">
+            <div class="card-grid-item" data-card-name="defend" data-card-key="StS2_Ironclad-Defend">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Defend.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -380,7 +411,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="demon form">
+            <div class="card-grid-item" data-card-name="demon form" data-card-key="StS2_Ironclad-DemonForm">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-DemonForm.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -390,7 +421,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="demonic shield">
+            <div class="card-grid-item" data-card-name="demonic shield" data-card-key="StS2_Ironclad-DemonicShield">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-DemonicShield.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -400,7 +431,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="dismantle">
+            <div class="card-grid-item" data-card-name="dismantle" data-card-key="StS2_Ironclad-Dismantle">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Dismantle.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -410,7 +441,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="dominate">
+            <div class="card-grid-item" data-card-name="dominate" data-card-key="StS2_Ironclad-Dominate">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Dominate.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -420,7 +451,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="drumof battle">
+            <div class="card-grid-item" data-card-name="drumof battle" data-card-key="StS2_Ironclad-DrumofBattle">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-DrumofBattle.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -430,7 +461,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="dual wield">
+            <div class="card-grid-item" data-card-name="dual wield" data-card-key="StS2_Ironclad-DualWield">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-DualWield.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -440,7 +471,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="entrench">
+            <div class="card-grid-item" data-card-name="entrench" data-card-key="StS2_Ironclad-Entrench">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Entrench.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -450,7 +481,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="evil eye">
+            <div class="card-grid-item" data-card-name="evil eye" data-card-key="StS2_Ironclad-EvilEye">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-EvilEye.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -460,7 +491,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="expecta fight">
+            <div class="card-grid-item" data-card-name="expecta fight" data-card-key="StS2_Ironclad-ExpectaFight">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-ExpectaFight.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -470,7 +501,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="feed">
+            <div class="card-grid-item" data-card-name="feed" data-card-key="StS2_Ironclad-Feed">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Feed.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -480,7 +511,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="feel no pain">
+            <div class="card-grid-item" data-card-name="feel no pain" data-card-key="StS2_Ironclad-FeelNoPain">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-FeelNoPain.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -490,7 +521,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="fiend fire">
+            <div class="card-grid-item" data-card-name="fiend fire" data-card-key="StS2_Ironclad-FiendFire">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-FiendFire.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -500,7 +531,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="fight me">
+            <div class="card-grid-item" data-card-name="fight me" data-card-key="StS2_Ironclad-FightMe">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-FightMe.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -510,7 +541,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="flame barrier">
+            <div class="card-grid-item" data-card-name="flame barrier" data-card-key="StS2_Ironclad-FlameBarrier">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-FlameBarrier.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -520,7 +551,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="forgotten ritual">
+            <div class="card-grid-item" data-card-name="forgotten ritual" data-card-key="StS2_Ironclad-ForgottenRitual">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-ForgottenRitual.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -530,7 +561,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="grapple">
+            <div class="card-grid-item" data-card-name="grapple" data-card-key="StS2_Ironclad-Grapple">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Grapple.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -540,7 +571,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="havoc">
+            <div class="card-grid-item" data-card-name="havoc" data-card-key="StS2_Ironclad-Havoc">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Havoc.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -550,7 +581,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="headbutt">
+            <div class="card-grid-item" data-card-name="headbutt" data-card-key="StS2_Ironclad-Headbutt">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Headbutt.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -560,7 +591,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="hellraiser">
+            <div class="card-grid-item" data-card-name="hellraiser" data-card-key="StS2_Ironclad-Hellraiser">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Hellraiser.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -570,7 +601,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="hemokinesis">
+            <div class="card-grid-item" data-card-name="hemokinesis" data-card-key="StS2_Ironclad-Hemokinesis">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Hemokinesis.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -580,7 +611,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="howlfrom beyond">
+            <div class="card-grid-item" data-card-name="howlfrom beyond" data-card-key="StS2_Ironclad-HowlfromBeyond">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-HowlfromBeyond.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -590,7 +621,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="impervious">
+            <div class="card-grid-item" data-card-name="impervious" data-card-key="StS2_Ironclad-Impervious">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Impervious.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -600,7 +631,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="infernal blade">
+            <div class="card-grid-item" data-card-name="infernal blade" data-card-key="StS2_Ironclad-InfernalBlade">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-InfernalBlade.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -610,7 +641,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="inferno">
+            <div class="card-grid-item" data-card-name="inferno" data-card-key="StS2_Ironclad-Inferno">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Inferno.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -620,7 +651,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="inflame">
+            <div class="card-grid-item" data-card-name="inflame" data-card-key="StS2_Ironclad-Inflame">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Inflame.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -630,7 +661,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="iron wave">
+            <div class="card-grid-item" data-card-name="iron wave" data-card-key="StS2_Ironclad-IronWave">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-IronWave.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -640,7 +671,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="juggernaut">
+            <div class="card-grid-item" data-card-name="juggernaut" data-card-key="StS2_Ironclad-Juggernaut">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Juggernaut.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -650,7 +681,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="juggling">
+            <div class="card-grid-item" data-card-name="juggling" data-card-key="StS2_Ironclad-Juggling">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Juggling.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -660,7 +691,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="mangle">
+            <div class="card-grid-item" data-card-name="mangle" data-card-key="StS2_Ironclad-Mangle">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Mangle.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -670,7 +701,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="molten fist">
+            <div class="card-grid-item" data-card-name="molten fist" data-card-key="StS2_Ironclad-MoltenFist">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-MoltenFist.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -680,7 +711,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="offering">
+            <div class="card-grid-item" data-card-name="offering" data-card-key="StS2_Ironclad-Offering">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Offering.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -690,7 +721,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="one two punch">
+            <div class="card-grid-item" data-card-name="one two punch" data-card-key="StS2_Ironclad-One-TwoPunch">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-One-TwoPunch.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -700,7 +731,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="pacts end">
+            <div class="card-grid-item" data-card-name="pacts end" data-card-key="StS2_Ironclad-PactsEnd">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-PactsEnd.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -710,7 +741,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="perfected strike">
+            <div class="card-grid-item" data-card-name="perfected strike" data-card-key="StS2_Ironclad-PerfectedStrike">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-PerfectedStrike.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -720,7 +751,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="pillage">
+            <div class="card-grid-item" data-card-name="pillage" data-card-key="StS2_Ironclad-Pillage">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Pillage.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -730,7 +761,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="pommel strike">
+            <div class="card-grid-item" data-card-name="pommel strike" data-card-key="StS2_Ironclad-PommelStrike">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-PommelStrike.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -740,7 +771,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="primal force">
+            <div class="card-grid-item" data-card-name="primal force" data-card-key="StS2_Ironclad-PrimalForce">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-PrimalForce.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -750,7 +781,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="pyre">
+            <div class="card-grid-item" data-card-name="pyre" data-card-key="StS2_Ironclad-Pyre">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Pyre.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -760,7 +791,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="rage">
+            <div class="card-grid-item" data-card-name="rage" data-card-key="StS2_Ironclad-Rage">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Rage.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -770,7 +801,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="rampage">
+            <div class="card-grid-item" data-card-name="rampage" data-card-key="StS2_Ironclad-Rampage">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Rampage.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -780,7 +811,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="rupture">
+            <div class="card-grid-item" data-card-name="rupture" data-card-key="StS2_Ironclad-Rupture">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Rupture.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -790,7 +821,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="second wind">
+            <div class="card-grid-item" data-card-name="second wind" data-card-key="StS2_Ironclad-SecondWind">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-SecondWind.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -800,7 +831,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="setup strike">
+            <div class="card-grid-item" data-card-name="setup strike" data-card-key="StS2_Ironclad-SetupStrike">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-SetupStrike.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -810,7 +841,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="shrug it off">
+            <div class="card-grid-item" data-card-name="shrug it off" data-card-key="StS2_Ironclad-ShrugItOff">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-ShrugItOff.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -820,7 +851,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="spite">
+            <div class="card-grid-item" data-card-name="spite" data-card-key="StS2_Ironclad-Spite">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Spite.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -830,7 +861,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="stampede">
+            <div class="card-grid-item" data-card-name="stampede" data-card-key="StS2_Ironclad-Stampede">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Stampede.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -840,7 +871,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="stoke">
+            <div class="card-grid-item" data-card-name="stoke" data-card-key="StS2_Ironclad-Stoke">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Stoke.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -850,7 +881,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="stomp">
+            <div class="card-grid-item" data-card-name="stomp" data-card-key="StS2_Ironclad-Stomp">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Stomp.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -860,7 +891,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="stone armor">
+            <div class="card-grid-item" data-card-name="stone armor" data-card-key="StS2_Ironclad-StoneArmor">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-StoneArmor.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -870,7 +901,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="strike">
+            <div class="card-grid-item" data-card-name="strike" data-card-key="StS2_Ironclad-Strike">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Strike.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -880,7 +911,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="sword boomerang">
+            <div class="card-grid-item" data-card-name="sword boomerang" data-card-key="StS2_Ironclad-SwordBoomerang">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-SwordBoomerang.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -890,7 +921,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="tank">
+            <div class="card-grid-item" data-card-name="tank" data-card-key="StS2_Ironclad-Tank">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Tank.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -900,7 +931,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="taunt">
+            <div class="card-grid-item" data-card-name="taunt" data-card-key="StS2_Ironclad-Taunt">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Taunt.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -910,7 +941,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="tear asunder">
+            <div class="card-grid-item" data-card-name="tear asunder" data-card-key="StS2_Ironclad-TearAsunder">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-TearAsunder.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -920,7 +951,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="thrash">
+            <div class="card-grid-item" data-card-name="thrash" data-card-key="StS2_Ironclad-Thrash">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Thrash.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -930,7 +961,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="thunderclap">
+            <div class="card-grid-item" data-card-name="thunderclap" data-card-key="StS2_Ironclad-Thunderclap">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Thunderclap.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -940,7 +971,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="tremble">
+            <div class="card-grid-item" data-card-name="tremble" data-card-key="StS2_Ironclad-Tremble">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Tremble.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -950,7 +981,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="true grit">
+            <div class="card-grid-item" data-card-name="true grit" data-card-key="StS2_Ironclad-TrueGrit">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-TrueGrit.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -960,7 +991,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="twin strike">
+            <div class="card-grid-item" data-card-name="twin strike" data-card-key="StS2_Ironclad-TwinStrike">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-TwinStrike.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -970,7 +1001,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="unmovable">
+            <div class="card-grid-item" data-card-name="unmovable" data-card-key="StS2_Ironclad-Unmovable">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Unmovable.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -980,7 +1011,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="unrelenting">
+            <div class="card-grid-item" data-card-name="unrelenting" data-card-key="StS2_Ironclad-Unrelenting">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Unrelenting.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -990,7 +1021,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="uppercut">
+            <div class="card-grid-item" data-card-name="uppercut" data-card-key="StS2_Ironclad-Uppercut">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Uppercut.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -1000,7 +1031,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="vicious">
+            <div class="card-grid-item" data-card-name="vicious" data-card-key="StS2_Ironclad-Vicious">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Vicious.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -1010,7 +1041,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-grid-item" data-card-name="whirlwind">
+            <div class="card-grid-item" data-card-name="whirlwind" data-card-key="StS2_Ironclad-Whirlwind">
                 <div class="card h-100 border-0" style="background-color: #111821;">
                     <img src="images/cards/StS2_Ironclad-Whirlwind.png" alt="Card image" />
                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -1024,9 +1055,12 @@
     </div>
 
     <div id="cardOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:9999; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity 0.5s ease; pointer-events:none;">
-        <div style="background:#181e2a; border: 4px solid #42a5f5; border-radius:1.2rem; box-shadow: 0 0 50px rgba(66, 135, 245, 0.8), 0 0 100px rgba(140, 36, 176, 1); padding:2.5rem; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div id="overlayCard" class="overlay-card">
             <img id="overlayImg" style="max-width:90vw; max-height:50vh; object-fit:contain; border-radius:0.8rem; background:#222b3a;" />
-            <small id="overlayTitle" class="text-truncate d-block text-light fw-semibold" style="max-width: 100%; font-size: 1.5rem; margin-top: 1rem;"></small>
+            <div class="overlay-meta">
+                <h2 id="overlayTitle" class="text-light fw-semibold"></h2>
+                <p id="overlayDescription"></p>
+            </div>
         </div>
     </div>
 
@@ -1035,8 +1069,11 @@
             const input = document.getElementById('cardSearchInput');
             const items = document.querySelectorAll('.card-grid-item');
             const overlay = document.getElementById('cardOverlay');
+            const overlayCard = document.getElementById('overlayCard');
             const overlayImg = document.getElementById('overlayImg');
             const overlayTitle = document.getElementById('overlayTitle');
+            const overlayDescription = document.getElementById('overlayDescription');
+            let cardDescriptions = {};
 
             const plusAvailabilityCache = new Map();
 
@@ -1089,14 +1126,35 @@
                 }
             }
 
+            async function loadDescriptions() {
+                try {
+                    const response = await fetch('images/cards/ironclad_card_descriptions.json', { cache: 'no-store' });
+                    if (!response.ok) {
+                        return;
+                    }
+                    cardDescriptions = await response.json();
+                } catch {
+                    cardDescriptions = {};
+                }
+            }
+
+            function getCardDescription(item, fallbackTitle) {
+                const cardKey = item.getAttribute('data-card-key') || '';
+                const entry = cardDescriptions[cardKey];
+                if (entry && typeof entry.description === 'string' && entry.description.trim()) {
+                    return entry.description;
+                }
+                return `No description found for ${fallbackTitle}.`;
+            }
+
             function syncOverlayFromItem(item) {
                 const img = item.querySelector('img');
                 const small = item.querySelector('small');
                 overlayImg.src = img.src;
                 overlayImg.dataset.baseSrc = img.dataset.baseSrc;
                 overlayTitle.textContent = small.textContent;
-                overlayTitle.className = small.className;
                 overlayTitle.dataset.originalText = small.dataset.originalText;
+                overlayDescription.textContent = getCardDescription(item, small.dataset.originalText);
             }
 
             items.forEach(item => {
@@ -1116,30 +1174,27 @@
                 });
             });
 
-            let hoverTimer = null;
+            overlayCard.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
+
             let showPlus = false;
             let activeOverlayItem = null;
             let toggleInProgress = false;
 
             items.forEach(item => {
-                item.addEventListener('mouseenter', function () {
-                    if (hoverTimer) clearTimeout(hoverTimer);
+                item.addEventListener('click', function () {
                     activeOverlayItem = this;
-                    hoverTimer = setTimeout(() => {
-                        syncOverlayFromItem(this);
-                        overlay.style.opacity = '1';
-                        overlay.style.pointerEvents = 'auto';
-                    }, 600);
-                });
-
-                item.addEventListener('mouseleave', function () {
-                    if (hoverTimer) clearTimeout(hoverTimer);
+                    syncOverlayFromItem(this);
+                    overlay.style.opacity = '1';
+                    overlay.style.pointerEvents = 'auto';
                 });
             });
 
             overlay.addEventListener('click', function () {
                 overlay.style.opacity = '0';
                 overlay.style.pointerEvents = 'none';
+                activeOverlayItem = null;
             });
 
             const upgradeHint = document.getElementById('upgradeHint');
@@ -1147,6 +1202,8 @@
             if (upgradeHint) {
                 upgradeHint.textContent = `Press ${toggleKey.toUpperCase()} to view upgraded cards`;
             }
+
+            loadDescriptions();
 
             document.addEventListener('keydown', async function (event) {
                 if ((event.key || '').toLowerCase() === toggleKey) {
