@@ -4,6 +4,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>spire-awakened</AssemblyName>
+    <RootNamespace>SpireAwakened</RootNamespace>
   </PropertyGroup>
 
 </Project>

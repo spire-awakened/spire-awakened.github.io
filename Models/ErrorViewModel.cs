@@ -1,4 +1,4 @@
-namespace spireHelper.Models;
+namespace SpireAwakened.Models;
 
 public class ErrorViewModel
 {

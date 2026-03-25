@@ -3,9 +3,9 @@ using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
-using spireHelper.Models;
+using SpireAwakened.Models;
 
-namespace spireHelper.Controllers;
+namespace SpireAwakened.Controllers;
 
 public class HomeController : Controller
 {
