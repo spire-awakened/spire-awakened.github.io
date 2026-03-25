@@ -169,7 +169,7 @@ internal static class StaticSiteExporter
             font-weight: 700;
         }
 
-        small.plus-mode {
+        .plus-mode {
             color: #00C853 !important;
         }
 
@@ -311,11 +311,16 @@ internal static class StaticSiteExporter
                 }
             }
 
-            function getCardDescription(item, fallbackTitle) {
+            function getCardDescription(item, fallbackTitle, useUpgraded) {
                 const cardKey = item.getAttribute('data-card-key') || '';
                 const entry = cardDescriptions[cardKey];
-                if (entry && typeof entry.description === 'string' && entry.description.trim()) {
-                    return entry.description;
+                if (entry) {
+                    if (useUpgraded && typeof entry.upgraded_description === 'string' && entry.upgraded_description.trim()) {
+                        return entry.upgraded_description;
+                    }
+                    if (typeof entry.description === 'string' && entry.description.trim()) {
+                        return entry.description;
+                    }
                 }
                 return `No description found for ${fallbackTitle}.`;
             }
@@ -326,8 +331,9 @@ internal static class StaticSiteExporter
                 overlayImg.src = img.src;
                 overlayImg.dataset.baseSrc = img.dataset.baseSrc;
                 overlayTitle.textContent = small.textContent;
+                overlayTitle.classList.toggle('plus-mode', small.classList.contains('plus-mode'));
                 overlayTitle.dataset.originalText = small.dataset.originalText;
-                overlayDescription.textContent = getCardDescription(item, small.dataset.originalText);
+                overlayDescription.textContent = getCardDescription(item, small.dataset.originalText, small.classList.contains('plus-mode'));
             }
 
             items.forEach(item => {
