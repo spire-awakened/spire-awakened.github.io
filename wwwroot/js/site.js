@@ -211,7 +211,7 @@
         document.documentElement.style.setProperty('--badge-offset-y', `${badgeOffsetY}px`);
     }
 
-    function createCardTile(key) {
+    function createCardTile(key, actionMode, stateIndex) {
         const card = cardCatalog.get(key);
         if (!card) {
             return null;
@@ -221,6 +221,21 @@
         item.className = 'card-grid-item';
         item.setAttribute('data-card-name', card.name);
         item.setAttribute('data-card-key', key);
+        if (typeof stateIndex === 'number') {
+            item.setAttribute('data-state-index', String(stateIndex));
+        }
+
+        let actionsHtml = '';
+        if (actionMode === 'comparison') {
+            actionsHtml = `<div class="card-actions">
+                    <button type="button" class="action-btn btn-deck" data-action="add-deck">Add to Deck</button>
+               </div>`;
+        }
+        if (actionMode === 'deck') {
+            actionsHtml = `<div class="card-actions">
+                    <button type="button" class="action-btn btn-remove" data-action="remove-deck">Remove from Deck</button>
+               </div>`;
+        }
 
         item.innerHTML = `
             <div class="card h-100 border-0" style="background-color: #111821;">
@@ -231,6 +246,7 @@
                 <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
                     <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">${card.label}</small>
                 </div>
+                ${actionsHtml}
             </div>`;
 
         return item;
@@ -245,9 +261,16 @@
 
     async function renderCollection(grid, keys) {
         grid.innerHTML = '';
+        let actionMode = null;
+        if (grid === comparisonGrid) {
+            actionMode = 'comparison';
+        }
+        if (grid === currentDeckGrid) {
+            actionMode = 'deck';
+        }
 
-        keys.forEach(key => {
-            const item = createCardTile(key);
+        keys.forEach((key, index) => {
+            const item = createCardTile(key, actionMode, index);
             if (item) {
                 grid.appendChild(item);
             }
@@ -268,6 +291,20 @@
         }
 
         deckState.push(key);
+        await renderCollection(currentDeckGrid, deckState);
+        updateCounts();
+    }
+
+    async function removeFromDeck(stateIndex, cardKey) {
+        if (Number.isInteger(stateIndex) && stateIndex >= 0 && stateIndex < deckState.length) {
+            deckState.splice(stateIndex, 1);
+        } else {
+            const fallbackIndex = deckState.lastIndexOf(cardKey);
+            if (fallbackIndex >= 0) {
+                deckState.splice(fallbackIndex, 1);
+            }
+        }
+
         await renderCollection(currentDeckGrid, deckState);
         updateCounts();
     }
@@ -364,19 +401,44 @@
         openOverlayForItem(item);
     });
 
-    comparisonGrid.addEventListener('click', function (event) {
+    comparisonGrid.addEventListener('click', async function (event) {
+        const actionButton = event.target.closest('button[data-action]');
         const item = event.target.closest('.card-grid-item');
         if (!item) {
             return;
         }
+
+        const cardKey = item.getAttribute('data-card-key');
+        if (actionButton && cardKey) {
+            event.stopPropagation();
+            const action = actionButton.getAttribute('data-action');
+            if (action === 'add-deck') {
+                await addToDeck(cardKey);
+            }
+            return;
+        }
+
         openOverlayForItem(item);
     });
 
-    currentDeckGrid.addEventListener('click', function (event) {
+    currentDeckGrid.addEventListener('click', async function (event) {
+        const actionButton = event.target.closest('button[data-action]');
         const item = event.target.closest('.card-grid-item');
         if (!item) {
             return;
         }
+
+        const cardKey = item.getAttribute('data-card-key');
+        if (actionButton && cardKey) {
+            event.stopPropagation();
+            const action = actionButton.getAttribute('data-action');
+            if (action === 'remove-deck') {
+                const stateIndex = Number.parseInt(item.getAttribute('data-state-index') || '', 10);
+                await removeFromDeck(stateIndex, cardKey);
+            }
+            return;
+        }
+
         openOverlayForItem(item);
     });
 

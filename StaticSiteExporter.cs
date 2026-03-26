@@ -172,7 +172,7 @@ internal static class StaticSiteExporter
     <link rel="stylesheet" href="css/site.css" />
 </head>
 <body class="bg-dark text-light">
-    <div class="container-fluid py-4 min-vh-100">
+    <div class="container-fluid cards-page-shell">
 {{cardsSection}}
     </div>
 
