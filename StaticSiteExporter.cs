@@ -56,7 +56,10 @@ internal static class StaticSiteExporter
             var safeKey = WebUtility.HtmlEncode(card.Key);
             cardHtml.AppendLine($"            <div class=\"card-grid-item\" data-card-name=\"{dataName}\" data-card-key=\"{safeKey}\">");
             cardHtml.AppendLine("                <div class=\"card h-100 border-0\" style=\"background-color: #111821;\">");
-            cardHtml.AppendLine($"                    <img src=\"{card.Url}\" alt=\"Card image\" />");
+            cardHtml.AppendLine("                    <div class=\"card-image-wrap\">");
+            cardHtml.AppendLine("                        <img class=\"tier-badge\" alt=\"Tier badge\" hidden />");
+            cardHtml.AppendLine($"                        <img class=\"card-art\" src=\"{card.Url}\" alt=\"Card image\" />");
+            cardHtml.AppendLine("                    </div>");
             cardHtml.AppendLine("                    <div class=\"card-body text-center\" style=\"background-color: rgba(255,255,255,0.06);\">");
             cardHtml.AppendLine("                        <small class=\"text-truncate d-block text-light fw-semibold\" style=\"max-width: 100%;\">");
             cardHtml.AppendLine($"                            {safeLabel}");
@@ -147,11 +150,26 @@ internal static class StaticSiteExporter
             box-shadow: 0 18px 38px rgba(66, 135, 245, 0.42), 0 0 24px rgba(140, 36, 176, 0.72);
         }
 
-        .card-grid img {
+        .card-image-wrap {
+            position: relative;
+        }
+
+        .card-grid .card-art {
             width: 100%;
             height: 240px;
             object-fit: contain;
             background-color: rgba(255,255,255,0.06);
+        }
+
+        .tier-badge {
+            position: absolute;
+            width: var(--badge-size, 16.67%);
+            height: var(--badge-size, 16.67%);
+            object-fit: contain;
+            background: transparent;
+            pointer-events: none;
+            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.55));
+            z-index: 2;
         }
 
         .card-body {
@@ -183,6 +201,74 @@ internal static class StaticSiteExporter
             gap: 1.25rem;
             align-items: flex-start;
             max-width: 95vw;
+        }
+
+        .overlay-image-wrap {
+            position: relative;
+        }
+
+        .overlay-tier-badge {
+            position: absolute;
+            width: var(--badge-size, 16.67%);
+            height: var(--badge-size, 16.67%);
+            object-fit: contain;
+            pointer-events: none;
+            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.55));
+            z-index: 2;
+        }
+
+        body.badge-pos-tr .tier-badge,
+        body.badge-pos-tr .overlay-tier-badge {
+            top: var(--badge-offset-y, 0px);
+            right: var(--badge-offset-x, 0px);
+            bottom: auto;
+            left: auto;
+            transform: none;
+        }
+
+        body.badge-pos-tl .tier-badge,
+        body.badge-pos-tl .overlay-tier-badge {
+            top: 0;
+            left: 0;
+            bottom: auto;
+            right: auto;
+            transform: none;
+        }
+
+        body.badge-pos-br .tier-badge,
+        body.badge-pos-br .overlay-tier-badge {
+            bottom: 0;
+            right: 0;
+            top: auto;
+            left: auto;
+            transform: none;
+        }
+
+        body.badge-pos-bl .tier-badge,
+        body.badge-pos-bl .overlay-tier-badge {
+            bottom: 0;
+            left: 0;
+            top: auto;
+            right: auto;
+            transform: none;
+        }
+
+        body.badge-pos-tc .tier-badge,
+        body.badge-pos-tc .overlay-tier-badge {
+            top: 0;
+            left: 50%;
+            right: auto;
+            bottom: auto;
+            transform: translateX(-50%);
+        }
+
+        body.badge-pos-rc .tier-badge,
+        body.badge-pos-rc .overlay-tier-badge {
+            right: 0;
+            top: 50%;
+            left: auto;
+            bottom: auto;
+            transform: translateY(-50%);
         }
 
         .overlay-meta {
@@ -229,7 +315,10 @@ internal static class StaticSiteExporter
 
     <div id="cardOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:9999; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity 0.5s ease; pointer-events:none;">
         <div id="overlayCard" class="overlay-card">
-            <img id="overlayImg" style="max-width:90vw; max-height:50vh; object-fit:contain; border-radius:0.8rem; background:#222b3a;" />
+            <div class="overlay-image-wrap">
+                <img id="overlayTierBadge" class="overlay-tier-badge" alt="Overlay tier badge" hidden />
+                <img id="overlayImg" style="max-width:90vw; max-height:50vh; object-fit:contain; border-radius:0.8rem; background:#222b3a;" />
+            </div>
             <div class="overlay-meta">
                 <h2 id="overlayTitle" class="text-light fw-semibold"></h2>
                 <p id="overlayDescription"></p>
@@ -244,14 +333,46 @@ internal static class StaticSiteExporter
             const overlay = document.getElementById('cardOverlay');
             const overlayCard = document.getElementById('overlayCard');
             const overlayImg = document.getElementById('overlayImg');
+            const overlayTierBadge = document.getElementById('overlayTierBadge');
             const overlayTitle = document.getElementById('overlayTitle');
             const overlayDescription = document.getElementById('overlayDescription');
             let cardDescriptions = {};
 
             const plusAvailabilityCache = new Map();
+            const badgePositionOptions = [
+                { key: 'tr', label: 'Top Right' },
+                { key: 'tl', label: 'Top Left' },
+                { key: 'br', label: 'Bottom Right' },
+                { key: 'bl', label: 'Bottom Left' },
+                { key: 'tc', label: 'Top Center' },
+                { key: 'rc', label: 'Right Center' }
+            ];
+            let badgePositionIndex = 0;
+            let badgeOffsetX = 17;
+            let badgeOffsetY = 1;
+            const badgeSize = 22;
 
             function getPlusSrc(baseSrc) {
                 return baseSrc.replace(/\.png(?=($|\?))/i, 'Plus.png');
+            }
+
+            function applyBadgePosition(index) {
+                const boundedIndex = ((index % badgePositionOptions.length) + badgePositionOptions.length) % badgePositionOptions.length;
+                badgePositionIndex = boundedIndex;
+
+                badgePositionOptions.forEach(option => {
+                    document.body.classList.remove(`badge-pos-${option.key}`);
+                });
+
+                const option = badgePositionOptions[badgePositionIndex];
+                document.body.classList.add(`badge-pos-${option.key}`);
+            }
+
+            function applyBadgeOffset(x, y) {
+                badgeOffsetX = Math.max(0, x);
+                badgeOffsetY = Math.max(0, y);
+                document.documentElement.style.setProperty('--badge-offset-x', `${badgeOffsetX}px`);
+                document.documentElement.style.setProperty('--badge-offset-y', `${badgeOffsetY}px`);
             }
 
             function canLoadImage(url) {
@@ -274,7 +395,7 @@ internal static class StaticSiteExporter
             }
 
             async function applyCardMode(item, enablePlus) {
-                const img = item.querySelector('img');
+                const img = item.querySelector('.card-image-wrap > img:last-child');
                 const small = item.querySelector('small');
                 const baseSrc = img.dataset.baseSrc;
 
@@ -311,9 +432,40 @@ internal static class StaticSiteExporter
                 }
             }
 
+            function normalizeCardKey(cardKey) {
+                return (cardKey || '').replace(/Plus$/i, '');
+            }
+
+            function getCardEntry(item) {
+                const cardKey = normalizeCardKey(item.getAttribute('data-card-key'));
+                return cardDescriptions[cardKey] || null;
+            }
+
+            function getTierFromEntry(entry) {
+                const tier = typeof entry?.tier === 'string' ? entry.tier.trim().toLowerCase() : '';
+                return /^[sabcdef]$/.test(tier) ? tier : '';
+            }
+
+            function updateTierBadge(item) {
+                const badge = item.querySelector('.tier-badge');
+                if (!badge) {
+                    return;
+                }
+
+                const entry = getCardEntry(item);
+                const tier = getTierFromEntry(entry);
+                if (!tier) {
+                    badge.hidden = true;
+                    badge.removeAttribute('src');
+                    return;
+                }
+
+                badge.src = `images/tiers/${tier}.png`;
+                badge.hidden = false;
+            }
+
             function getCardDescription(item, fallbackTitle, useUpgraded) {
-                const cardKey = item.getAttribute('data-card-key') || '';
-                const entry = cardDescriptions[cardKey];
+                const entry = getCardEntry(item);
                 if (entry) {
                     if (useUpgraded && typeof entry.upgraded_description === 'string' && entry.upgraded_description.trim()) {
                         return entry.upgraded_description;
@@ -326,7 +478,7 @@ internal static class StaticSiteExporter
             }
 
             function syncOverlayFromItem(item) {
-                const img = item.querySelector('img');
+                const img = item.querySelector('.card-image-wrap > img:last-child');
                 const small = item.querySelector('small');
                 overlayImg.src = img.src;
                 overlayImg.dataset.baseSrc = img.dataset.baseSrc;
@@ -334,10 +486,19 @@ internal static class StaticSiteExporter
                 overlayTitle.classList.toggle('plus-mode', small.classList.contains('plus-mode'));
                 overlayTitle.dataset.originalText = small.dataset.originalText;
                 overlayDescription.textContent = getCardDescription(item, small.dataset.originalText, small.classList.contains('plus-mode'));
+
+                const tier = getTierFromEntry(getCardEntry(item));
+                if (tier) {
+                    overlayTierBadge.src = `images/tiers/${tier}.png`;
+                    overlayTierBadge.hidden = false;
+                } else {
+                    overlayTierBadge.hidden = true;
+                    overlayTierBadge.removeAttribute('src');
+                }
             }
 
             items.forEach(item => {
-                const img = item.querySelector('img');
+                const img = item.querySelector('.card-image-wrap > img:last-child');
                 img.dataset.baseSrc = img.src;
                 const small = item.querySelector('small');
                 small.dataset.originalText = small.textContent.trim();
@@ -382,10 +543,18 @@ internal static class StaticSiteExporter
                 upgradeHint.textContent = `Press ${toggleKey.toUpperCase()} to view upgraded cards`;
             }
 
-            loadDescriptions();
+            applyBadgePosition(0);
+            applyBadgeOffset(17, 1);
+            document.documentElement.style.setProperty('--badge-size', `${badgeSize}%`);
+
+            loadDescriptions().then(() => {
+                items.forEach(updateTierBadge);
+            });
 
             document.addEventListener('keydown', async function (event) {
-                if ((event.key || '').toLowerCase() === toggleKey) {
+                const pressedKey = (event.key || '').toLowerCase();
+
+                if (pressedKey === toggleKey) {
                     event.preventDefault();
                     if (toggleInProgress) {
                         return;
