@@ -6,6 +6,19 @@
     const comparisonEmpty = document.getElementById('comparisonEmpty');
     const comparisonCountLabel = document.getElementById('comparisonCountLabel');
     const deckCountLabel = document.getElementById('deckCountLabel');
+    const deckHealthOverall = document.getElementById('deckHealthOverall');
+    const metricFrontloadValue = document.getElementById('metricFrontloadValue');
+    const metricBlockValue = document.getElementById('metricBlockValue');
+    const metricScalingValue = document.getElementById('metricScalingValue');
+    const metricConsistencyValue = document.getElementById('metricConsistencyValue');
+    const metricUtilityValue = document.getElementById('metricUtilityValue');
+    const metricFrontloadBar = document.getElementById('metricFrontloadBar');
+    const metricBlockBar = document.getElementById('metricBlockBar');
+    const metricScalingBar = document.getElementById('metricScalingBar');
+    const metricConsistencyBar = document.getElementById('metricConsistencyBar');
+    const metricUtilityBar = document.getElementById('metricUtilityBar');
+    const deckHealthWeaknesses = document.getElementById('deckHealthWeaknesses');
+    const deckHealthNextPicks = document.getElementById('deckHealthNextPicks');
 
     const overlay = document.getElementById('cardOverlay');
     const overlayCard = document.getElementById('overlayCard');
@@ -283,6 +296,197 @@
         comparisonCountLabel.textContent = `${comparisonState.length} cards`;
         deckCountLabel.textContent = `${deckState.length} cards`;
         comparisonEmpty.hidden = comparisonState.length > 0;
+        renderDeckHealth();
+    }
+
+    function clampScore(value) {
+        return Math.max(0, Math.min(100, Math.round(value)));
+    }
+
+    function getDeckCardText(cardKey) {
+        const normalized = normalizeCardKey(cardKey).toLowerCase();
+        const entry = cardDescriptions[normalizeCardKey(cardKey)] || {};
+        const description = typeof entry.description === 'string' ? entry.description.toLowerCase() : '';
+        const upgraded = typeof entry.upgraded_description === 'string' ? entry.upgraded_description.toLowerCase() : '';
+        return `${normalized} ${description} ${upgraded}`;
+    }
+
+    function includesAny(text, terms) {
+        return terms.some(term => text.includes(term));
+    }
+
+    function analyzeDeckHealth() {
+        const summary = {
+            frontloadCards: 0,
+            blockCards: 0,
+            scalingCards: 0,
+            drawCards: 0,
+            utilityCards: 0,
+            aoeCards: 0,
+            lowCurveCards: 0,
+            highCurveCards: 0,
+            conditionalCards: 0
+        };
+
+        deckState.forEach(cardKey => {
+            const text = getDeckCardText(cardKey);
+
+            if (includesAny(text, ['damage', 'strike', 'bash', 'attack'])) {
+                summary.frontloadCards += 1;
+            }
+            if (includesAny(text, ['block', 'defend', 'armor', 'plated'])) {
+                summary.blockCards += 1;
+            }
+            if (includesAny(text, ['strength', 'dexterity', 'gain 1 strength', 'at the start of each turn', 'power'])) {
+                summary.scalingCards += 1;
+            }
+            if (includesAny(text, ['draw', 'drawn', 'exhaust to draw'])) {
+                summary.drawCards += 1;
+            }
+            if (includesAny(text, ['all enemies', 'each enemy'])) {
+                summary.aoeCards += 1;
+            }
+            if (includesAny(text, ['vulnerable', 'weak', 'frail', 'exhaust', 'status', 'artifact', 'disarm'])) {
+                summary.utilityCards += 1;
+            }
+            if (includesAny(text, ['cost 0', 'costs 0', 'cost 1', 'costs 1'])) {
+                summary.lowCurveCards += 1;
+            }
+            if (includesAny(text, ['cost 2', 'costs 2', 'cost 3', 'costs 3', 'demon form', 'bludgeon', 'barricade'])) {
+                summary.highCurveCards += 1;
+            }
+            if (includesAny(text, ['if', 'only', 'when', 'clash'])) {
+                summary.conditionalCards += 1;
+            }
+        });
+
+        const deckSize = Math.max(deckState.length, 1);
+        const frontload = clampScore((summary.frontloadCards / deckSize) * 140 + summary.aoeCards * 6);
+        const block = clampScore((summary.blockCards / deckSize) * 150 + summary.utilityCards * 2);
+        const scaling = clampScore((summary.scalingCards / deckSize) * 180 + summary.drawCards * 4);
+        const consistency = clampScore(60 + summary.drawCards * 8 + summary.lowCurveCards * 3 - summary.highCurveCards * 6 - summary.conditionalCards * 4 - Math.max(0, deckSize - 22) * 2);
+        const utility = clampScore((summary.utilityCards / deckSize) * 170 + summary.aoeCards * 8);
+        const overall = clampScore(frontload * 0.25 + block * 0.25 + scaling * 0.2 + consistency * 0.2 + utility * 0.1);
+
+        return {
+            frontload,
+            block,
+            scaling,
+            consistency,
+            utility,
+            overall
+        };
+    }
+
+    function metricSeverity(score) {
+        if (score < 40) {
+            return 'critical';
+        }
+        if (score < 60) {
+            return 'weak';
+        }
+        return 'ok';
+    }
+
+    function toWeaknessText(metricKey) {
+        if (metricKey === 'frontload') {
+            return 'Low early damage pressure in turns 1-3.';
+        }
+        if (metricKey === 'block') {
+            return 'Defense consistency is shaky in bad draws.';
+        }
+        if (metricKey === 'scaling') {
+            return 'Limited long-fight scaling for elites and bosses.';
+        }
+        if (metricKey === 'consistency') {
+            return 'Draw and energy curve can produce clunky turns.';
+        }
+        return 'Utility coverage is narrow against varied fights.';
+    }
+
+    function toSuggestionText(metricKey) {
+        if (metricKey === 'frontload') {
+            return 'Prioritize cheap attacks and vulnerable application.';
+        }
+        if (metricKey === 'block') {
+            return 'Add efficient block and weak/mitigation tools.';
+        }
+        if (metricKey === 'scaling') {
+            return 'Pick repeatable scaling powers or strength engines.';
+        }
+        if (metricKey === 'consistency') {
+            return 'Add draw/energy smoothing and trim high-curve cards.';
+        }
+        return 'Look for AoE and broad utility effects.';
+    }
+
+    function setMetricDisplay(valueElement, barElement, score) {
+        if (!valueElement || !barElement) {
+            return;
+        }
+
+        valueElement.textContent = String(score);
+        barElement.style.width = `${score}%`;
+        if (score >= 70) {
+            barElement.style.background = 'linear-gradient(90deg, #2f8f54 0%, #56d07d 100%)';
+            return;
+        }
+        if (score >= 45) {
+            barElement.style.background = 'linear-gradient(90deg, #9b7c2b 0%, #e0b94e 100%)';
+            return;
+        }
+        barElement.style.background = 'linear-gradient(90deg, #8d2d2d 0%, #d45757 100%)';
+    }
+
+    function setListItems(listElement, items) {
+        if (!listElement) {
+            return;
+        }
+
+        listElement.innerHTML = '';
+        items.forEach(text => {
+            const li = document.createElement('li');
+            li.textContent = text;
+            listElement.appendChild(li);
+        });
+    }
+
+    function renderDeckHealth() {
+        if (!deckHealthOverall) {
+            return;
+        }
+
+        const scores = analyzeDeckHealth();
+        const rankedWeaknesses = [
+            { key: 'frontload', score: scores.frontload },
+            { key: 'block', score: scores.block },
+            { key: 'scaling', score: scores.scaling },
+            { key: 'consistency', score: scores.consistency },
+            { key: 'utility', score: scores.utility }
+        ].sort((a, b) => a.score - b.score);
+
+        setMetricDisplay(metricFrontloadValue, metricFrontloadBar, scores.frontload);
+        setMetricDisplay(metricBlockValue, metricBlockBar, scores.block);
+        setMetricDisplay(metricScalingValue, metricScalingBar, scores.scaling);
+        setMetricDisplay(metricConsistencyValue, metricConsistencyBar, scores.consistency);
+        setMetricDisplay(metricUtilityValue, metricUtilityBar, scores.utility);
+        deckHealthOverall.textContent = `${scores.overall} overall`;
+
+        const weaknessItems = rankedWeaknesses
+            .filter(item => metricSeverity(item.score) !== 'ok')
+            .slice(0, 3)
+            .map(item => toWeaknessText(item.key));
+
+        if (weaknessItems.length === 0) {
+            weaknessItems.push('No major weakness detected in this V1 model.');
+        }
+
+        const suggestionItems = rankedWeaknesses
+            .slice(0, 2)
+            .map(item => toSuggestionText(item.key));
+
+        setListItems(deckHealthWeaknesses, weaknessItems);
+        setListItems(deckHealthNextPicks, suggestionItems);
     }
 
     async function addToDeck(key) {

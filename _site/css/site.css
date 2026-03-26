@@ -294,6 +294,80 @@ body {
     background: rgba(161, 46, 46, 0.95);
 }
 
+.deck-health-panel {
+    margin-top: 0.75rem;
+    padding: 0.65rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0.65rem;
+    background: rgba(10, 15, 26, 0.75);
+}
+
+.deck-health-panel h3 {
+    margin: 0 0 0.45rem;
+    font-size: 1rem;
+    color: #f2f7ff;
+}
+
+.deck-health-metric {
+    margin-bottom: 0.45rem;
+}
+
+.deck-health-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #cdd8ef;
+    margin-bottom: 0.2rem;
+}
+
+.deck-health-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(123, 139, 171, 0.25);
+    overflow: hidden;
+}
+
+.deck-health-fill {
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #2f8f54 0%, #56d07d 100%);
+    transition: width 0.2s ease;
+}
+
+.deck-health-notes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+    margin-top: 0.55rem;
+}
+
+.deck-health-notes h4 {
+    margin: 0 0 0.25rem;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.35px;
+    color: #9eb1d6;
+}
+
+.deck-health-notes ul {
+    margin: 0;
+    padding-left: 1rem;
+}
+
+.deck-health-notes li {
+    font-size: 0.76rem;
+    color: #dbe6ff;
+    margin-bottom: 0.18rem;
+}
+
+@media (max-width: 1600px) {
+    .deck-health-notes {
+        grid-template-columns: 1fr;
+    }
+}
+
 .overlay-card {
     background: #181e2a;
     border: 4px solid #42a5f5;
