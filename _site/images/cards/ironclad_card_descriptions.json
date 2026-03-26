@@ -3,67 +3,67 @@
                                "title":  "Bash",
                                "description":  "Deal 8 damage. Apply 2 Vulnerable.",
                                "upgraded_description":  "Deal 10 damage. Apply 3 Vulnerable.",
-                               "tier":  "A"
+                               "tier":  "C"
                            },
     "StS2_Ironclad-Defend":  {
                                  "title":  "Defend (Ironclad)",
                                  "description":  "Gain 5 Block.",
                                  "upgraded_description":  "Gain 8 Block.",
-                                 "tier":  "S"
+                                 "tier":  "C"
                              },
     "StS2_Ironclad-Strike":  {
                                  "title":  "Strike (Ironclad)",
                                  "description":  "Deal 6 damage.",
                                  "upgraded_description":  "Deal 9 damage.",
-                                 "tier":  "C"
+                                 "tier":  "D"
                              },
     "StS2_Ironclad-Anger":  {
                                 "title":  "Anger",
                                 "description":  "Deal 6 damage. Add a copy of this card into your Discard Pile.",
                                 "upgraded_description":  "Deal 8 damage. Add a copy of this card into your Discard Pile.",
-                                "tier":  "C"
+                                "tier":  "B"
                             },
     "StS2_Ironclad-Armaments":  {
                                     "title":  "Armaments",
                                     "description":  "Gain 5 Block. Upgrade a card in your Hand.",
                                     "upgraded_description":  "Gain 5 Block. Upgrade ALL cards in your Hand.",
-                                    "tier":  "B"
+                                    "tier":  "A"
                                 },
     "StS2_Ironclad-BloodWall":  {
                                     "title":  "Blood Wall",
                                     "description":  "Lose 2 HP. Gain 16 Block.",
                                     "upgraded_description":  "Lose 2 HP. Gain 20 Block.",
-                                    "tier":  "F"
+                                    "tier":  "C"
                                 },
     "StS2_Ironclad-Bloodletting":  {
                                        "title":  "Bloodletting",
                                        "description":  "Lose 3 HP. Gain .",
                                        "upgraded_description":  "Lose 3 HP. Gain .",
-                                       "tier":  "C"
+                                       "tier":  "A"
                                    },
     "StS2_Ironclad-BodySlam":  {
                                    "title":  "Body Slam",
                                    "description":  "Deal damage equal to your Block.",
                                    "upgraded_description":  "Deal damage equal to your Block.",
-                                   "tier":  "C"
+                                   "tier":  "B"
                                },
     "StS2_Ironclad-Breakthrough":  {
                                        "title":  "Breakthrough",
                                        "description":  "Lose 1 HP. Deal 9 damage to ALL enemies.",
                                        "upgraded_description":  "Lose 1 HP. Deal 13 damage to ALL enemies.",
-                                       "tier":  "F"
+                                       "tier":  "B"
                                    },
     "StS2_Ironclad-Cinder":  {
                                  "title":  "Cinder",
                                  "description":  "Deal 17 damage. Exhaust the top card of your Draw Pile.",
                                  "upgraded_description":  "Deal 22 damage. Exhaust the top card of your Draw Pile.",
-                                 "tier":  "A"
+                                 "tier":  "C"
                              },
     "StS2_Ironclad-Havoc":  {
                                 "title":  "Havoc",
                                 "description":  "Play the top card of your Draw Pile and Exhaust it.",
                                 "upgraded_description":  "Play the top card of your Draw Pile and Exhaust it.",
-                                "tier":  "C"
+                                "tier":  "D"
                             },
     "StS2_Ironclad-Headbutt":  {
                                    "title":  "Headbutt",
@@ -75,37 +75,37 @@
                                    "title":  "Iron Wave",
                                    "description":  "Gain 5 Block. Deal 5 damage.",
                                    "upgraded_description":  "Gain 7 Block. Deal 7 damage.",
-                                   "tier":  "E"
+                                   "tier":  "C"
                                },
     "StS2_Ironclad-MoltenFist":  {
                                      "title":  "Molten Fist",
                                      "description":  "Deal 10 damage. Double the enemy\u0027s Vulnerable. Exhaust.",
                                      "upgraded_description":  "Deal 14 damage. Double the enemy\u0027s Vulnerable. Exhaust.",
-                                     "tier":  "S"
+                                     "tier":  "B"
                                  },
     "StS2_Ironclad-PerfectedStrike":  {
                                           "title":  "Perfected Strike",
                                           "description":  "Deal 6 damage. Deals 2 additional damage for ALL your cards containing “Strike”.",
                                           "upgraded_description":  "Deal 6 damage. Deals 3 additional damage for ALL your cards containing “Strike”.",
-                                          "tier":  "A"
+                                          "tier":  "B"
                                       },
     "StS2_Ironclad-PommelStrike":  {
                                        "title":  "Pommel Strike",
                                        "description":  "Deal 9 damage. Draw 1 card.",
                                        "upgraded_description":  "Deal 10 damage. Draw 2 cards.",
-                                       "tier":  "F"
+                                       "tier":  "A"
                                    },
     "StS2_Ironclad-SetupStrike":  {
                                       "title":  "Setup Strike",
                                       "description":  "Deal 7 damage. Gain 2 Strength this turn.",
                                       "upgraded_description":  "Deal 9 damage. Gain 3 Strength this turn.",
-                                      "tier":  "A"
+                                      "tier":  "B"
                                   },
     "StS2_Ironclad-ShrugItOff":  {
                                      "title":  "Shrug It Off",
                                      "description":  "Gain 8 Block. Draw 1 card.",
                                      "upgraded_description":  "Gain 11 Block. Draw 1 card.",
-                                     "tier":  "C"
+                                     "tier":  "A"
                                  },
     "StS2_Ironclad-SwordBoomerang":  {
                                          "title":  "Sword Boomerang",
@@ -117,19 +117,19 @@
                                       "title":  "Thunderclap",
                                       "description":  "Deal 4 damage and apply 1 Vulnerable to ALL enemies.",
                                       "upgraded_description":  "Deal 7 damage and apply 1 Vulnerable to ALL enemies.",
-                                      "tier":  "D"
+                                      "tier":  "C"
                                   },
     "StS2_Ironclad-Tremble":  {
                                   "title":  "Tremble",
                                   "description":  "Apply 2 Vulnerable.",
                                   "upgraded_description":  "Apply 3 Vulnerable.",
-                                  "tier":  "S"
+                                  "tier":  "C"
                               },
     "StS2_Ironclad-TrueGrit":  {
                                    "title":  "True Grit",
                                    "description":  "Gain 7 Block. Exhaust 1 card at random.",
                                    "upgraded_description":  "Gain 9 Block. Exhaust 1 card .",
-                                   "tier":  "A"
+                                   "tier":  "B"
                                },
     "StS2_Ironclad-TwinStrike":  {
                                      "title":  "Twin Strike",
@@ -153,43 +153,43 @@
                                    "title":  "Bludgeon",
                                    "description":  "Deal 32 damage.",
                                    "upgraded_description":  "Deal 42 damage.",
-                                   "tier":  "A"
+                                   "tier":  "B"
                                },
     "StS2_Ironclad-Bully":  {
                                 "title":  "Bully",
                                 "description":  "Deal 4 damage. Deals 2 additional damage for each Vulnerable on the enemy.",
                                 "upgraded_description":  "Deal 4 damage. Deals 3 additional damage for each Vulnerable on the enemy.",
-                                "tier":  "F"
+                                "tier":  "C"
                             },
     "StS2_Ironclad-BurningPact":  {
                                       "title":  "Burning Pact",
                                       "description":  "Exhaust 1 card. Draw 2 cards.",
                                       "upgraded_description":  "Exhaust 1 card. Draw 3 cards.",
-                                      "tier":  "D"
+                                      "tier":  "A"
                                   },
     "StS2_Ironclad-DemonicShield":  {
                                         "title":  "Demonic Shield",
                                         "description":  "Lose 1 HP. Give another player Block equal to your Block. Exhaust.",
                                         "upgraded_description":  "Lose 1 HP. Give another player Block equal to your Block.",
-                                        "tier":  "E"
+                                        "tier":  "B"
                                     },
     "StS2_Ironclad-Dismantle":  {
                                     "title":  "Dismantle",
                                     "description":  "Deal 8 damage. If the enemy is Vulnerable, hits twice.",
                                     "upgraded_description":  "Deal 10 damage. If the enemy is Vulnerable, hits twice.",
-                                    "tier":  "D"
+                                    "tier":  "B"
                                 },
     "StS2_Ironclad-Dominate":  {
                                    "title":  "Dominate",
                                    "description":  "Gain 1 Strength for each Vulnerable on the enemy. Exhaust.",
                                    "upgraded_description":  "Gain 1 Strength for each Vulnerable on the enemy.",
-                                   "tier":  "E"
+                                   "tier":  "C"
                                },
     "StS2_Ironclad-DrumofBattle":  {
                                        "title":  "Drum of Battle",
                                        "description":  "Draw 2 cards. At the start of your turn, Exhaust the top card of your Draw Pile.",
                                        "upgraded_description":  "Draw 3 cards. At the start of your turn, Exhaust the top card of your Draw Pile.",
-                                       "tier":  "F"
+                                       "tier":  "D"
                                    },
     "StS2_Ironclad-EvilEye":  {
                                   "title":  "Evil Eye",
@@ -201,97 +201,97 @@
                                        "title":  "Expect a Fight",
                                        "description":  "Gain for each Attack in your Hand.",
                                        "upgraded_description":  "Gain for each Attack in your Hand.",
-                                       "tier":  "E"
+                                       "tier":  "S"
                                    },
     "StS2_Ironclad-FeelNoPain":  {
                                      "title":  "Feel No Pain",
                                      "description":  "Whenever a card is Exhausted, gain 3 Block.",
                                      "upgraded_description":  "Whenever a card is Exhausted, gain 4 Block.",
-                                     "tier":  "S"
+                                     "tier":  "A"
                                  },
     "StS2_Ironclad-FightMe":  {
                                   "title":  "Fight Me!",
                                   "description":  "Deal 5 damage twice. Gain 2 Strength. The enemy gains 1 Strength.",
                                   "upgraded_description":  "Deal 6 damage twice. Gain 3 Strength. The enemy gains 1 Strength.",
-                                  "tier":  "D"
+                                  "tier":  "B"
                               },
     "StS2_Ironclad-FlameBarrier":  {
                                        "title":  "Flame Barrier",
                                        "description":  "Gain 12 Block. Whenever you are attacked this turn, deal 4 damage back.",
                                        "upgraded_description":  "Gain 16 Block. Whenever you are attacked this turn, deal 6 damage back.",
-                                       "tier":  "C"
+                                       "tier":  "B"
                                    },
     "StS2_Ironclad-ForgottenRitual":  {
                                           "title":  "Forgotten Ritual",
                                           "description":  "If you Exhausted a card this turn, gain .",
                                           "upgraded_description":  "If you Exhausted a card this turn, gain 4.",
-                                          "tier":  "E"
+                                          "tier":  "S"
                                       },
     "StS2_Ironclad-Grapple":  {
                                   "title":  "Grapple",
                                   "description":  "Deal 7 damage. Whenever you gain Block this turn, deal 5 damage to the enemy.",
                                   "upgraded_description":  "Deal 9 damage. Whenever you gain Block this turn, deal 7 damage to the enemy.",
-                                  "tier":  "D"
+                                  "tier":  "B"
                               },
     "StS2_Ironclad-Hemokinesis":  {
                                       "title":  "Hemokinesis",
                                       "description":  "Lose 2 HP. Deal 14 damage.",
                                       "upgraded_description":  "Lose 2 HP. Deal 19 damage.",
-                                      "tier":  "F"
+                                      "tier":  "C"
                                   },
     "StS2_Ironclad-HowlfromBeyond":  {
                                          "title":  "Howl from Beyond",
                                          "description":  "Deal 16 damage to ALL enemies. At the start of your turn, plays from the Exhaust Pile.",
                                          "upgraded_description":  "Deal 21 damage to ALL enemies. At the start of your turn, plays from the Exhaust Pile.",
-                                         "tier":  "E"
+                                         "tier":  "B"
                                      },
     "StS2_Ironclad-InfernalBlade":  {
                                         "title":  "Infernal Blade",
                                         "description":  "Add a random Attack into your Hand. It\u0027s free to play this turn. Exhaust.",
                                         "upgraded_description":  "Add a random Attack into your Hand. It\u0027s free to play this turn. Exhaust.",
-                                        "tier":  "A"
+                                        "tier":  "C"
                                     },
     "StS2_Ironclad-Inferno":  {
                                   "title":  "Inferno",
                                   "description":  "At the start of your turn, lose 1 HP. Whenever you lose HP on your turn, deal 6 damage to ALL enemies.",
                                   "upgraded_description":  "At the start of your turn, lose 1 HP. Whenever you lose HP on your turn, deal 9 damage to ALL enemies.",
-                                  "tier":  "S"
+                                  "tier":  "B"
                               },
     "StS2_Ironclad-Inflame":  {
                                   "title":  "Inflame",
                                   "description":  "Gain 2 Strength.",
                                   "upgraded_description":  "Gain 3 Strength.",
-                                  "tier":  "D"
+                                  "tier":  "B"
                               },
     "StS2_Ironclad-Juggling":  {
                                    "title":  "Juggling",
                                    "description":  "Add a copy of the third Attack you play each turn into your Hand.",
                                    "upgraded_description":  "Innate. Add a copy of the third Attack you play each turn into your Hand.",
-                                   "tier":  "B"
+                                   "tier":  "C"
                                },
     "StS2_Ironclad-Pillage":  {
                                   "title":  "Pillage",
                                   "description":  "Deal 6 damage. Draw cards until you draw a non-Attack card.",
                                   "upgraded_description":  "Deal 9 damage. Draw cards until you draw a non-Attack card.",
-                                  "tier":  "F"
+                                  "tier":  "A"
                               },
     "StS2_Ironclad-Rage":  {
                                "title":  "Rage",
                                "description":  "Whenever you play an Attack this turn, gain 3 Block.",
                                "upgraded_description":  "Whenever you play an Attack this turn, gain 5 Block.",
-                               "tier":  "A"
+                               "tier":  "B"
                            },
     "StS2_Ironclad-Rampage":  {
                                   "title":  "Rampage",
                                   "description":  "Deal 9 damage. Increase this card\u0027s damage by 5 this combat.",
                                   "upgraded_description":  "Deal 9 damage. Increase this card\u0027s damage by 9 this combat.",
-                                  "tier":  "S"
+                                  "tier":  "C"
                               },
     "StS2_Ironclad-Rupture":  {
                                   "title":  "Rupture",
                                   "description":  "Whenever you lose HP on your turn, gain 1 Strength.",
                                   "upgraded_description":  "Whenever you lose HP on your turn, gain 2 Strength.",
-                                  "tier":  "E"
+                                  "tier":  "B"
                               },
     "StS2_Ironclad-SecondWind":  {
                                      "title":  "Second Wind",
@@ -303,67 +303,67 @@
                                 "title":  "Spite",
                                 "description":  "Deal 6 damage. If you lost HP this turn, draw 1 card.",
                                 "upgraded_description":  "Deal 9 damage. If you lost HP this turn, draw 1 card.",
-                                "tier":  "E"
+                                "tier":  "A"
                             },
     "StS2_Ironclad-Stampede":  {
                                    "title":  "Stampede",
                                    "description":  "At the end of your turn, 1 random Attack in your Hand is played against a random enemy.",
                                    "upgraded_description":  "At the end of your turn, 1 random Attack in your Hand is played against a random enemy.",
-                                   "tier":  "E"
+                                   "tier":  "B"
                                },
     "StS2_Ironclad-Stomp":  {
                                 "title":  "Stomp",
                                 "description":  "Deal 12 damage to ALL enemies. Costs 1 less for each Attack played this turn.",
                                 "upgraded_description":  "Deal 15 damage to ALL enemies. Costs 1 less for each Attack played this turn.",
-                                "tier":  "D"
+                                "tier":  "A"
                             },
     "StS2_Ironclad-StoneArmor":  {
                                      "title":  "Stone Armor",
                                      "description":  "Gain 4 Plating.",
                                      "upgraded_description":  "Gain 6 Plating.",
-                                     "tier":  "B"
+                                     "tier":  "C"
                                  },
     "StS2_Ironclad-Taunt":  {
                                 "title":  "Taunt",
                                 "description":  "Gain 7 Block. Apply 1 Vulnerable.",
                                 "upgraded_description":  "Gain 8 Block. Apply 2 Vulnerable.",
-                                "tier":  "S"
+                                "tier":  "B"
                             },
     "StS2_Ironclad-Unrelenting":  {
                                       "title":  "Unrelenting",
                                       "description":  "Deal 12 damage. The next Attack you play costs 0 .",
                                       "upgraded_description":  "Deal 18 damage. The next Attack you play costs 0 .",
-                                      "tier":  "C"
+                                      "tier":  "B"
                                   },
     "StS2_Ironclad-Uppercut":  {
                                    "title":  "Uppercut",
                                    "description":  "Deal 13 damage. Apply 1 Weak. Apply 1 Vulnerable.",
                                    "upgraded_description":  "Deal 13 damage. Apply 2 Weak. Apply 2 Vulnerable.",
-                                   "tier":  "D"
+                                   "tier":  "B"
                                },
     "StS2_Ironclad-Vicious":  {
                                   "title":  "Vicious",
                                   "description":  "Whenever you apply Vulnerable, draw 1 card.",
                                   "upgraded_description":  "Whenever you apply Vulnerable, draw 2 cards.",
-                                  "tier":  "F"
+                                  "tier":  "B"
                               },
     "StS2_Ironclad-Whirlwind":  {
                                     "title":  "Whirlwind",
                                     "description":  "Deal 5 damage to ALL enemies X times.",
                                     "upgraded_description":  "Deal 8 damage to ALL enemies X times.",
-                                    "tier":  "F"
+                                    "tier":  "A"
                                 },
     "StS2_Ironclad-Aggression":  {
                                      "title":  "Aggression",
                                      "description":  "At the start of your turn, put a random Attack from your Discard Pile into your Hand and Upgrade it.",
                                      "upgraded_description":  "Innate. At the start of your turn, put a random Attack from your Discard Pile into your Hand and Upgrade it.",
-                                     "tier":  "A"
+                                     "tier":  "B"
                                  },
     "StS2_Ironclad-Barricade":  {
                                     "title":  "Barricade",
                                     "description":  "Block is not removed at the start of your turn.",
                                     "upgraded_description":  "Block is not removed at the start of your turn.",
-                                    "tier":  "F"
+                                    "tier":  "B"
                                 },
     "StS2_Ironclad-Brand":  {
                                 "title":  "Brand",
@@ -375,25 +375,25 @@
                                   "title":  "Cascade",
                                   "description":  "Play the top X cards of your Draw Pile.",
                                   "upgraded_description":  "Play the top X+1 cards of your Draw Pile.",
-                                  "tier":  "S"
+                                  "tier":  "B"
                               },
     "StS2_Ironclad-Colossus":  {
                                    "title":  "Colossus",
                                    "description":  "Gain 5 Block. You receive 50% less damage from Vulnerable enemies this turn.",
                                    "upgraded_description":  "Gain 8 Block. You receive 50% less damage from Vulnerable enemies this turn.",
-                                   "tier":  "S"
+                                   "tier":  "B"
                                },
     "StS2_Ironclad-Conflagration":  {
                                         "title":  "Conflagration",
                                         "description":  "Deal 8 damage to ALL enemies. Deals 2 additional damage for each other Attack you\u0027ve played this turn.",
                                         "upgraded_description":  "Deal 9 damage to ALL enemies. Deals 3 additional damage for each other Attack you\u0027ve played this turn.",
-                                        "tier":  "S"
+                                        "tier":  "B"
                                     },
     "StS2_Ironclad-CrimsonMantle":  {
                                         "title":  "Crimson Mantle",
                                         "description":  "At the start of your turn, lose 1 HP and gain 8 Block.",
                                         "upgraded_description":  "At the start of your turn, lose 1 HP and gain 10 Block.",
-                                        "tier":  "D"
+                                        "tier":  "A"
                                     },
     "StS2_Ironclad-Cruelty":  {
                                   "title":  "Cruelty",
@@ -405,7 +405,7 @@
                                       "title":  "Dark Embrace",
                                       "description":  "Whenever a card is Exhausted, draw 1 card.",
                                       "upgraded_description":  "Whenever a card is Exhausted,draw 1 card.",
-                                      "tier":  "S"
+                                      "tier":  "A"
                                   },
     "StS2_Ironclad-DemonForm":  {
                                     "title":  "Demon Form",
@@ -417,19 +417,19 @@
                                "title":  "Feed",
                                "description":  "Deal 10 damage. If Fatal, raise your Max HP by 3. Exhaust.",
                                "upgraded_description":  "Deal 12 damage. If Fatal, raise your Max HP by 4. Exhaust.",
-                               "tier":  "C"
+                               "tier":  "S"
                            },
     "StS2_Ironclad-FiendFire":  {
                                     "title":  "Fiend Fire",
                                     "description":  "Exhaust your Hand. Deal 7 damage for each card Exhausted. Exhaust.",
                                     "upgraded_description":  "Exhaust your Hand. Deal 10 damage for each card Exhausted. Exhaust.",
-                                    "tier":  "D"
+                                    "tier":  "A"
                                 },
     "StS2_Ironclad-Hellraiser":  {
                                      "title":  "Hellraiser",
                                      "description":  "Whenever you draw a card containing “Strike”, it is played against a random enemy.",
                                      "upgraded_description":  "Whenever you draw a card containing “Strike”, it is played against a random enemy.",
-                                     "tier":  "B"
+                                     "tier":  "A"
                                  },
     "StS2_Ironclad-Impervious":  {
                                      "title":  "Impervious",
@@ -441,19 +441,19 @@
                                      "title":  "Juggernaut",
                                      "description":  "Whenever you gain Block, deal 5 damage to a random enemy.",
                                      "upgraded_description":  "Whenever you gain Block, deal 7 damage to a random enemy.",
-                                     "tier":  "S"
+                                     "tier":  "B"
                                  },
     "StS2_Ironclad-Mangle":  {
                                  "title":  "Mangle",
                                  "description":  "Deal 15 damage. Enemy loses 10 Strength this turn.",
                                  "upgraded_description":  "Deal 20 damage. Enemy loses 15 Strength this turn.",
-                                 "tier":  "F"
+                                 "tier":  "B"
                              },
     "StS2_Ironclad-Offering":  {
                                    "title":  "Offering",
                                    "description":  "Lose 6 HP. Gain . Draw 3 cards. Exhaust.",
                                    "upgraded_description":  "Lose 6 HP. Gain . Draw 5 cards. Exhaust.",
-                                   "tier":  "F"
+                                   "tier":  "S"
                                },
     "StS2_Ironclad-One-TwoPunch":  {
                                        "title":  "One-Two Punch",
@@ -471,31 +471,31 @@
                                       "title":  "Primal Force",
                                       "description":  "Transform all Attacks in your Hand into Giant Rock.",
                                       "upgraded_description":  "Transform all Attacks in your Hand into Giant Rock+.",
-                                      "tier":  "E"
+                                      "tier":  "B"
                                   },
     "StS2_Ironclad-Pyre":  {
                                "title":  "Pyre",
                                "description":  "Gain at the start of each turn.",
                                "upgraded_description":  "Gain at the start of each turn.",
-                               "tier":  "F"
+                               "tier":  "B"
                            },
     "StS2_Ironclad-Stoke":  {
                                 "title":  "Stoke",
                                 "description":  "Exhaust your Hand. Draw a card for each card Exhausted. Exhaust.",
                                 "upgraded_description":  "Exhaust your Hand. Draw a card for each card Exhausted. Exhaust.",
-                                "tier":  "C"
+                                "tier":  "A"
                             },
     "StS2_Ironclad-Tank":  {
                                "title":  "Tank",
                                "description":  "Take double damage from enemies. Allies take half damage from enemies.",
                                "upgraded_description":  "Take double damage from enemies. Allies take half damage from enemies.",
-                               "tier":  "D"
+                               "tier":  "C"
                            },
     "StS2_Ironclad-TearAsunder":  {
                                       "title":  "Tear Asunder",
                                       "description":  "Deal 5 damage. Hits an additional time for each time you lost HP this combat.",
                                       "upgraded_description":  "Deal 7 damage. Hits an additional time for each time you lost HP this combat.",
-                                      "tier":  "A"
+                                      "tier":  "B"
                                   },
     "StS2_Ironclad-Thrash":  {
                                  "title":  "Thrash",
@@ -507,25 +507,25 @@
                                     "title":  "Unmovable",
                                     "description":  "The first time you gain Block from a card each turn, double the amount gained.",
                                     "upgraded_description":  "The first time you gain Block from a card each turn, double the amount gained.",
-                                    "tier":  "C"
+                                    "tier":  "B"
                                 },
     "StS2_Ironclad-Break":  {
                                 "title":  "Break",
                                 "description":  "Deal 20 damage. Apply 5 Vulnerable.",
                                 "upgraded_description":  "Deal 25 damage. Apply 7 Vulnerable.",
-                                "tier":  "S"
+                                "tier":  "B"
                             },
     "StS2_Ironclad-Corruption":  {
                                      "title":  "Corruption",
                                      "description":  "Skills cost 0 . Whenever you play a Skill, Exhaust it.",
                                      "upgraded_description":  "Skills cost 0 . Whenever you play a Skill, Exhaust it.",
-                                     "tier":  "D"
+                                     "tier":  "A"
                                  },
     "StS2_Ironclad-Clash":  {
                                 "title":  "Clash",
                                 "description":  "Can only be played if every card in your Hand is an Attack. Deal 14 damage.",
                                 "upgraded_description":  "Can only be played if every card in your Hand is an Attack. Deal 18 damage.",
-                                "tier":  "E"
+                                "tier":  "D"
                             },
     "StS2_Ironclad-DualWield":  {
                                     "title":  "Dual Wield",
@@ -537,6 +537,6 @@
                                    "title":  "Entrench",
                                    "description":  "Double your Block.",
                                    "upgraded_description":  "Double your Block.",
-                                   "tier":  "S"
+                                   "tier":  "B"
                                }
 }

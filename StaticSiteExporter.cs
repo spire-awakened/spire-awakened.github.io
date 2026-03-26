@@ -48,31 +48,118 @@ internal static class StaticSiteExporter
 
     private static string BuildIndexHtml(List<(string Url, string Label, string Key)> cards)
     {
-        var cardHtml = new StringBuilder();
+        var allCardsHtml = new StringBuilder();
         foreach (var card in cards)
         {
             var safeLabel = WebUtility.HtmlEncode(card.Label);
             var dataName = WebUtility.HtmlEncode(card.Label.ToLowerInvariant());
             var safeKey = WebUtility.HtmlEncode(card.Key);
-            cardHtml.AppendLine($"            <div class=\"card-grid-item\" data-card-name=\"{dataName}\" data-card-key=\"{safeKey}\">");
-            cardHtml.AppendLine("                <div class=\"card h-100 border-0\" style=\"background-color: #111821;\">");
-            cardHtml.AppendLine("                    <div class=\"card-image-wrap\">");
-            cardHtml.AppendLine("                        <img class=\"tier-badge\" alt=\"Tier badge\" hidden />");
-            cardHtml.AppendLine($"                        <img class=\"card-art\" src=\"{card.Url}\" alt=\"Card image\" />");
-            cardHtml.AppendLine("                    </div>");
-            cardHtml.AppendLine("                    <div class=\"card-body text-center\" style=\"background-color: rgba(255,255,255,0.06);\">");
-            cardHtml.AppendLine("                        <small class=\"text-truncate d-block text-light fw-semibold\" style=\"max-width: 100%;\">");
-            cardHtml.AppendLine($"                            {safeLabel}");
-            cardHtml.AppendLine("                        </small>");
-            cardHtml.AppendLine("                    </div>");
-            cardHtml.AppendLine("                </div>");
-            cardHtml.AppendLine("            </div>");
+            allCardsHtml.AppendLine($"            <div class=\"card-grid-item\" data-card-name=\"{dataName}\" data-card-key=\"{safeKey}\">");
+            allCardsHtml.AppendLine("                <div class=\"card h-100 border-0\" style=\"background-color: #111821;\">");
+            allCardsHtml.AppendLine("                    <div class=\"card-image-wrap\">");
+            allCardsHtml.AppendLine("                        <img class=\"tier-badge\" alt=\"Tier badge\" hidden />");
+            allCardsHtml.AppendLine($"                        <img class=\"card-art\" src=\"{card.Url}\" alt=\"Card image\" />");
+            allCardsHtml.AppendLine("                    </div>");
+            allCardsHtml.AppendLine("                    <div class=\"card-body text-center\" style=\"background-color: rgba(255,255,255,0.06);\">");
+            allCardsHtml.AppendLine("                        <small class=\"text-truncate d-block text-light fw-semibold\" style=\"max-width: 100%;\">");
+            allCardsHtml.AppendLine($"                            {safeLabel}");
+            allCardsHtml.AppendLine("                        </small>");
+            allCardsHtml.AppendLine("                    </div>");
+            allCardsHtml.AppendLine("                    <div class=\"card-actions\">");
+            allCardsHtml.AppendLine("                        <button type=\"button\" class=\"action-btn btn-compare\" data-action=\"add-compare\">Add to Comparison</button>");
+            allCardsHtml.AppendLine("                        <button type=\"button\" class=\"action-btn btn-deck\" data-action=\"add-deck\">Add to Deck</button>");
+            allCardsHtml.AppendLine("                    </div>");
+            allCardsHtml.AppendLine("                </div>");
+            allCardsHtml.AppendLine("            </div>");
+        }
+
+        var cardsByKey = cards.ToDictionary(card => card.Key, StringComparer.OrdinalIgnoreCase);
+        var ironcladStartingDeckKeys = new[]
+        {
+            "StS2_Ironclad-Strike",
+            "StS2_Ironclad-Strike",
+            "StS2_Ironclad-Strike",
+            "StS2_Ironclad-Strike",
+            "StS2_Ironclad-Defend",
+            "StS2_Ironclad-Defend",
+            "StS2_Ironclad-Defend",
+            "StS2_Ironclad-Defend",
+            "StS2_Ironclad-Bash",
+        };
+
+        var currentDeckHtml = new StringBuilder();
+        for (var i = 0; i < ironcladStartingDeckKeys.Length; i++)
+        {
+            var deckKey = ironcladStartingDeckKeys[i];
+            if (!cardsByKey.TryGetValue(deckKey, out var deckCard))
+            {
+                continue;
+            }
+
+            var safeDeckLabel = WebUtility.HtmlEncode(deckCard.Label);
+            var deckDataName = WebUtility.HtmlEncode(deckCard.Label.ToLowerInvariant());
+            var safeDeckKey = WebUtility.HtmlEncode(deckCard.Key);
+            currentDeckHtml.AppendLine($"            <div class=\"card-grid-item\" data-card-name=\"{deckDataName}\" data-card-key=\"{safeDeckKey}\" data-deck-slot=\"{i + 1}\">");
+            currentDeckHtml.AppendLine("                <div class=\"card h-100 border-0\" style=\"background-color: #111821;\">");
+            currentDeckHtml.AppendLine("                    <div class=\"card-image-wrap\">");
+            currentDeckHtml.AppendLine("                        <img class=\"tier-badge\" alt=\"Tier badge\" hidden />");
+            currentDeckHtml.AppendLine($"                        <img class=\"card-art\" src=\"{deckCard.Url}\" alt=\"Card image\" />");
+            currentDeckHtml.AppendLine("                    </div>");
+            currentDeckHtml.AppendLine("                    <div class=\"card-body text-center\" style=\"background-color: rgba(255,255,255,0.06);\">");
+            currentDeckHtml.AppendLine("                        <small class=\"text-truncate d-block text-light fw-semibold\" style=\"max-width: 100%;\">");
+            currentDeckHtml.AppendLine($"                            {safeDeckLabel}");
+            currentDeckHtml.AppendLine("                        </small>");
+            currentDeckHtml.AppendLine("                    </div>");
+            currentDeckHtml.AppendLine("                </div>");
+            currentDeckHtml.AppendLine("            </div>");
         }
 
         var noCardsHtml = "        <div class=\"alert alert-warning\">No card images found in images/cards.</div>";
         var cardsSection = cards.Count == 0
             ? noCardsHtml
-            : $"        <div class=\"card-grid\">{Environment.NewLine}{cardHtml}        </div>";
+            : $"""
+        <div class="card-columns">
+            <section class="cards-section">
+                <div class="search-box mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span style="color:#a1b1d7;font-weight:600; font-size: 1.1rem;">Ironclad</span>
+                        <span class="stats">Total cards: <strong>{cards.Count}</strong></span>
+                    </div>
+                    <label for="cardSearchInput">Search Card Name</label>
+                    <input id="cardSearchInput" type="search" class="form-control" placeholder="Type to filter cards..." aria-label="Search cards" autofocus />
+                    <div style="margin-top: 0.5rem;">
+                        <span id="upgradeHint" class="stats" style="display: block;">Press Q to view upgraded cards</span>
+                    </div>
+                </div>
+                <h2>All Cards</h2>
+                <div id="allCardsPanel" class="cards-panel-body">
+                    <div id="allCardsGrid" class="card-grid">
+{allCardsHtml}                </div>
+                </div>
+            </section>
+            <section class="cards-section right-panels">
+                <div class="panel-split">
+                    <div class="panel-block">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
+                            <h2 style="margin: 0; flex: 1;">Card Comparison <span id="comparisonCountLabel" class="stats-inline">0 cards</span></h2>
+                            <button id="clearComparisonBtn" type="button" class="action-btn btn-compare" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; white-space: nowrap;">Clear</button>
+                        </div>
+                        <div id="comparisonPanel" class="cards-panel-body">
+                            <div id="comparisonGrid" class="card-grid"></div>
+                            <div id="comparisonEmpty" class="panel-empty">No cards in comparison yet.</div>
+                        </div>
+                    </div>
+                    <div class="panel-block">
+                        <h2>Current Deck <span id="deckCountLabel" class="stats-inline">{ironcladStartingDeckKeys.Length} cards</span></h2>
+                        <div id="deckPanel" class="cards-panel-body">
+                            <div id="currentDeckGrid" class="card-grid">
+{currentDeckHtml}                </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+""";
 
         return $$"""
 <!DOCTYPE html>
@@ -83,233 +170,9 @@ internal static class StaticSiteExporter
     <title>Ironclad - spire-awakened</title>
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/site.css" />
-    <style>
-        body {
-            background: linear-gradient(180deg, #0b0f1a 0%, #121724 100%);
-            color: #e7ebf2;
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .page-header {
-            border-radius: 0.75rem;
-            padding: 1rem 1rem 0.6rem;
-            background-color: rgba(17, 24, 41, 0.84);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(6px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
-            margin-bottom: 1rem;
-        }
-
-        .page-header .stats {
-            font-size: 0.98rem;
-            color: #bbc4d8;
-        }
-
-        .search-box {
-            border-radius: 0.75rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 0.8rem;
-            background-color: rgba(13, 19, 33, 0.8);
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-        }
-
-        .search-box label {
-            color: #cdd3e0;
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-            display: block;
-        }
-
-        .search-box input {
-            border-radius: 0.6rem;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            background-color: rgba(14, 20, 35, 0.94);
-            color: #f8fbff;
-            caret-color: #ffffff;
-            font-weight: 600;
-        }
-
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 10px;
-            width: 100%;
-        }
-
-        .card-grid-item .card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
-            border-radius: 1rem;
-            border: 1px solid rgba(136, 151, 181, 0.2);
-            overflow: hidden;
-            min-height: 280px;
-        }
-
-        .card-grid-item:hover .card {
-            transform: translateY(-6px) scale(1.035);
-            box-shadow: 0 18px 38px rgba(66, 135, 245, 0.42), 0 0 24px rgba(140, 36, 176, 0.72);
-        }
-
-        .card-image-wrap {
-            position: relative;
-        }
-
-        .card-grid .card-art {
-            width: 100%;
-            height: 240px;
-            object-fit: contain;
-            background-color: rgba(255,255,255,0.06);
-        }
-
-        .tier-badge {
-            position: absolute;
-            width: var(--badge-size, 16.67%);
-            height: var(--badge-size, 16.67%);
-            object-fit: contain;
-            background: transparent;
-            pointer-events: none;
-            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.55));
-            z-index: 2;
-        }
-
-        .card-body {
-            padding: 0.15rem 0.5rem 0.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .card-body small {
-            font-size: 1.06rem;
-            color: #f4f8ff;
-            margin: 0;
-            line-height: 1.2;
-            font-weight: 700;
-        }
-
-        .plus-mode {
-            color: #00C853 !important;
-        }
-
-        .overlay-card {
-            background: #181e2a;
-            border: 4px solid #42a5f5;
-            border-radius: 1.2rem;
-            box-shadow: 0 0 50px rgba(66, 135, 245, 0.8), 0 0 100px rgba(140, 36, 176, 1);
-            padding: 1.5rem;
-            display: flex;
-            gap: 1.25rem;
-            align-items: flex-start;
-            max-width: 95vw;
-        }
-
-        .overlay-image-wrap {
-            position: relative;
-        }
-
-        .overlay-tier-badge {
-            position: absolute;
-            width: var(--badge-size, 16.67%);
-            height: var(--badge-size, 16.67%);
-            object-fit: contain;
-            pointer-events: none;
-            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.55));
-            z-index: 2;
-        }
-
-        body.badge-pos-tr .tier-badge,
-        body.badge-pos-tr .overlay-tier-badge {
-            top: var(--badge-offset-y, 0px);
-            right: var(--badge-offset-x, 0px);
-            bottom: auto;
-            left: auto;
-            transform: none;
-        }
-
-        body.badge-pos-tl .tier-badge,
-        body.badge-pos-tl .overlay-tier-badge {
-            top: 0;
-            left: 0;
-            bottom: auto;
-            right: auto;
-            transform: none;
-        }
-
-        body.badge-pos-br .tier-badge,
-        body.badge-pos-br .overlay-tier-badge {
-            bottom: 0;
-            right: 0;
-            top: auto;
-            left: auto;
-            transform: none;
-        }
-
-        body.badge-pos-bl .tier-badge,
-        body.badge-pos-bl .overlay-tier-badge {
-            bottom: 0;
-            left: 0;
-            top: auto;
-            right: auto;
-            transform: none;
-        }
-
-        body.badge-pos-tc .tier-badge,
-        body.badge-pos-tc .overlay-tier-badge {
-            top: 0;
-            left: 50%;
-            right: auto;
-            bottom: auto;
-            transform: translateX(-50%);
-        }
-
-        body.badge-pos-rc .tier-badge,
-        body.badge-pos-rc .overlay-tier-badge {
-            right: 0;
-            top: 50%;
-            left: auto;
-            bottom: auto;
-            transform: translateY(-50%);
-        }
-
-        .overlay-meta {
-            max-width: 360px;
-            min-width: 240px;
-        }
-
-        .overlay-meta h2 {
-            font-size: 1.5rem;
-            line-height: 1.2;
-            margin-bottom: 0.75rem;
-        }
-
-        .overlay-meta p {
-            margin: 0;
-            color: #d7deef;
-            font-size: 1.04rem;
-            line-height: 1.35;
-            white-space: pre-line;
-        }
-    </style>
 </head>
 <body class="bg-dark text-light">
     <div class="container-fluid py-4 min-vh-100">
-        <div class="page-header">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div class="d-flex align-items-center gap-2">
-                    <span style="color:#a1b1d7;font-weight:600;">Ironclad</span>
-                    <span class="stats">Total cards: <strong>{{cards.Count}}</strong></span>
-                </div>
-                <div>
-                    <span id="upgradeHint" class="stats">Press Q to view upgraded cards</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="search-box mb-4">
-            <label for="cardSearchInput">Search Card Name</label>
-            <input id="cardSearchInput" type="search" class="form-control" placeholder="Type to filter cards..." aria-label="Search cards" autofocus />
-        </div>
-
 {{cardsSection}}
     </div>
 
@@ -322,259 +185,17 @@ internal static class StaticSiteExporter
             <div class="overlay-meta">
                 <h2 id="overlayTitle" class="text-light fw-semibold"></h2>
                 <p id="overlayDescription"></p>
+                <div class="overlay-actions">
+                    <button id="overlayAddCompare" type="button" class="action-btn btn-compare">Add to Comparison</button>
+                    <button id="overlayAddDeck" type="button" class="action-btn btn-deck">Add to Deck</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-        (function () {
-            const input = document.getElementById('cardSearchInput');
-            const items = document.querySelectorAll('.card-grid-item');
-            const overlay = document.getElementById('cardOverlay');
-            const overlayCard = document.getElementById('overlayCard');
-            const overlayImg = document.getElementById('overlayImg');
-            const overlayTierBadge = document.getElementById('overlayTierBadge');
-            const overlayTitle = document.getElementById('overlayTitle');
-            const overlayDescription = document.getElementById('overlayDescription');
-            let cardDescriptions = {};
-
-            const plusAvailabilityCache = new Map();
-            const badgePositionOptions = [
-                { key: 'tr', label: 'Top Right' },
-                { key: 'tl', label: 'Top Left' },
-                { key: 'br', label: 'Bottom Right' },
-                { key: 'bl', label: 'Bottom Left' },
-                { key: 'tc', label: 'Top Center' },
-                { key: 'rc', label: 'Right Center' }
-            ];
-            let badgePositionIndex = 0;
-            let badgeOffsetX = 17;
-            let badgeOffsetY = 1;
-            const badgeSize = 22;
-
-            function getPlusSrc(baseSrc) {
-                return baseSrc.replace(/\.png(?=($|\?))/i, 'Plus.png');
-            }
-
-            function applyBadgePosition(index) {
-                const boundedIndex = ((index % badgePositionOptions.length) + badgePositionOptions.length) % badgePositionOptions.length;
-                badgePositionIndex = boundedIndex;
-
-                badgePositionOptions.forEach(option => {
-                    document.body.classList.remove(`badge-pos-${option.key}`);
-                });
-
-                const option = badgePositionOptions[badgePositionIndex];
-                document.body.classList.add(`badge-pos-${option.key}`);
-            }
-
-            function applyBadgeOffset(x, y) {
-                badgeOffsetX = Math.max(0, x);
-                badgeOffsetY = Math.max(0, y);
-                document.documentElement.style.setProperty('--badge-offset-x', `${badgeOffsetX}px`);
-                document.documentElement.style.setProperty('--badge-offset-y', `${badgeOffsetY}px`);
-            }
-
-            function canLoadImage(url) {
-                if (plusAvailabilityCache.has(url)) {
-                    return Promise.resolve(plusAvailabilityCache.get(url));
-                }
-
-                return new Promise(resolve => {
-                    const probe = new Image();
-                    probe.onload = () => {
-                        plusAvailabilityCache.set(url, true);
-                        resolve(true);
-                    };
-                    probe.onerror = () => {
-                        plusAvailabilityCache.set(url, false);
-                        resolve(false);
-                    };
-                    probe.src = url;
-                });
-            }
-
-            async function applyCardMode(item, enablePlus) {
-                const img = item.querySelector('.card-image-wrap > img:last-child');
-                const small = item.querySelector('small');
-                const baseSrc = img.dataset.baseSrc;
-
-                if (!enablePlus) {
-                    img.src = baseSrc;
-                    small.classList.remove('plus-mode');
-                    small.textContent = small.dataset.originalText;
-                    return;
-                }
-
-                const plusSrc = getPlusSrc(baseSrc);
-                const plusExists = await canLoadImage(plusSrc);
-
-                if (plusExists) {
-                    img.src = plusSrc;
-                    small.classList.add('plus-mode');
-                    small.textContent = small.dataset.originalText + '+';
-                } else {
-                    img.src = baseSrc;
-                    small.classList.remove('plus-mode');
-                    small.textContent = small.dataset.originalText;
-                }
-            }
-
-            async function loadDescriptions() {
-                try {
-                    const response = await fetch('images/cards/ironclad_card_descriptions.json', { cache: 'no-store' });
-                    if (!response.ok) {
-                        return;
-                    }
-                    cardDescriptions = await response.json();
-                } catch {
-                    cardDescriptions = {};
-                }
-            }
-
-            function normalizeCardKey(cardKey) {
-                return (cardKey || '').replace(/Plus$/i, '');
-            }
-
-            function getCardEntry(item) {
-                const cardKey = normalizeCardKey(item.getAttribute('data-card-key'));
-                return cardDescriptions[cardKey] || null;
-            }
-
-            function getTierFromEntry(entry) {
-                const tier = typeof entry?.tier === 'string' ? entry.tier.trim().toLowerCase() : '';
-                return /^[sabcdef]$/.test(tier) ? tier : '';
-            }
-
-            function updateTierBadge(item) {
-                const badge = item.querySelector('.tier-badge');
-                if (!badge) {
-                    return;
-                }
-
-                const entry = getCardEntry(item);
-                const tier = getTierFromEntry(entry);
-                if (!tier) {
-                    badge.hidden = true;
-                    badge.removeAttribute('src');
-                    return;
-                }
-
-                badge.src = `images/tiers/${tier}.png`;
-                badge.hidden = false;
-            }
-
-            function getCardDescription(item, fallbackTitle, useUpgraded) {
-                const entry = getCardEntry(item);
-                if (entry) {
-                    if (useUpgraded && typeof entry.upgraded_description === 'string' && entry.upgraded_description.trim()) {
-                        return entry.upgraded_description;
-                    }
-                    if (typeof entry.description === 'string' && entry.description.trim()) {
-                        return entry.description;
-                    }
-                }
-                return `No description found for ${fallbackTitle}.`;
-            }
-
-            function syncOverlayFromItem(item) {
-                const img = item.querySelector('.card-image-wrap > img:last-child');
-                const small = item.querySelector('small');
-                overlayImg.src = img.src;
-                overlayImg.dataset.baseSrc = img.dataset.baseSrc;
-                overlayTitle.textContent = small.textContent;
-                overlayTitle.classList.toggle('plus-mode', small.classList.contains('plus-mode'));
-                overlayTitle.dataset.originalText = small.dataset.originalText;
-                overlayDescription.textContent = getCardDescription(item, small.dataset.originalText, small.classList.contains('plus-mode'));
-
-                const tier = getTierFromEntry(getCardEntry(item));
-                if (tier) {
-                    overlayTierBadge.src = `images/tiers/${tier}.png`;
-                    overlayTierBadge.hidden = false;
-                } else {
-                    overlayTierBadge.hidden = true;
-                    overlayTierBadge.removeAttribute('src');
-                }
-            }
-
-            items.forEach(item => {
-                const img = item.querySelector('.card-image-wrap > img:last-child');
-                img.dataset.baseSrc = img.src;
-                const small = item.querySelector('small');
-                small.dataset.originalText = small.textContent.trim();
-            });
-
-            input.addEventListener('input', function () {
-                const term = this.value.trim().toLowerCase();
-
-                items.forEach(item => {
-                    const name = item.getAttribute('data-card-name') || '';
-                    const match = name.includes(term);
-                    item.style.display = match ? 'block' : 'none';
-                });
-            });
-
-            overlayCard.addEventListener('click', function (event) {
-                event.stopPropagation();
-            });
-
-            let showPlus = false;
-            let activeOverlayItem = null;
-            let toggleInProgress = false;
-
-            items.forEach(item => {
-                item.addEventListener('click', function () {
-                    activeOverlayItem = this;
-                    syncOverlayFromItem(this);
-                    overlay.style.opacity = '1';
-                    overlay.style.pointerEvents = 'auto';
-                });
-            });
-
-            overlay.addEventListener('click', function () {
-                overlay.style.opacity = '0';
-                overlay.style.pointerEvents = 'none';
-                activeOverlayItem = null;
-            });
-
-            const upgradeHint = document.getElementById('upgradeHint');
-            const toggleKey = 'q';
-            if (upgradeHint) {
-                upgradeHint.textContent = `Press ${toggleKey.toUpperCase()} to view upgraded cards`;
-            }
-
-            applyBadgePosition(0);
-            applyBadgeOffset(17, 1);
-            document.documentElement.style.setProperty('--badge-size', `${badgeSize}%`);
-
-            loadDescriptions().then(() => {
-                items.forEach(updateTierBadge);
-            });
-
-            document.addEventListener('keydown', async function (event) {
-                const pressedKey = (event.key || '').toLowerCase();
-
-                if (pressedKey === toggleKey) {
-                    event.preventDefault();
-                    if (toggleInProgress) {
-                        return;
-                    }
-
-                    toggleInProgress = true;
-                    showPlus = !showPlus;
-
-                    const updates = Array.from(items).map(item => applyCardMode(item, showPlus));
-                    await Promise.all(updates);
-
-                    if (overlay.style.opacity === '1' && activeOverlayItem) {
-                        syncOverlayFromItem(activeOverlayItem);
-                    }
-
-                    toggleInProgress = false;
-                }
-            });
-        })();
-    </script>
+    <script src="lib/jquery/dist/jquery.min.js"></script>
+    <script src="lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/site.js"></script>
 </body>
 </html>
 """;
