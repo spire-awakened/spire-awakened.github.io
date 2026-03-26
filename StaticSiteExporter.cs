@@ -57,7 +57,6 @@ internal static class StaticSiteExporter
             allCardsHtml.AppendLine($"            <div class=\"card-grid-item\" data-card-name=\"{dataName}\" data-card-key=\"{safeKey}\">");
             allCardsHtml.AppendLine("                <div class=\"card h-100 border-0\" style=\"background-color: #111821;\">");
             allCardsHtml.AppendLine("                    <div class=\"card-image-wrap\">");
-            allCardsHtml.AppendLine("                        <img class=\"tier-badge\" alt=\"Tier badge\" hidden />");
             allCardsHtml.AppendLine($"                        <img class=\"card-art\" src=\"{card.Url}\" alt=\"Card image\" />");
             allCardsHtml.AppendLine("                    </div>");
             allCardsHtml.AppendLine("                    <div class=\"card-body text-center\" style=\"background-color: rgba(255,255,255,0.06);\">");
@@ -102,7 +101,6 @@ internal static class StaticSiteExporter
             currentDeckHtml.AppendLine($"            <div class=\"card-grid-item\" data-card-name=\"{deckDataName}\" data-card-key=\"{safeDeckKey}\" data-deck-slot=\"{i + 1}\">");
             currentDeckHtml.AppendLine("                <div class=\"card h-100 border-0\" style=\"background-color: #111821;\">");
             currentDeckHtml.AppendLine("                    <div class=\"card-image-wrap\">");
-            currentDeckHtml.AppendLine("                        <img class=\"tier-badge\" alt=\"Tier badge\" hidden />");
             currentDeckHtml.AppendLine($"                        <img class=\"card-art\" src=\"{deckCard.Url}\" alt=\"Card image\" />");
             currentDeckHtml.AppendLine("                    </div>");
             currentDeckHtml.AppendLine("                    <div class=\"card-body text-center\" style=\"background-color: rgba(255,255,255,0.06);\">");
@@ -129,6 +127,14 @@ internal static class StaticSiteExporter
                     <input id="cardSearchInput" type="search" class="form-control" placeholder="Type to filter cards..." aria-label="Search cards" autofocus />
                     <div style="margin-top: 0.5rem;">
                         <span id="upgradeHint" class="stats" style="display: block;">Press Q to view upgraded cards</span>
+                    </div>
+                    <div class="strength-context-row">
+                        <label for="strengthContextSelect">Strength Context</label>
+                        <select id="strengthContextSelect" class="form-select form-select-sm" aria-label="Card strength context">
+                            <option value="short">Short Fight</option>
+                            <option value="elite">Elite</option>
+                            <option value="boss">Boss</option>
+                        </select>
                     </div>
                 </div>
                 <h2>All Cards</h2>
@@ -216,7 +222,6 @@ internal static class StaticSiteExporter
     <div id="cardOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:9999; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity 0.5s ease; pointer-events:none;">
         <div id="overlayCard" class="overlay-card">
             <div class="overlay-image-wrap">
-                <img id="overlayTierBadge" class="overlay-tier-badge" alt="Overlay tier badge" hidden />
                 <img id="overlayImg" style="max-width:90vw; max-height:50vh; object-fit:contain; border-radius:0.8rem; background:#222b3a;" />
             </div>
             <div class="overlay-meta">

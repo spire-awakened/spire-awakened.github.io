@@ -69,6 +69,14 @@
                     <div style="margin-top: 0.5rem;">
                         <span id="upgradeHint" class="stats" style="display: block;">Press Q to view upgraded cards</span>
                     </div>
+                    <div class="strength-context-row">
+                        <label for="strengthContextSelect">Strength Context</label>
+                        <select id="strengthContextSelect" class="form-select form-select-sm" aria-label="Card strength context">
+                            <option value="short">Short Fight</option>
+                            <option value="elite">Elite</option>
+                            <option value="boss">Boss</option>
+                        </select>
+                    </div>
                 </div>
                 <h2>All Cards</h2>
                 <div id="allCardsPanel" class="cards-panel-body">
@@ -80,7 +88,6 @@
                             <div class="card-grid-item" data-card-name="@label.ToLowerInvariant()" data-card-key="@rawName">
                                 <div class="card h-100 border-0" style="background-color: #111821;">
                                     <div class="card-image-wrap">
-                                        <img class="tier-badge" alt="Tier badge" hidden />
                                         <img class="card-art" src="@cardUrl" alt="Card image" />
                                     </div>
                                     <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -127,7 +134,6 @@
                                     <div class="card-grid-item" data-card-name="@deckLabel.ToLowerInvariant()" data-card-key="@deckCardKey" data-deck-slot="@(i + 1)">
                                         <div class="card h-100 border-0" style="background-color: #111821;">
                                             <div class="card-image-wrap">
-                                                <img class="tier-badge" alt="Tier badge" hidden />
                                                 <img class="card-art" src="@deckCardUrl" alt="Card image" />
                                             </div>
                                             <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
@@ -187,7 +193,6 @@
 <div id="cardOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:9999; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity 0.5s ease; pointer-events:none;">
     <div id="overlayCard" class="overlay-card">
         <div class="overlay-image-wrap">
-            <img id="overlayTierBadge" class="overlay-tier-badge" alt="Overlay tier badge" hidden />
             <img id="overlayImg" style="max-width:90vw; max-height:50vh; object-fit:contain; border-radius:0.8rem; background:#222b3a;" />
         </div>
         <div class="overlay-meta">

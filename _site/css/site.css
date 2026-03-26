@@ -80,6 +80,25 @@ body {
     color: #ffffff;
 }
 
+.strength-context-row {
+    margin-top: 0.6rem;
+}
+
+.strength-context-row label {
+    font-size: 0.72rem;
+    color: #b8c5de;
+    margin-bottom: 0.18rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.35px;
+}
+
+.strength-context-row select {
+    background: rgba(15, 23, 40, 0.95);
+    color: #ecf2ff;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+}
+
 .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -212,8 +231,69 @@ body {
     box-shadow: 0 18px 38px rgba(66, 135, 245, 0.42), 0 0 24px rgba(140, 36, 176, 0.72);
 }
 
+.card-grid-item.synergy-high .card {
+    border-color: rgba(97, 233, 154, 0.78);
+    box-shadow: 0 10px 24px rgba(39, 154, 92, 0.38), 0 0 16px rgba(85, 232, 150, 0.28);
+}
+
+.card-grid-item.synergy-medium .card {
+    border-color: rgba(120, 192, 255, 0.74);
+    box-shadow: 0 10px 24px rgba(60, 129, 202, 0.33), 0 0 14px rgba(95, 175, 255, 0.24);
+}
+
+.card-grid-item.synergy-high:hover .card {
+    box-shadow: 0 18px 40px rgba(45, 173, 105, 0.44), 0 0 24px rgba(109, 238, 165, 0.42);
+}
+
+.card-grid-item.synergy-medium:hover .card {
+    box-shadow: 0 18px 40px rgba(69, 138, 207, 0.4), 0 0 22px rgba(111, 188, 255, 0.36);
+}
+
 .card-image-wrap {
     position: relative;
+}
+
+.pickup-corner-score {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 3;
+    min-width: 30px;
+    text-align: center;
+    padding: 0.08rem 0.33rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #eff7ff;
+    background: rgba(39, 71, 119, 0.86);
+    border: 1px solid rgba(140, 194, 255, 0.6);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.card-grid-item.pickup-snap .pickup-corner-score {
+    background: rgba(39, 129, 79, 0.88);
+    border-color: rgba(125, 244, 179, 0.75);
+}
+
+.card-grid-item.pickup-strong .pickup-corner-score {
+    background: rgba(44, 108, 167, 0.88);
+    border-color: rgba(121, 198, 255, 0.72);
+}
+
+.card-grid-item.pickup-playable .pickup-corner-score {
+    background: rgba(127, 100, 39, 0.9);
+    border-color: rgba(237, 196, 95, 0.72);
+}
+
+.card-grid-item.pickup-niche .pickup-corner-score {
+    background: rgba(109, 73, 39, 0.9);
+    border-color: rgba(214, 162, 91, 0.68);
+}
+
+.card-grid-item.pickup-skip .pickup-corner-score {
+    background: rgba(110, 52, 52, 0.9);
+    border-color: rgba(216, 117, 117, 0.72);
 }
 
 .card-grid .card-art {
@@ -223,22 +303,102 @@ body {
     background-color: rgba(255,255,255,0.06);
 }
 
-.tier-badge {
-    position: absolute;
-    width: var(--badge-size, 16.67%);
-    height: var(--badge-size, 16.67%);
-    object-fit: contain;
-    background: transparent;
-    pointer-events: none;
-    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.55));
-    z-index: 2;
-}
-
 .card-body {
     padding: 0.15rem 0.5rem 0.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.card-body.with-strength-details {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+}
+
+.comparison-strength-slot {
+    padding: 0.28rem 0.34rem 0.2rem;
+    background: rgba(9, 13, 22, 0.78);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    min-height: 66px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.comparison-strength-head {
+    margin-bottom: 0.22rem;
+    justify-content: space-between;
+}
+
+#comparisonGrid .card-strength-block {
+    margin-top: 0;
+    display: block;
+    width: 100%;
+    min-width: 0;
+}
+
+.comparison-strength-bars {
+    gap: 0.22rem;
+    width: 100%;
+    min-width: 0;
+}
+
+#comparisonGrid .comparison-strength-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0.24rem;
+    width: 100%;
+    min-width: 0;
+}
+
+#comparisonGrid .comparison-strength-row .card-strength-row-label {
+    font-size: 0.66rem;
+    color: #d9e8ff;
+    flex: 0 0 10px;
+}
+
+#comparisonGrid .card-strength-value {
+    font-size: 0.64rem;
+    font-weight: 800;
+    color: #e5f0ff;
+    text-align: right;
+    white-space: nowrap;
+    flex: 0 0 24px;
+    line-height: 1;
+}
+
+#comparisonGrid .card-strength-track {
+    height: 6px;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+#comparisonGrid .card-strength-fill {
+    min-width: 2px;
+}
+
+#comparisonGrid .card-strength-why {
+    color: #8fb2de;
+    white-space: normal;
+    word-break: break-word;
+    border-top: 1px dashed rgba(143, 178, 222, 0.24);
+    padding-top: 0.22rem;
+}
+
+#comparisonGrid .card-strength-score {
+    font-size: 0.74rem;
+}
+
+#comparisonGrid .card-strength-band {
+    font-size: 0.63rem;
+}
+
+#comparisonGrid .card-body small {
+    margin-bottom: 0.16rem;
 }
 
 .card-body small {
@@ -247,6 +407,128 @@ body {
     margin: 0;
     line-height: 1.2;
     font-weight: 700;
+}
+
+.synergy-tag {
+    margin-top: 0.35rem;
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.35px;
+    border-radius: 999px;
+    padding: 0.1rem 0.44rem;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    color: #e7f3ff;
+    background: rgba(49, 66, 100, 0.55);
+}
+
+.synergy-tag.synergy-high {
+    color: #d3ffe7;
+    background: rgba(43, 116, 76, 0.65);
+    border-color: rgba(112, 233, 168, 0.7);
+}
+
+.synergy-tag.synergy-medium {
+    color: #d7ecff;
+    background: rgba(52, 90, 140, 0.68);
+    border-color: rgba(111, 186, 255, 0.68);
+}
+
+.card-strength-block {
+    margin-top: 0.34rem;
+    width: 100%;
+}
+
+.card-strength-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.34rem;
+}
+
+.card-strength-score {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #f3fbff;
+    background: rgba(41, 72, 122, 0.7);
+    border: 1px solid rgba(127, 190, 255, 0.5);
+    border-radius: 999px;
+    padding: 0.06rem 0.4rem;
+    line-height: 1.1;
+}
+
+.card-strength-band {
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: #d8e8ff;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.card-strength-bars {
+    margin-top: 0.22rem;
+    display: grid;
+    gap: 0.15rem;
+}
+
+.card-strength-row {
+    display: grid;
+    grid-template-columns: 12px 1fr;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.card-strength-row-label {
+    font-size: 0.58rem;
+    color: #b8c8e7;
+    font-weight: 700;
+}
+
+.card-strength-track {
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(132, 151, 187, 0.28);
+    overflow: hidden;
+}
+
+.card-strength-fill {
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #5f9de5 0%, #89d0ff 100%);
+}
+
+.card-strength-why {
+    margin-top: 0.22rem;
+    font-size: 0.62rem;
+    color: #aec6ea;
+    line-height: 1.2;
+}
+
+.card-grid-item.pickup-snap .card-strength-score {
+    background: rgba(38, 129, 78, 0.78);
+    border-color: rgba(122, 245, 177, 0.7);
+}
+
+.card-grid-item.pickup-strong .card-strength-score {
+    background: rgba(44, 108, 167, 0.76);
+    border-color: rgba(121, 198, 255, 0.7);
+}
+
+.card-grid-item.pickup-playable .card-strength-score {
+    background: rgba(127, 100, 39, 0.8);
+    border-color: rgba(237, 196, 95, 0.7);
+}
+
+.card-grid-item.pickup-niche .card-strength-score {
+    background: rgba(109, 73, 39, 0.8);
+    border-color: rgba(214, 162, 91, 0.65);
+}
+
+.card-grid-item.pickup-skip .card-strength-score {
+    background: rgba(110, 52, 52, 0.82);
+    border-color: rgba(216, 117, 117, 0.68);
 }
 
 .plus-mode {
@@ -382,70 +664,6 @@ body {
 
 .overlay-image-wrap {
     position: relative;
-}
-
-.overlay-tier-badge {
-    position: absolute;
-    width: var(--badge-size, 16.67%);
-    height: var(--badge-size, 16.67%);
-    object-fit: contain;
-    pointer-events: none;
-    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.55));
-    z-index: 2;
-}
-
-body.badge-pos-tr .tier-badge,
-body.badge-pos-tr .overlay-tier-badge {
-    top: var(--badge-offset-y, 0px);
-    right: var(--badge-offset-x, 0px);
-    bottom: auto;
-    left: auto;
-    transform: none;
-}
-
-body.badge-pos-tl .tier-badge,
-body.badge-pos-tl .overlay-tier-badge {
-    top: 0;
-    left: 0;
-    bottom: auto;
-    right: auto;
-    transform: none;
-}
-
-body.badge-pos-br .tier-badge,
-body.badge-pos-br .overlay-tier-badge {
-    bottom: 0;
-    right: 0;
-    top: auto;
-    left: auto;
-    transform: none;
-}
-
-body.badge-pos-bl .tier-badge,
-body.badge-pos-bl .overlay-tier-badge {
-    bottom: 0;
-    left: 0;
-    top: auto;
-    right: auto;
-    transform: none;
-}
-
-body.badge-pos-tc .tier-badge,
-body.badge-pos-tc .overlay-tier-badge {
-    top: 0;
-    left: 50%;
-    right: auto;
-    bottom: auto;
-    transform: translateX(-50%);
-}
-
-body.badge-pos-rc .tier-badge,
-body.badge-pos-rc .overlay-tier-badge {
-    right: 0;
-    top: 50%;
-    left: auto;
-    bottom: auto;
-    transform: translateY(-50%);
 }
 
 .overlay-meta {

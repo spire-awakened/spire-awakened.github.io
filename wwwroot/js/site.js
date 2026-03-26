@@ -6,6 +6,7 @@
     const comparisonEmpty = document.getElementById('comparisonEmpty');
     const comparisonCountLabel = document.getElementById('comparisonCountLabel');
     const deckCountLabel = document.getElementById('deckCountLabel');
+    const strengthContextSelect = document.getElementById('strengthContextSelect');
     const deckHealthOverall = document.getElementById('deckHealthOverall');
     const metricFrontloadValue = document.getElementById('metricFrontloadValue');
     const metricBlockValue = document.getElementById('metricBlockValue');
@@ -23,31 +24,19 @@
     const overlay = document.getElementById('cardOverlay');
     const overlayCard = document.getElementById('overlayCard');
     const overlayImg = document.getElementById('overlayImg');
-    const overlayTierBadge = document.getElementById('overlayTierBadge');
     const overlayTitle = document.getElementById('overlayTitle');
     const overlayDescription = document.getElementById('overlayDescription');
     const overlayAddCompare = document.getElementById('overlayAddCompare');
     const overlayAddDeck = document.getElementById('overlayAddDeck');
 
     const plusAvailabilityCache = new Map();
-    const badgePositionOptions = [
-        { key: 'tr', label: 'Top Right' },
-        { key: 'tl', label: 'Top Left' },
-        { key: 'br', label: 'Bottom Right' },
-        { key: 'bl', label: 'Bottom Left' },
-        { key: 'tc', label: 'Top Center' },
-        { key: 'rc', label: 'Right Center' }
-    ];
 
     let cardDescriptions = {};
-    let badgePositionIndex = 0;
-    let badgeOffsetX = 17;
-    let badgeOffsetY = 1;
-    const badgeSize = 22;
     let showPlus = false;
     let toggleInProgress = false;
     let activeOverlayItem = null;
     let activeOverlayCardKey = '';
+    let strengthContext = 'short';
 
     const cardCatalog = new Map();
     const deckState = Array.from(currentDeckGrid.querySelectorAll('.card-grid-item'))
@@ -139,29 +128,6 @@
         return cardDescriptions[cardKey] || null;
     }
 
-    function getTierFromEntry(entry) {
-        const tier = typeof entry?.tier === 'string' ? entry.tier.trim().toLowerCase() : '';
-        return /^[sabcdef]$/.test(tier) ? tier : '';
-    }
-
-    function updateTierBadge(item) {
-        const badge = item.querySelector('.tier-badge');
-        if (!badge) {
-            return;
-        }
-
-        const entry = getCardEntry(item);
-        const tier = getTierFromEntry(entry);
-        if (!tier) {
-            badge.hidden = true;
-            badge.removeAttribute('src');
-            return;
-        }
-
-        badge.src = `images/tiers/${tier}.png`;
-        badge.hidden = false;
-    }
-
     function getCardDescription(item, fallbackTitle, useUpgraded) {
         const entry = getCardEntry(item);
         if (entry) {
@@ -181,7 +147,6 @@
         }
 
         prepareItem(item);
-
         const img = item.querySelector('.card-image-wrap > img:last-child');
         const small = item.querySelector('small');
         if (!img || !small) {
@@ -194,34 +159,22 @@
         overlayTitle.classList.toggle('plus-mode', small.classList.contains('plus-mode'));
         overlayTitle.dataset.originalText = small.dataset.originalText;
         overlayDescription.textContent = getCardDescription(item, small.dataset.originalText, small.classList.contains('plus-mode'));
+    }
 
-        const tier = getTierFromEntry(getCardEntry(item));
-        if (tier) {
-            overlayTierBadge.src = `images/tiers/${tier}.png`;
-            overlayTierBadge.hidden = false;
-        } else {
-            overlayTierBadge.hidden = true;
-            overlayTierBadge.removeAttribute('src');
+    function ensurePickupCornerScore(item) {
+        const imageWrap = item.querySelector('.card-image-wrap');
+        if (!imageWrap) {
+            return null;
         }
-    }
 
-    function applyBadgePosition(index) {
-        const boundedIndex = ((index % badgePositionOptions.length) + badgePositionOptions.length) % badgePositionOptions.length;
-        badgePositionIndex = boundedIndex;
+        let badge = imageWrap.querySelector('.pickup-corner-score');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'pickup-corner-score';
+            imageWrap.appendChild(badge);
+        }
 
-        badgePositionOptions.forEach(option => {
-            document.body.classList.remove(`badge-pos-${option.key}`);
-        });
-
-        const option = badgePositionOptions[badgePositionIndex];
-        document.body.classList.add(`badge-pos-${option.key}`);
-    }
-
-    function applyBadgeOffset(x, y) {
-        badgeOffsetX = Math.max(0, x);
-        badgeOffsetY = Math.max(0, y);
-        document.documentElement.style.setProperty('--badge-offset-x', `${badgeOffsetX}px`);
-        document.documentElement.style.setProperty('--badge-offset-y', `${badgeOffsetY}px`);
+        return badge;
     }
 
     function createCardTile(key, actionMode, stateIndex) {
@@ -239,7 +192,35 @@
         }
 
         let actionsHtml = '';
+        let strengthSlotHtml = '';
         if (actionMode === 'comparison') {
+            strengthSlotHtml = `
+                <div class="comparison-strength-slot">
+                    <div class="card-strength-block">
+                        <div class="card-strength-head comparison-strength-head">
+                            <span class="card-strength-score" data-strength-score>0</span>
+                            <span class="card-strength-band" data-strength-band>Playable</span>
+                        </div>
+                        <div class="card-strength-bars comparison-strength-bars">
+                            <div class="card-strength-row comparison-strength-row">
+                                <span class="card-strength-row-label">B</span>
+                                <div class="card-strength-track"><div class="card-strength-fill" data-strength-kind="base"></div></div>
+                                <span class="card-strength-value" data-strength-value="base">0</span>
+                            </div>
+                            <div class="card-strength-row comparison-strength-row">
+                                <span class="card-strength-row-label">N</span>
+                                <div class="card-strength-track"><div class="card-strength-fill" data-strength-kind="need"></div></div>
+                                <span class="card-strength-value" data-strength-value="need">0</span>
+                            </div>
+                            <div class="card-strength-row comparison-strength-row">
+                                <span class="card-strength-row-label">F</span>
+                                <div class="card-strength-track"><div class="card-strength-fill" data-strength-kind="fit"></div></div>
+                                <span class="card-strength-value" data-strength-value="fit">0</span>
+                            </div>
+                        </div>
+                        <div class="card-strength-why"></div>
+                    </div>
+                </div>`;
             actionsHtml = `<div class="card-actions">
                     <button type="button" class="action-btn btn-deck" data-action="add-deck">Add to Deck</button>
                </div>`;
@@ -253,9 +234,9 @@
         item.innerHTML = `
             <div class="card h-100 border-0" style="background-color: #111821;">
                 <div class="card-image-wrap">
-                    <img class="tier-badge" alt="Tier badge" hidden />
                     <img class="card-art" src="${card.src}" alt="Card image" />
                 </div>
+                ${strengthSlotHtml}
                 <div class="card-body text-center" style="background-color: rgba(255,255,255,0.06);">
                     <small class="text-truncate d-block text-light fw-semibold" style="max-width: 100%;">${card.label}</small>
                 </div>
@@ -269,7 +250,6 @@
         const gridItems = Array.from(grid.querySelectorAll('.card-grid-item'));
         gridItems.forEach(prepareItem);
         await Promise.all(gridItems.map(item => applyCardMode(item, showPlus)));
-        gridItems.forEach(updateTierBadge);
     }
 
     async function renderCollection(grid, keys) {
@@ -297,6 +277,7 @@
         deckCountLabel.textContent = `${deckState.length} cards`;
         comparisonEmpty.hidden = comparisonState.length > 0;
         renderDeckHealth();
+        renderSynergyHighlights();
     }
 
     function clampScore(value) {
@@ -489,6 +470,414 @@
         setListItems(deckHealthNextPicks, suggestionItems);
     }
 
+    function getNeedDeficits(scores) {
+        return {
+            frontload: Math.max(0, 70 - scores.frontload),
+            block: Math.max(0, 70 - scores.block),
+            scaling: Math.max(0, 70 - scores.scaling),
+            consistency: Math.max(0, 70 - scores.consistency),
+            utility: Math.max(0, 70 - scores.utility)
+        };
+    }
+
+    function clamp01(value) {
+        return Math.max(0, Math.min(1, value));
+    }
+
+    function getBasePowerScore(traits, context) {
+        let score = 30;
+        if (traits.attack) {
+            score += 14;
+        }
+        if (traits.block) {
+            score += 14;
+        }
+        if (traits.scaling) {
+            score += 12;
+        }
+        if (traits.draw) {
+            score += 9;
+        }
+        if (traits.aoe) {
+            score += 8;
+        }
+        if (traits.vulnerable || traits.status) {
+            score += 7;
+        }
+        if (traits.highCost) {
+            score -= 8;
+        }
+        if (traits.conditional) {
+            score -= 6;
+        }
+
+        if (context === 'short') {
+            if (traits.attack) {
+                score += 6;
+            }
+            if (traits.highCost) {
+                score -= 5;
+            }
+        }
+        if (context === 'elite') {
+            if (traits.block) {
+                score += 6;
+            }
+            if (traits.scaling) {
+                score += 4;
+            }
+        }
+        if (context === 'boss') {
+            if (traits.scaling) {
+                score += 8;
+            }
+            if (traits.draw) {
+                score += 4;
+            }
+            if (traits.attack && !traits.scaling) {
+                score -= 2;
+            }
+        }
+
+        return clampScore(score);
+    }
+
+    function getNeedMatchScore(traits, deficits, context) {
+        let score = 0;
+        score += (traits.attack || traits.vulnerable ? deficits.frontload * 0.32 : 0);
+        score += (traits.block ? deficits.block * 0.42 : 0);
+        score += (traits.scaling ? deficits.scaling * 0.5 : 0);
+        score += (traits.draw || traits.exhaust ? deficits.consistency * 0.34 : 0);
+        score += (traits.aoe || traits.status || traits.exhaust ? deficits.utility * 0.36 : 0);
+
+        if (context === 'short') {
+            score += traits.attack ? 8 : 0;
+        }
+        if (context === 'elite') {
+            score += traits.block ? 6 : 0;
+        }
+        if (context === 'boss') {
+            score += traits.scaling ? 10 : 0;
+        }
+
+        return clampScore(score);
+    }
+
+    function toPickupBand(score) {
+        if (score >= 85) {
+            return { className: 'pickup-snap', label: 'Snap Pick' };
+        }
+        if (score >= 70) {
+            return { className: 'pickup-strong', label: 'Strong' };
+        }
+        if (score >= 55) {
+            return { className: 'pickup-playable', label: 'Playable' };
+        }
+        if (score >= 40) {
+            return { className: 'pickup-niche', label: 'Niche' };
+        }
+        return { className: 'pickup-skip', label: 'Skip Lean' };
+    }
+
+    function buildStrengthReasons(traits, profile, deficits) {
+        const reasons = [];
+
+        if (profile.exhaust >= 2 && traits.exhaust) {
+            reasons.push('Supports your exhaust package');
+        }
+        if (deficits.block >= 20 && traits.block) {
+            reasons.push('Patches current block weakness');
+        }
+        if (deficits.scaling >= 20 && traits.scaling) {
+            reasons.push('Improves long-fight scaling');
+        }
+        if (deficits.frontload >= 20 && (traits.attack || traits.vulnerable)) {
+            reasons.push('Adds early fight pressure');
+        }
+        if (deficits.consistency >= 20 && (traits.draw || traits.exhaust)) {
+            reasons.push('Smooths draw and consistency');
+        }
+        if (traits.highCost && profile.highCost >= 4) {
+            reasons.push('Curve risk: already heavy on high-cost cards');
+        }
+        if (traits.conditional && profile.conditional >= 3) {
+            reasons.push('Can be unreliable in current deck shape');
+        }
+
+        if (reasons.length === 0) {
+            reasons.push('Neutral impact for current deck and context');
+        }
+
+        return reasons.slice(0, 3);
+    }
+
+    function ensureStrengthBlock(item) {
+        const slot = item.querySelector('.comparison-strength-slot');
+        const container = slot || item.querySelector('.card-body');
+        if (!container) {
+            return null;
+        }
+
+        let block = container.querySelector('.card-strength-block');
+        if (!block) {
+            block = document.createElement('div');
+            block.className = 'card-strength-block';
+            block.innerHTML = `
+                <div class="card-strength-head comparison-strength-head">
+                    <span class="card-strength-score" data-strength-score>0</span>
+                    <span class="card-strength-band" data-strength-band>Playable</span>
+                </div>
+                <div class="card-strength-bars comparison-strength-bars">
+                    <div class="card-strength-row comparison-strength-row">
+                        <span class="card-strength-row-label">B</span>
+                        <div class="card-strength-track"><div class="card-strength-fill" data-strength-kind="base"></div></div>
+                        <span class="card-strength-value" data-strength-value="base">0</span>
+                    </div>
+                    <div class="card-strength-row comparison-strength-row">
+                        <span class="card-strength-row-label">N</span>
+                        <div class="card-strength-track"><div class="card-strength-fill" data-strength-kind="need"></div></div>
+                        <span class="card-strength-value" data-strength-value="need">0</span>
+                    </div>
+                    <div class="card-strength-row comparison-strength-row">
+                        <span class="card-strength-row-label">F</span>
+                        <div class="card-strength-track"><div class="card-strength-fill" data-strength-kind="fit"></div></div>
+                        <span class="card-strength-value" data-strength-value="fit">0</span>
+                    </div>
+                </div>
+                <div class="card-strength-why"></div>`;
+            container.appendChild(block);
+        }
+
+        return block;
+    }
+
+    function renderComparisonStrengthBlock(item, data) {
+        const slot = item.querySelector('.comparison-strength-slot');
+        if (!slot) {
+            return null;
+        }
+
+        const base = clampScore(data.base);
+        const need = clampScore(data.need);
+        const fit = clampScore(data.fit);
+        const pickup = clampScore(data.pickup);
+        const reason = data.reasons[0] || 'Neutral impact for current deck and context';
+        const reasonTitle = data.reasons.join(' | ');
+
+        slot.innerHTML = `
+            <div class="card-strength-block">
+                <div class="card-strength-head comparison-strength-head">
+                    <span class="card-strength-score" data-strength-score title="Pickup score ${pickup} (${strengthContext})">${pickup}</span>
+                    <span class="card-strength-band" data-strength-band>${data.band}</span>
+                </div>
+                <div class="card-strength-bars comparison-strength-bars">
+                    <div class="card-strength-row comparison-strength-row">
+                        <span class="card-strength-row-label">B</span>
+                        <div class="card-strength-track"><div class="card-strength-fill" data-strength-kind="base" style="width:${base}%;"></div></div>
+                        <span class="card-strength-value" data-strength-value="base">${base}</span>
+                    </div>
+                    <div class="card-strength-row comparison-strength-row">
+                        <span class="card-strength-row-label">N</span>
+                        <div class="card-strength-track"><div class="card-strength-fill" data-strength-kind="need" style="width:${need}%;"></div></div>
+                        <span class="card-strength-value" data-strength-value="need">${need}</span>
+                    </div>
+                    <div class="card-strength-row comparison-strength-row">
+                        <span class="card-strength-row-label">F</span>
+                        <div class="card-strength-track"><div class="card-strength-fill" data-strength-kind="fit" style="width:${fit}%;"></div></div>
+                        <span class="card-strength-value" data-strength-value="fit">${fit}</span>
+                    </div>
+                </div>
+                <div class="card-strength-why" title="${reasonTitle}">${reason}</div>
+            </div>`;
+
+        return slot.querySelector('.card-strength-block');
+    }
+
+    function setStrengthFill(block, kind, score) {
+        const fill = block.querySelector(`.card-strength-fill[data-strength-kind="${kind}"]`);
+        if (!fill) {
+            return;
+        }
+        fill.style.width = `${clampScore(score)}%`;
+
+        const value = block.querySelector(`.card-strength-value[data-strength-value="${kind}"]`);
+        if (value) {
+            value.textContent = String(clampScore(score));
+        }
+    }
+
+    function renderCardStrengthSignals() {
+        if (!allCardsGrid) {
+            return;
+        }
+
+        const deckScores = analyzeDeckHealth();
+        const deficits = getNeedDeficits(deckScores);
+        const profile = getDeckSynergyProfile();
+        const allCardItems = Array.from(allCardsGrid.querySelectorAll('.card-grid-item'));
+        const comparisonItems = comparisonGrid ? Array.from(comparisonGrid.querySelectorAll('.card-grid-item')) : [];
+
+        const renderOne = function (item, showDetails) {
+            item.classList.remove('pickup-snap', 'pickup-strong', 'pickup-playable', 'pickup-niche', 'pickup-skip');
+
+            const key = item.getAttribute('data-card-key') || '';
+            const traits = getCardTraits(key);
+            const basePower = getBasePowerScore(traits, strengthContext);
+            const fit = clampScore(50 + getSynergyScore(profile, traits) * 2);
+            const need = getNeedMatchScore(traits, deficits, strengthContext);
+            const pickup = clampScore(basePower * 0.25 + fit * 0.45 + need * 0.3);
+            const band = toPickupBand(pickup);
+            const reasons = buildStrengthReasons(traits, profile, deficits);
+
+            item.classList.add(band.className);
+
+            const cornerBadge = ensurePickupCornerScore(item);
+            if (cornerBadge) {
+                cornerBadge.hidden = false;
+                cornerBadge.textContent = String(pickup);
+                cornerBadge.title = reasons.join(' | ');
+            }
+
+            if (!showDetails) {
+                const existing = item.querySelector('.card-strength-block');
+                if (existing) {
+                    existing.remove();
+                }
+                item.title = reasons.join(' | ');
+                return;
+            }
+
+            const block = renderComparisonStrengthBlock(item, {
+                pickup,
+                band: band.label,
+                base: basePower,
+                need,
+                fit,
+                reasons,
+                context: strengthContext
+            }) || ensureStrengthBlock(item);
+            if (!block) {
+                return;
+            }
+
+            item.title = reasons.join(' | ');
+        };
+
+        allCardItems.forEach(item => renderOne(item, false));
+        comparisonItems.forEach(item => renderOne(item, true));
+    }
+
+    function getCardTraits(cardKey) {
+        const text = getDeckCardText(cardKey);
+        return {
+            attack: includesAny(text, [' attack', 'deal', 'strike', 'bash', 'whirlwind', 'heavy blade']),
+            block: includesAny(text, [' block', 'defend', 'plated armor', 'gain armor']),
+            scaling: includesAny(text, ['strength', 'dexterity', 'power', 'at the start of each turn']),
+            draw: includesAny(text, ['draw', 'drawn']),
+            exhaust: includesAny(text, ['exhaust', 'exhausted']),
+            vulnerable: includesAny(text, ['vulnerable']),
+            aoe: includesAny(text, ['all enemies', 'each enemy']),
+            status: includesAny(text, ['status', 'wound', 'burn', 'dazed']),
+            highCost: includesAny(text, ['cost 2', 'costs 2', 'cost 3', 'costs 3', 'bludgeon', 'barricade', 'demon form']),
+            conditional: includesAny(text, ['if', 'only', 'when', 'clash'])
+        };
+    }
+
+    function getDeckSynergyProfile() {
+        const profile = {
+            attack: 0,
+            block: 0,
+            scaling: 0,
+            draw: 0,
+            exhaust: 0,
+            vulnerable: 0,
+            aoe: 0,
+            status: 0,
+            highCost: 0,
+            conditional: 0
+        };
+
+        deckState.forEach(cardKey => {
+            const traits = getCardTraits(cardKey);
+            Object.keys(profile).forEach(key => {
+                if (traits[key]) {
+                    profile[key] += 1;
+                }
+            });
+        });
+
+        return profile;
+    }
+
+    function getSynergyScore(profile, traits) {
+        let score = 0;
+
+        if (profile.exhaust >= 2 && traits.exhaust) {
+            score += 28;
+        }
+        if (profile.scaling >= 2 && (traits.scaling || traits.draw)) {
+            score += 18;
+        }
+        if (profile.attack >= 5 && traits.vulnerable) {
+            score += 18;
+        }
+        if (profile.block >= 4 && traits.block) {
+            score += 14;
+        }
+        if (profile.draw >= 2 && traits.highCost) {
+            score += 10;
+        }
+        if (profile.status >= 1 && (traits.exhaust || traits.status)) {
+            score += 14;
+        }
+        if (profile.aoe < 2 && traits.aoe) {
+            score += 12;
+        }
+        if (profile.scaling < 2 && traits.scaling) {
+            score += 12;
+        }
+
+        if (profile.highCost >= 4 && traits.highCost) {
+            score -= 16;
+        }
+        if (profile.conditional >= 3 && traits.conditional) {
+            score -= 8;
+        }
+
+        return score;
+    }
+
+    function renderSynergyHighlights() {
+        if (!allCardsGrid) {
+            return;
+        }
+
+        const profile = getDeckSynergyProfile();
+        const allItems = Array.from(allCardsGrid.querySelectorAll('.card-grid-item'));
+        const deckSize = deckState.length;
+
+        allItems.forEach(item => {
+            item.classList.remove('synergy-high', 'synergy-medium');
+
+            if (deckSize < 5) {
+                return;
+            }
+
+            const key = item.getAttribute('data-card-key') || '';
+            const traits = getCardTraits(key);
+            const score = getSynergyScore(profile, traits);
+
+            if (score >= 28) {
+                item.classList.add('synergy-high');
+                return;
+            }
+
+            if (score >= 14) {
+                item.classList.add('synergy-medium');
+            }
+        });
+    }
+
     async function addToDeck(key) {
         if (!cardCatalog.has(key)) {
             return;
@@ -497,6 +886,11 @@
         deckState.push(key);
         await renderCollection(currentDeckGrid, deckState);
         updateCounts();
+        if (comparisonState.length > 0) {
+            await renderCollection(comparisonGrid, comparisonState);
+        }
+        renderCardStrengthSignals();
+        requestAnimationFrame(() => renderCardStrengthSignals());
     }
 
     async function removeFromDeck(stateIndex, cardKey) {
@@ -511,6 +905,11 @@
 
         await renderCollection(currentDeckGrid, deckState);
         updateCounts();
+        if (comparisonState.length > 0) {
+            await renderCollection(comparisonGrid, comparisonState);
+        }
+        renderCardStrengthSignals();
+        requestAnimationFrame(() => renderCardStrengthSignals());
     }
 
     async function addToComparison(key) {
@@ -521,12 +920,16 @@
         comparisonState.push(key);
         await renderCollection(comparisonGrid, comparisonState);
         updateCounts();
+        renderCardStrengthSignals();
+        requestAnimationFrame(() => renderCardStrengthSignals());
     }
 
     async function clearComparison() {
         comparisonState.length = 0;
         await renderCollection(comparisonGrid, comparisonState);
         updateCounts();
+        renderCardStrengthSignals();
+        requestAnimationFrame(() => renderCardStrengthSignals());
     }
 
     async function loadDescriptions() {
@@ -667,6 +1070,14 @@
         });
     }
 
+    if (strengthContextSelect) {
+        strengthContext = strengthContextSelect.value || 'short';
+        strengthContextSelect.addEventListener('change', function () {
+            strengthContext = this.value || 'short';
+            renderCardStrengthSignals();
+        });
+    }
+
     input.addEventListener('input', function () {
         const term = this.value.trim().toLowerCase();
         Array.from(allCardsGrid.querySelectorAll('.card-grid-item')).forEach(item => {
@@ -681,16 +1092,13 @@
         upgradeHint.textContent = `Press ${toggleKey.toUpperCase()} to view upgraded cards`;
     }
 
-    applyBadgePosition(0);
-    applyBadgeOffset(17, 1);
-    document.documentElement.style.setProperty('--badge-size', `${badgeSize}%`);
-
     Promise.resolve()
         .then(() => loadDescriptions())
         .then(async () => {
             await refreshGridModeAndBadges(allCardsGrid);
             await renderCollection(currentDeckGrid, deckState);
             updateCounts();
+            renderCardStrengthSignals();
         });
 
     document.addEventListener('keydown', async function (event) {
