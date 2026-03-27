@@ -27,12 +27,18 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+          dotnet-quality: ga
 
       - name: Restore
-        run: dotnet restore ./spire-awakened.sln
+        run: dotnet restore ./spire-awakened.csproj
 
       - name: Generate static site
-        run: dotnet run --project ./spire-awakened.csproj -- --export-static --output ./_site
+        run: dotnet run --configuration Release --no-restore --project ./spire-awakened.csproj -- --export-static --output ./_site
+
+      - name: Verify export output
+        run: |
+          test -f ./_site/index.html
+          test -f ./_site/.nojekyll
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

@@ -27,6 +27,9 @@
     const removalPriorityName = document.getElementById('removalPriorityName');
     const removalPriorityReason = document.getElementById('removalPriorityReason');
     const removalPriorityWhy = document.getElementById('removalPriorityWhy');
+    const deckStrategyTag = document.getElementById('deckStrategyTag');
+    const deckStrategySummary = document.getElementById('deckStrategySummary');
+    const deckStrategyPlan = document.getElementById('deckStrategyPlan');
     const pickAdvisorBanner = document.getElementById('pickAdvisorBanner');
     const pickAdvisorList = document.getElementById('pickAdvisorList');
     const rightPanels = document.querySelector('.right-panels');
@@ -1362,6 +1365,87 @@
         renderDeckActionPriority(removalPriorityScore, removalPriorityName, removalPriorityReason, removalPriorityWhy, removalChoice, defaults.removal);
     }
 
+    function renderFightStrategy(scores) {
+        if (!deckStrategyTag || !deckStrategySummary || !deckStrategyPlan) {
+            return;
+        }
+
+        if (!scores || deckState.length === 0) {
+            deckStrategyTag.textContent = 'Adaptive';
+            deckStrategySummary.textContent = 'Add cards to get a play pattern recommendation.';
+            setListItems(deckStrategyPlan, ['No deck data yet.']);
+            return;
+        }
+
+        const deficits = getNeedDeficits(scores);
+        const profile = getDeckSynergyProfile();
+        const deckSize = deckState.length;
+        const runPhase = deckSize <= 14 ? 'early' : (deckSize <= 24 ? 'mid' : 'late');
+        const biggestGap = Object.keys(deficits)
+            .sort((left, right) => deficits[right] - deficits[left])[0] || 'frontload';
+        const plans = [];
+        let tag = 'Balanced';
+        let summary = 'Play for stable value each turn and shift to scaling when safe.';
+
+        if (runPhase === 'late' && scores.scaling >= 62) {
+            tag = 'Scale';
+            summary = 'In longer fights, protect HP early and lean hard into scaling lines.';
+            plans.push('Prioritize setup cards that compound over multiple turns.');
+            plans.push('Delay premium attacks until scaling or Vulnerable windows are active.');
+            plans.push('Against bosses, trade short-term tempo for reliable late-turn dominance.');
+        } else if (scores.scaling >= 70 && scores.block >= 55 && scores.frontload < 55) {
+            tag = 'Scale';
+            summary = 'Open with mitigation, then commit to scaling lines and close later.';
+            plans.push('First two turns: prioritize block and setup effects over greedy damage.');
+            plans.push('Spend premium attacks after scaling pieces or Vulnerable are online.');
+            plans.push('Against elites/bosses, plan for a longer fight and protect HP early.');
+        } else if (runPhase === 'early' && scores.block < 58) {
+            tag = 'Stabilize';
+            summary = 'In early floors, prioritize HP preservation and consistent turns over greed.';
+            plans.push('Take cleaner lines that reduce incoming damage, even at small tempo loss.');
+            plans.push('Avoid overcommitting fragile setups before your defense is online.');
+            plans.push('Prefer reliable hallway clears over high-variance burst plans.');
+        } else if (scores.frontload >= 68 && scores.block < 52) {
+            tag = 'Tempo';
+            summary = 'Race early damage and end fights quickly before defense falls behind.';
+            plans.push('Prioritize aggressive turn 1-3 lines to remove enemy actions fast.');
+            plans.push('Use block opportunistically, not as a full defensive posture.');
+            plans.push('Path toward hallway/elite fights you can burst before attrition starts.');
+        } else if (scores.block >= 68 && scores.scaling < 52) {
+            tag = 'Stabilize';
+            summary = 'Defend consistently while drafting toward a reliable win condition.';
+            plans.push('Spend early energy on efficient block and status mitigation.');
+            plans.push('Delay risky trades unless they secure lethal or major tempo.');
+            plans.push('Draft and sequence cards that convert defense into scaling pressure.');
+        } else {
+            tag = 'Adaptive';
+            summary = 'Take low-risk turns early, then pivot to your best payoff pattern.';
+            plans.push('Use opening turns to fix draw order and avoid dead energy.');
+            plans.push('Commit to damage only when your support pieces are active.');
+            plans.push('Adjust per fight: faster lines in hallways, safer lines in elites.');
+        }
+
+        if (scores.consistency < 52) {
+            plans.unshift('Mulligan mindset: prioritize low-cost, high-certainty cards each turn.');
+        }
+        if (runPhase === 'early') {
+            plans.push('Early act rule: preserve HP first; avoid unnecessary damage races.');
+        }
+        if (runPhase === 'late') {
+            plans.push('Late act rule: sequence for boss scaling turns, not just immediate tempo.');
+        }
+        if (profile.highCost >= 4) {
+            plans.push('Protect hand quality: avoid overcommitting expensive cards in one turn.');
+        }
+        if (biggestGap === 'utility') {
+            plans.push('Preserve flexible answers for multi-enemy or status-heavy fights.');
+        }
+
+        deckStrategyTag.textContent = tag;
+        deckStrategySummary.textContent = summary;
+        setListItems(deckStrategyPlan, Array.from(new Set(plans)).slice(0, 4));
+    }
+
     function renderDeckHealth() {
         if (!deckHealthOverall) {
             return;
@@ -1399,6 +1483,7 @@
         setListItems(deckHealthWeaknesses, weaknessItems);
         setListItems(deckHealthNextPicks, suggestionItems);
         renderDeckPriorities(scores);
+        renderFightStrategy(scores);
     }
 
     function getNeedDeficits(scores) {
