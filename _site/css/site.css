@@ -38,10 +38,11 @@ body {
 }
 
 .cards-page-shell {
-    height: 100vh;
+    min-height: 100vh;
+    height: auto;
     padding-top: 1rem;
     padding-bottom: 1rem;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .search-box {
@@ -107,21 +108,33 @@ body {
 }
 
 #comparisonGrid {
-    max-height: 350px;
-    overflow-y: auto;
+    max-height: none;
+    overflow: visible;
 }
 
 .card-columns {
     display: grid;
     gap: 1rem;
     grid-template-columns: 1fr;
-    height: 100%;
+    height: auto;
     min-height: 0;
+    align-items: start;
 }
 
 @media (min-width: 1200px) {
+    .cards-page-shell {
+        height: calc(100vh - 60px);
+        overflow: hidden;
+    }
+
     .card-columns {
         grid-template-columns: 1fr 1fr;
+        min-height: 0;
+        height: 100%;
+    }
+
+    .cards-section {
+        min-height: 0;
         height: 100%;
     }
 }
@@ -135,7 +148,7 @@ body {
     flex-direction: column;
     overflow: hidden;
     min-height: 320px;
-    height: 100%;
+    height: auto;
 }
 
 .right-panels {
@@ -161,6 +174,30 @@ body {
     min-height: 0;
     display: flex;
     flex-direction: column;
+}
+
+.comparison-panel,
+.deck-panel {
+    min-height: 0;
+}
+
+.comparison-panel {
+    overflow: hidden;
+}
+
+#comparisonPanel {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.deck-panel {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#deckPanel {
+    flex: 0 0 auto;
+    overflow: visible;
 }
 
 .cards-panel-body {
@@ -795,4 +832,200 @@ body {
 .pick-skip .pick-score {
     background: rgba(110, 50, 50, 0.78);
     border-color: rgba(215, 110, 110, 0.68);
+}
+
+/* ── Search Header ───────────────────────────────────── */
+.search-topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-bottom: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.search-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.search-title {
+    color: #a1b1d7;
+    font-weight: 700;
+    font-size: 1.04rem;
+}
+
+.help-panel {
+    margin-top: 0.55rem;
+    border: 1px solid rgba(157, 185, 236, 0.24);
+    border-radius: 0.55rem;
+    background: rgba(10, 16, 29, 0.7);
+}
+
+.help-panel > summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 0.35rem 0.55rem;
+    color: #cfe0ff;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.28px;
+    text-transform: uppercase;
+}
+
+.help-panel > summary::-webkit-details-marker {
+    display: none;
+}
+
+.help-panel > summary::before {
+    content: '+';
+    margin-right: 0.42rem;
+}
+
+.help-panel[open] > summary::before {
+    content: '-';
+}
+
+.help-panel-body {
+    border-top: 1px solid rgba(157, 185, 236, 0.18);
+    padding: 0.45rem 0.65rem 0.55rem;
+}
+
+.help-panel-body p {
+    margin: 0 0 0.4rem;
+    color: #dbe7ff;
+    font-size: 0.78rem;
+}
+
+.help-panel-body ul {
+    margin: 0;
+    padding-left: 1rem;
+}
+
+.help-panel-body li {
+    font-size: 0.76rem;
+    color: #bbceef;
+    margin-bottom: 0.16rem;
+}
+
+/* ── Right Panel Tabs ────────────────────────────────── */
+.right-panel-tabs {
+    display: flex;
+    gap: 0.45rem;
+    margin-bottom: 0.55rem;
+}
+
+.panel-tab {
+    border: 1px solid rgba(141, 163, 204, 0.35);
+    background: rgba(28, 39, 62, 0.8);
+    color: #c6d6f5;
+    border-radius: 999px;
+    padding: 0.24rem 0.72rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.28px;
+    text-transform: uppercase;
+}
+
+.panel-tab.is-active {
+    background: rgba(51, 90, 156, 0.86);
+    color: #ecf4ff;
+    border-color: rgba(125, 185, 255, 0.66);
+}
+
+/* ── Focus Preset (recommended) ──────────────────────── */
+.ui-preset-focus #allCardsGrid .card-body {
+    display: none;
+}
+
+.ui-preset-focus #allCardsGrid .card {
+    position: relative;
+}
+
+.ui-preset-focus #allCardsGrid .card-actions {
+    position: absolute;
+    left: 0.35rem;
+    right: 0.35rem;
+    bottom: 0.35rem;
+    z-index: 4;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.32rem;
+    padding: 0.35rem;
+    border-radius: 0.55rem;
+    border: 1px solid rgba(168, 194, 241, 0.26);
+    background: rgba(8, 12, 20, 0.86);
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.ui-preset-focus #allCardsGrid .card-grid-item:hover .card-actions,
+.ui-preset-focus #allCardsGrid .card-grid-item:focus-within .card-actions {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.ui-preset-focus #allCardsGrid .card-actions .action-btn {
+    font-size: 0.69rem;
+    padding: 0.26rem 0.3rem;
+}
+
+.ui-preset-focus .right-panels[data-active-panel="comparison"] .deck-panel {
+    display: none;
+}
+
+.ui-preset-focus .right-panels[data-active-panel="deck"] .comparison-panel {
+    display: none;
+}
+
+.ui-preset-focus .right-panels .panel-split {
+    grid-template-rows: minmax(0, 1fr);
+}
+
+@media (hover: none), (pointer: coarse) {
+    .ui-preset-focus #allCardsGrid .card-actions {
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+    }
+}
+
+@media (max-width: 1200px) {
+    .cards-page-shell {
+        min-height: auto;
+        height: auto;
+        overflow: visible;
+    }
+
+    .card-columns {
+        min-height: auto;
+        height: auto;
+    }
+
+    .cards-section {
+        overflow: hidden;
+    }
+
+    .cards-panel-body {
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 60vh;
+    }
+
+    .deck-panel {
+        max-height: 60vh;
+    }
+
+    .pick-advisor-row {
+        grid-template-columns: 52px 1fr auto;
+    }
+
+    .pick-reason {
+        grid-column: 1 / -1;
+        white-space: normal;
+    }
 }

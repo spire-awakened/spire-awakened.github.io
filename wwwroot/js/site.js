@@ -21,6 +21,9 @@
     const deckHealthNextPicks = document.getElementById('deckHealthNextPicks');
     const pickAdvisorBanner = document.getElementById('pickAdvisorBanner');
     const pickAdvisorList = document.getElementById('pickAdvisorList');
+    const rightPanels = document.querySelector('.right-panels');
+    const tabComparisonBtn = document.getElementById('tabComparisonBtn');
+    const tabDeckBtn = document.getElementById('tabDeckBtn');
 
     const overlay = document.getElementById('cardOverlay');
     const overlayCard = document.getElementById('overlayCard');
@@ -42,6 +45,7 @@
     let toggleInProgress = false;
     let activeOverlayItem = null;
     let activeOverlayCardKey = '';
+    let activeRightPanel = 'comparison';
 
     const cardCatalog = new Map();
     const deckState = Array.from(currentDeckGrid.querySelectorAll('.card-grid-item'))
@@ -227,12 +231,12 @@
                     </div>
                 </div>`;
             actionsHtml = `<div class="card-actions">
-                    <button type="button" class="action-btn btn-deck" data-action="add-deck">Add to Deck</button>
+                    <button type="button" class="action-btn btn-deck" data-action="add-deck">Deck</button>
                </div>`;
         }
         if (actionMode === 'deck') {
             actionsHtml = `<div class="card-actions">
-                    <button type="button" class="action-btn btn-remove" data-action="remove-deck">Remove from Deck</button>
+                    <button type="button" class="action-btn btn-remove" data-action="remove-deck">Remove</button>
                </div>`;
         }
 
@@ -1742,6 +1746,21 @@
         pickAdvisorBanner.hidden = false;
     }
 
+    function setActiveRightPanel(panel) {
+        activeRightPanel = panel === 'deck' ? 'deck' : 'comparison';
+
+        if (rightPanels) {
+            rightPanels.setAttribute('data-active-panel', activeRightPanel);
+        }
+
+        const buttons = [tabComparisonBtn, tabDeckBtn].filter(Boolean);
+        buttons.forEach(button => {
+            const isSelected = button.getAttribute('data-panel') === activeRightPanel;
+            button.classList.toggle('is-active', isSelected);
+            button.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        });
+    }
+
     async function addToDeck(key) {
         if (!cardCatalog.has(key)) {
             return;
@@ -1957,6 +1976,18 @@
         });
     }
 
+    if (tabComparisonBtn) {
+        tabComparisonBtn.addEventListener('click', function () {
+            setActiveRightPanel('comparison');
+        });
+    }
+
+    if (tabDeckBtn) {
+        tabDeckBtn.addEventListener('click', function () {
+            setActiveRightPanel('deck');
+        });
+    }
+
     input.addEventListener('input', function () {
         const term = this.value.trim().toLowerCase();
         Array.from(allCardsGrid.querySelectorAll('.card-grid-item')).forEach(item => {
@@ -1970,6 +2001,10 @@
     if (upgradeHint) {
         upgradeHint.textContent = `Press ${toggleKey.toUpperCase()} to view upgraded cards`;
     }
+
+    document.body.classList.remove('ui-preset-review');
+    document.body.classList.add('ui-preset-focus');
+    setActiveRightPanel('comparison');
 
     Promise.resolve()
         .then(() => Promise.all([loadDescriptions(), loadSynergyMetadata()]))
