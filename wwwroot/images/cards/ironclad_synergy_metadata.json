@@ -1,0 +1,1815 @@
+{
+  "schemaVersion": "1.0",
+  "game": "Slay the Spire 2",
+  "character": "Ironclad",
+  "status": "active",
+  "intent": "Manual, source-backed synergy metadata seed consumed by the app as a curated scoring layer on top of the heuristic model.",
+  "coverage": {
+    "mode": "full-pool",
+    "curatedCardCount": 90,
+    "packagesCovered": [
+      "strength",
+      "block",
+      "exhaust",
+      "self_damage",
+      "vulnerable",
+      "strike"
+    ]
+  },
+  "sourceCatalog": {
+    "mobalytics": {
+      "label": "Mobalytics Ironclad Guide",
+      "url": "https://mobalytics.gg/slay-the-spire-2/characters/ironclad-guide",
+      "quality": "high",
+      "strengths": [
+        "Build structure",
+        "Early vs high-synergy card framing",
+        "Useful caveats and anti-traps"
+      ]
+    },
+    "keengamer": {
+      "label": "KeenGamer Ironclad Guide",
+      "url": "https://www.keengamer.com/articles/guides/the-complete-guide-to-the-ironclad-in-slay-the-spire-2/",
+      "quality": "high",
+      "strengths": [
+        "Explicit synergy groupings",
+        "Strong enabler/payoff lists",
+        "Useful package coverage for new StS2 cards"
+      ]
+    },
+    "gamesgg": {
+      "label": "Games.GG Ironclad Guide",
+      "url": "https://games.gg/slay-the-spire-2/guides/slay-the-spire-2-ironclad-guide-builds-cards-and-strategy/",
+      "quality": "high",
+      "strengths": [
+        "Archetype identity",
+        "Clear win conditions",
+        "Reliable package-level heuristics"
+      ]
+    },
+    "sts2tools": {
+      "label": "STS2Tools Ironclad Guide",
+      "url": "https://sts2tools.com/slay-the-spire-2-characters/ironclad/",
+      "quality": "medium",
+      "strengths": [
+        "Act-by-act heuristics",
+        "Deckbuilding discipline guidance",
+        "Quick-start deckbuilding constraints"
+      ]
+    },
+    "bo3": {
+      "label": "BO3 Ironclad Guide",
+      "url": "https://bo3.gg/games/articles/slay-the-spire-2-ironclad-guide-strategy-builds-and-cards",
+      "quality": "medium",
+      "strengths": [
+        "Confirms mainstream archetypes",
+        "Useful consistency guidance",
+        "Supports long-fight scaling heuristics"
+      ]
+    }
+  },
+  "schema": {
+    "packages": {
+      "description": "Named archetypes used by the scorer.",
+      "fields": [
+        "description",
+        "enablers",
+        "payoffs",
+        "thresholds",
+        "heuristics",
+        "sourceSupport",
+        "confidence"
+      ]
+    },
+    "cards": {
+      "description": "Per-card curated metadata using project card keys.",
+      "fields": [
+        "title",
+        "roles",
+        "packages",
+        "enables",
+        "paysOff",
+        "requires",
+        "antiSynergy",
+        "stageBias",
+        "sourceSupport",
+        "confidence",
+        "notes"
+      ]
+    }
+  },
+  "packages": {
+    "strength": {
+      "description": "Stack Strength and convert it into burst damage, especially with multi-hit attacks.",
+      "enablers": [
+        "StS2_Ironclad-Inflame",
+        "StS2_Ironclad-DemonForm",
+        "StS2_Ironclad-FightMe",
+        "StS2_Ironclad-SetupStrike"
+      ],
+      "payoffs": [
+        "StS2_Ironclad-Whirlwind",
+        "StS2_Ironclad-TwinStrike",
+        "StS2_Ironclad-FightMe"
+      ],
+      "thresholds": {
+        "enabledAt": {
+          "strengthSources": 2,
+          "multiHitPayoffs": 1
+        }
+      },
+      "heuristics": [
+        "Reward multi-hit attacks when deck already has repeatable Strength scaling.",
+        "Reward Strength generators more when deck already has multi-hit finishers.",
+        "Add extra value when Vulnerable support is present."
+      ],
+      "sourceSupport": [
+        "mobalytics",
+        "gamesgg",
+        "bo3"
+      ],
+      "confidence": 0.9
+    },
+    "block": {
+      "description": "Accumulate Block and convert it into damage or repeated payoff triggers.",
+      "enablers": [
+        "StS2_Ironclad-FlameBarrier",
+        "StS2_Ironclad-ShrugItOff",
+        "StS2_Ironclad-TrueGrit",
+        "StS2_Ironclad-Barricade",
+        "StS2_Ironclad-Entrench"
+      ],
+      "payoffs": [
+        "StS2_Ironclad-BodySlam",
+        "StS2_Ironclad-Juggernaut"
+      ],
+      "thresholds": {
+        "enabledAt": {
+          "repeatableBlockCards": 3,
+          "corePayoffs": 1
+        }
+      },
+      "heuristics": [
+        "Body Slam is weak without dense or persistent Block generation.",
+        "Barricade and Entrench become much better once the deck already has meaningful Block density.",
+        "Passive Block sources increase package value disproportionately."
+      ],
+      "sourceSupport": [
+        "mobalytics",
+        "gamesgg",
+        "keengamer",
+        "sts2tools",
+        "bo3"
+      ],
+      "confidence": 0.92
+    },
+    "exhaust": {
+      "description": "Use Exhaust as a resource engine for draw, Block, and finishers.",
+      "enablers": [
+        "StS2_Ironclad-BurningPact",
+        "StS2_Ironclad-TrueGrit",
+        "StS2_Ironclad-SecondWind",
+        "StS2_Ironclad-Corruption"
+      ],
+      "payoffs": [
+        "StS2_Ironclad-DarkEmbrace",
+        "StS2_Ironclad-FeelNoPain",
+        "StS2_Ironclad-AshenStrike",
+        "StS2_Ironclad-PactsEnd"
+      ],
+      "thresholds": {
+        "enabledAt": {
+          "exhaustEnablers": 3,
+          "enginePieces": 1
+        }
+      },
+      "heuristics": [
+        "Corruption, Dark Embrace, and Feel No Pain form the main engine and should score as premium only with enough exhaust fuel.",
+        "Exhaust payoffs should be penalized in low-exhaust decks.",
+        "Support cards like Burning Pact and True Grit should gain value if the deck already contains exhaust payoffs."
+      ],
+      "sourceSupport": [
+        "mobalytics",
+        "gamesgg",
+        "keengamer",
+        "bo3",
+        "sts2tools"
+      ],
+      "confidence": 0.95
+    },
+    "self_damage": {
+      "description": "Spend HP as a resource, then turn that HP loss into Strength, AoE, draw, or tempo.",
+      "enablers": [
+        "StS2_Ironclad-Bloodletting",
+        "StS2_Ironclad-Hemokinesis",
+        "StS2_Ironclad-Offering",
+        "StS2_Ironclad-Inferno"
+      ],
+      "payoffs": [
+        "StS2_Ironclad-Rupture",
+        "StS2_Ironclad-Spite",
+        "StS2_Ironclad-TearAsunder"
+      ],
+      "thresholds": {
+        "enabledAt": {
+          "repeatableHpLoss": 2,
+          "payoffCards": 1,
+          "stabilizers": 1
+        }
+      },
+      "heuristics": [
+        "Do not rate HP-loss cards highly together by default; the deck needs mitigation, sustain, or explicit payoffs.",
+        "Rupture becomes much stronger once repeated HP-loss enablers exist.",
+        "Bloodletting specifically wants draw, energy sinks, or payoff density."
+      ],
+      "sourceSupport": [
+        "mobalytics",
+        "gamesgg",
+        "keengamer",
+        "bo3",
+        "sts2tools"
+      ],
+      "confidence": 0.91
+    },
+    "vulnerable": {
+      "description": "Apply Vulnerable consistently, then exploit it for burst, scaling, defense, or draw.",
+      "enablers": [
+        "StS2_Ironclad-Bash",
+        "StS2_Ironclad-Thunderclap",
+        "StS2_Ironclad-Uppercut"
+      ],
+      "payoffs": [
+        "StS2_Ironclad-Vicious",
+        "StS2_Ironclad-Dominate",
+        "StS2_Ironclad-Cruelty"
+      ],
+      "thresholds": {
+        "enabledAt": {
+          "vulnerableSources": 2,
+          "payoffCards": 1
+        }
+      },
+      "heuristics": [
+        "Vulnerable payoffs should require actual Vulnerable application density.",
+        "Vulnerable application deserves a bonus in Strength and burst decks even without full package commitment."
+      ],
+      "sourceSupport": [
+        "keengamer",
+        "gamesgg",
+        "mobalytics"
+      ],
+      "confidence": 0.86
+    },
+    "strike": {
+      "description": "Exploit cards that count or replay Strike-tagged attacks, without overcommitting to low-impact cards.",
+      "enablers": [
+        "StS2_Ironclad-PommelStrike",
+        "StS2_Ironclad-SetupStrike",
+        "StS2_Ironclad-TwinStrike"
+      ],
+      "payoffs": [
+        "StS2_Ironclad-PerfectedStrike",
+        "StS2_Ironclad-Hellraiser"
+      ],
+      "thresholds": {
+        "enabledAt": {
+          "strikeCards": 5,
+          "drawOrEnergySupport": 1
+        }
+      },
+      "heuristics": [
+        "Perfected Strike scales with Strike count, but not every Strike card is worth adding.",
+        "Strike decks need enough draw, energy, or secondary scaling to avoid falling off."
+      ],
+      "sourceSupport": [
+        "mobalytics",
+        "keengamer"
+      ],
+      "confidence": 0.83
+    }
+  },
+  "cards": {
+    "StS2_Ironclad-Bash": {
+      "title": "Bash",
+      "roles": ["frontload", "vulnerable_source"],
+      "packages": ["vulnerable"],
+      "enables": ["vulnerable"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.7, "mid": 0.4, "late": 0.2},
+      "sourceSupport": ["keengamer", "gamesgg", "mobalytics"],
+      "confidence": 0.76,
+      "notes": [
+        "Baseline Vulnerable source.",
+        "Gets extra value when the deck already has Vulnerable payoffs or Strength burst."
+      ]
+    },
+    "StS2_Ironclad-Thunderclap": {
+      "title": "Thunderclap",
+      "roles": ["aoe", "vulnerable_source"],
+      "packages": ["vulnerable"],
+      "enables": ["vulnerable"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.8, "mid": 0.5, "late": 0.3},
+      "sourceSupport": ["keengamer"],
+      "confidence": 0.69,
+      "notes": [
+        "Efficient way to spread Vulnerable across multiple enemies.",
+        "Useful support card for AoE and burst decks, not just dedicated Vulnerable builds."
+      ]
+    },
+    "StS2_Ironclad-Uppercut": {
+      "title": "Uppercut",
+      "roles": ["frontload", "utility", "vulnerable_source"],
+      "packages": ["vulnerable"],
+      "enables": ["vulnerable"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.4, "mid": 0.6, "late": 0.5},
+      "sourceSupport": ["keengamer", "mobalytics"],
+      "confidence": 0.75,
+      "notes": [
+        "Good utility add when the deck needs both Weak and Vulnerable.",
+        "Needs enough energy support to offset its heavier cost."
+      ]
+    },
+    "StS2_Ironclad-Vicious": {
+      "title": "Vicious",
+      "roles": ["draw_engine", "vulnerable_payoff"],
+      "packages": ["vulnerable"],
+      "enables": [],
+      "paysOff": ["vulnerable"],
+      "requires": [
+        {"type": "packageCount", "package": "vulnerable", "min": 2}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "vulnerable", "penalty": "high"}
+      ],
+      "stageBias": {"early": 0.2, "mid": 0.7, "late": 0.6},
+      "sourceSupport": ["keengamer"],
+      "confidence": 0.81,
+      "notes": [
+        "One of the clearest payoff cards in the Vulnerable package.",
+        "Should score poorly when the deck has weak Vulnerable application."
+      ]
+    },
+    "StS2_Ironclad-Dominate": {
+      "title": "Dominate",
+      "roles": ["vulnerable_payoff", "strength_scaling"],
+      "packages": ["vulnerable", "strength"],
+      "enables": [],
+      "paysOff": ["vulnerable"],
+      "requires": [
+        {"type": "packageCount", "package": "vulnerable", "min": 2}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "vulnerable", "penalty": "high"}
+      ],
+      "stageBias": {"early": 0.2, "mid": 0.6, "late": 0.7},
+      "sourceSupport": ["keengamer"],
+      "confidence": 0.8,
+      "notes": [
+        "Bridge card between Vulnerable and Strength scaling.",
+        "Needs reliable debuff setup before it becomes premium."
+      ]
+    },
+    "StS2_Ironclad-Cruelty": {
+      "title": "Cruelty",
+      "roles": ["vulnerable_payoff", "burst_multiplier"],
+      "packages": ["vulnerable", "strength"],
+      "enables": [],
+      "paysOff": ["vulnerable"],
+      "requires": [
+        {"type": "packageCount", "package": "vulnerable", "min": 2}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "vulnerable", "penalty": "high"}
+      ],
+      "stageBias": {"early": 0.1, "mid": 0.5, "late": 0.8},
+      "sourceSupport": ["keengamer"],
+      "confidence": 0.78,
+      "notes": [
+        "High ceiling in decks already built around applying Vulnerable and hitting hard.",
+        "Should be treated as a synergy pick, not a generic damage card."
+      ]
+    },
+    "StS2_Ironclad-BodySlam": {
+      "title": "Body Slam",
+      "roles": ["block_payoff", "finisher"],
+      "packages": ["block", "exhaust"],
+      "enables": [],
+      "paysOff": ["block"],
+      "requires": [
+        {"type": "packageCount", "package": "block", "min": 3}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "block", "penalty": "high"}
+      ],
+      "stageBias": {"early": 0.2, "mid": 0.6, "late": 0.9},
+      "sourceSupport": ["mobalytics", "gamesgg", "keengamer", "sts2tools", "bo3"],
+      "confidence": 0.95,
+      "notes": [
+        "Core payoff for the Block package.",
+        "Also benefits indirectly from exhaust decks that generate large Block through Feel No Pain."
+      ]
+    },
+    "StS2_Ironclad-Barricade": {
+      "title": "Barricade",
+      "roles": ["block_engine", "persistence"],
+      "packages": ["block"],
+      "enables": ["block"],
+      "paysOff": [],
+      "requires": [
+        {"type": "roleCount", "role": "repeatable_block", "min": 3}
+      ],
+      "antiSynergy": [
+        {"type": "missingRoleDensity", "role": "repeatable_block", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.1, "mid": 0.6, "late": 0.9},
+      "sourceSupport": ["mobalytics", "gamesgg", "sts2tools", "bo3"],
+      "confidence": 0.93,
+      "notes": [
+        "Engine card that needs surrounding Block density to justify its setup cost.",
+        "Should score much higher once Body Slam, Entrench, or persistent Block sources exist."
+      ]
+    },
+    "StS2_Ironclad-Entrench": {
+      "title": "Entrench",
+      "roles": ["block_multiplier", "block_payoff"],
+      "packages": ["block"],
+      "enables": [],
+      "paysOff": ["block"],
+      "requires": [
+        {"type": "packageCount", "package": "block", "min": 3},
+        {"type": "cardPresence", "anyOf": ["StS2_Ironclad-Barricade", "StS2_Ironclad-BodySlam"]}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "block", "penalty": "high"}
+      ],
+      "stageBias": {"early": 0.0, "mid": 0.4, "late": 0.8},
+      "sourceSupport": ["gamesgg", "bo3"],
+      "confidence": 0.84,
+      "notes": [
+        "Classic win-more card unless the deck already creates substantial Block.",
+        "Should be strongly penalized in thin-block decks."
+      ]
+    },
+    "StS2_Ironclad-Juggernaut": {
+      "title": "Juggernaut",
+      "roles": ["block_payoff", "damage_engine"],
+      "packages": ["block", "exhaust"],
+      "enables": [],
+      "paysOff": ["block"],
+      "requires": [
+        {"type": "packageCount", "package": "block", "min": 3}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "block", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.1, "mid": 0.5, "late": 0.8},
+      "sourceSupport": ["mobalytics", "gamesgg", "bo3"],
+      "confidence": 0.85,
+      "notes": [
+        "Damage engine for Block-heavy decks.",
+        "Cross-package bridge because exhaust decks often generate Block repeatedly."
+      ]
+    },
+    "StS2_Ironclad-Corruption": {
+      "title": "Corruption",
+      "roles": ["exhaust_engine", "cost_cheat"],
+      "packages": ["exhaust"],
+      "enables": ["exhaust"],
+      "paysOff": [],
+      "requires": [
+        {"type": "roleCount", "role": "skill_density", "min": 4}
+      ],
+      "antiSynergy": [
+        {"type": "lowRoleDensity", "role": "skill_density", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.1, "mid": 0.7, "late": 0.9},
+      "sourceSupport": ["mobalytics", "gamesgg", "keengamer", "bo3"],
+      "confidence": 0.96,
+      "notes": [
+        "Main exhaust engine card.",
+        "Should spike in value alongside Dark Embrace, Feel No Pain, and a skill-heavy shell."
+      ]
+    },
+    "StS2_Ironclad-DarkEmbrace": {
+      "title": "Dark Embrace",
+      "roles": ["exhaust_payoff", "draw_engine"],
+      "packages": ["exhaust"],
+      "enables": [],
+      "paysOff": ["exhaust"],
+      "requires": [
+        {"type": "packageCount", "package": "exhaust", "min": 3}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "exhaust", "penalty": "high"}
+      ],
+      "stageBias": {"early": 0.1, "mid": 0.7, "late": 0.8},
+      "sourceSupport": ["mobalytics", "gamesgg", "keengamer", "bo3", "sts2tools"],
+      "confidence": 0.97,
+      "notes": [
+        "One of the main exhaust payoffs and a clear support-gated pick.",
+        "Should be rated as weak standalone value in low-exhaust decks."
+      ]
+    },
+    "StS2_Ironclad-FeelNoPain": {
+      "title": "Feel No Pain",
+      "roles": ["exhaust_payoff", "block_engine"],
+      "packages": ["exhaust", "block"],
+      "enables": [],
+      "paysOff": ["exhaust"],
+      "requires": [
+        {"type": "packageCount", "package": "exhaust", "min": 3}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "exhaust", "penalty": "high"}
+      ],
+      "stageBias": {"early": 0.2, "mid": 0.8, "late": 0.9},
+      "sourceSupport": ["mobalytics", "gamesgg", "keengamer", "bo3", "sts2tools"],
+      "confidence": 0.96,
+      "notes": [
+        "Premium exhaust payoff and bridge into Block strategies.",
+        "Should sharply improve Body Slam and Juggernaut evaluations once supported."
+      ]
+    },
+    "StS2_Ironclad-BurningPact": {
+      "title": "Burning Pact",
+      "roles": ["exhaust_enabler", "draw_support"],
+      "packages": ["exhaust"],
+      "enables": ["exhaust"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.5, "mid": 0.7, "late": 0.6},
+      "sourceSupport": ["mobalytics", "keengamer", "sts2tools"],
+      "confidence": 0.88,
+      "notes": [
+        "Good support card on its own, but much better with exhaust payoffs.",
+        "Should gain additional weight if the deck already contains Dark Embrace or Feel No Pain."
+      ]
+    },
+    "StS2_Ironclad-SecondWind": {
+      "title": "Second Wind",
+      "roles": ["exhaust_enabler", "block_generator"],
+      "packages": ["exhaust", "block"],
+      "enables": ["exhaust", "block"],
+      "paysOff": [],
+      "requires": [
+        {"type": "roleCount", "role": "non_attack_density", "min": 3}
+      ],
+      "antiSynergy": [
+        {"type": "lowRoleDensity", "role": "non_attack_density", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.2, "mid": 0.8, "late": 0.8},
+      "sourceSupport": ["keengamer", "mobalytics"],
+      "confidence": 0.85,
+      "notes": [
+        "Powerful cross-package support card.",
+        "Gets much better in skill-heavy or exhaust-engine decks and helps enable Block payoffs."
+      ]
+    },
+    "StS2_Ironclad-AshenStrike": {
+      "title": "Ashen Strike",
+      "roles": ["exhaust_payoff", "finisher"],
+      "packages": ["exhaust"],
+      "enables": [],
+      "paysOff": ["exhaust"],
+      "requires": [
+        {"type": "packageCount", "package": "exhaust", "min": 3}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "exhaust", "penalty": "high"}
+      ],
+      "stageBias": {"early": 0.1, "mid": 0.5, "late": 0.8},
+      "sourceSupport": ["mobalytics", "keengamer"],
+      "confidence": 0.84,
+      "notes": [
+        "Late-turn or late-fight exhaust finisher.",
+        "Should be kept below generic premium attacks until exhaust density is present."
+      ]
+    },
+    "StS2_Ironclad-PactsEnd": {
+      "title": "Pact's End",
+      "roles": ["exhaust_payoff", "aoe_finisher"],
+      "packages": ["exhaust"],
+      "enables": [],
+      "paysOff": ["exhaust"],
+      "requires": [
+        {"type": "packageCount", "package": "exhaust", "min": 3}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "exhaust", "penalty": "high"}
+      ],
+      "stageBias": {"early": 0.0, "mid": 0.4, "late": 0.8},
+      "sourceSupport": ["mobalytics", "keengamer"],
+      "confidence": 0.83,
+      "notes": [
+        "Very support-gated payoff.",
+        "Should get a strong activation threshold in the scorer instead of a flat bonus."
+      ]
+    },
+    "StS2_Ironclad-Rupture": {
+      "title": "Rupture",
+      "roles": ["self_damage_payoff", "strength_scaling"],
+      "packages": ["self_damage", "strength"],
+      "enables": [],
+      "paysOff": ["self_damage"],
+      "requires": [
+        {"type": "packageCount", "package": "self_damage", "min": 2}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "self_damage", "penalty": "high"}
+      ],
+      "stageBias": {"early": 0.2, "mid": 0.7, "late": 0.9},
+      "sourceSupport": ["mobalytics", "gamesgg", "keengamer", "bo3"],
+      "confidence": 0.94,
+      "notes": [
+        "Defining payoff for self-damage decks.",
+        "Should be valued very differently depending on whether repeated HP-loss enablers already exist."
+      ]
+    },
+    "StS2_Ironclad-Inferno": {
+      "title": "Inferno",
+      "roles": ["self_damage_enabler", "aoe_payoff"],
+      "packages": ["self_damage"],
+      "enables": ["self_damage"],
+      "paysOff": ["self_damage"],
+      "requires": [
+        {"type": "stabilizerCount", "min": 1}
+      ],
+      "antiSynergy": [
+        {"type": "missingStabilizer", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.1, "mid": 0.6, "late": 0.8},
+      "sourceSupport": ["mobalytics", "keengamer"],
+      "confidence": 0.82,
+      "notes": [
+        "Acts as both repeatable HP-loss enabler and repeatable payoff.",
+        "Needs enough survivability or healing to avoid becoming a trap."
+      ]
+    },
+    "StS2_Ironclad-Hemokinesis": {
+      "title": "Hemokinesis",
+      "roles": ["self_damage_enabler", "frontload"],
+      "packages": ["self_damage"],
+      "enables": ["self_damage"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [
+        {"type": "tooManyHpCostCards", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.8, "mid": 0.5, "late": 0.3},
+      "sourceSupport": ["mobalytics", "gamesgg", "bo3"],
+      "confidence": 0.79,
+      "notes": [
+        "Good standalone frontload, but should improve further once self-damage payoffs exist.",
+        "Needs a deck-level HP-cost cap to avoid overcommitting to risky cards."
+      ]
+    },
+    "StS2_Ironclad-Bloodletting": {
+      "title": "Bloodletting",
+      "roles": ["self_damage_enabler", "energy_engine"],
+      "packages": ["self_damage"],
+      "enables": ["self_damage"],
+      "paysOff": [],
+      "requires": [
+        {"type": "roleCount", "role": "draw_support", "min": 1}
+      ],
+      "antiSynergy": [
+        {"type": "missingRoleDensity", "role": "draw_support", "penalty": "high"}
+      ],
+      "stageBias": {"early": 0.1, "mid": 0.6, "late": 0.6},
+      "sourceSupport": ["mobalytics", "gamesgg", "keengamer"],
+      "confidence": 0.88,
+      "notes": [
+        "Support-gated card; strongest guidance from sources is that it wants draw or a clear payoff shell.",
+        "Local card description file appears incomplete for this card, so metadata should remain mechanic-oriented rather than numeric."
+      ]
+    },
+    "StS2_Ironclad-Offering": {
+      "title": "Offering",
+      "roles": ["self_damage_enabler", "draw_support", "energy_engine"],
+      "packages": ["self_damage", "exhaust"],
+      "enables": ["self_damage", "exhaust"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [
+        {"type": "tooManyHpCostCards", "penalty": "low"}
+      ],
+      "stageBias": {"early": 0.4, "mid": 0.7, "late": 0.8},
+      "sourceSupport": ["mobalytics", "gamesgg", "keengamer"],
+      "confidence": 0.89,
+      "notes": [
+        "Broadly strong card that also acts as package glue for self-damage and exhaust shells.",
+        "Should not require full self-damage commitment to score well."
+      ]
+    },
+    "StS2_Ironclad-Inflame": {
+      "title": "Inflame",
+      "roles": ["strength_source", "scaling"],
+      "packages": ["strength"],
+      "enables": ["strength"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.5, "mid": 0.8, "late": 0.9},
+      "sourceSupport": ["mobalytics", "gamesgg", "bo3"],
+      "confidence": 0.9,
+      "notes": [
+        "Reliable generic Strength source.",
+        "Gets a larger bonus in decks that already contain multi-hit attacks or Strength multipliers."
+      ]
+    },
+    "StS2_Ironclad-DemonForm": {
+      "title": "Demon Form",
+      "roles": ["strength_source", "boss_scaling"],
+      "packages": ["strength"],
+      "enables": ["strength"],
+      "paysOff": [],
+      "requires": [
+        {"type": "roleCount", "role": "setup_time", "min": 1}
+      ],
+      "antiSynergy": [
+        {"type": "tooMuchTopEnd", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.1, "mid": 0.5, "late": 0.9},
+      "sourceSupport": ["mobalytics", "gamesgg", "bo3"],
+      "confidence": 0.9,
+      "notes": [
+        "Premier long-fight Strength source.",
+        "Should be less attractive in already-clunky decks without time or defense to set up."
+      ]
+    },
+    "StS2_Ironclad-FightMe": {
+      "title": "Fight Me!",
+      "roles": ["strength_source", "multi_hit", "frontload"],
+      "packages": ["strength"],
+      "enables": ["strength"],
+      "paysOff": ["strength"],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.7, "mid": 0.7, "late": 0.6},
+      "sourceSupport": ["mobalytics"],
+      "confidence": 0.77,
+      "notes": [
+        "Compact card that both generates and exploits Strength.",
+        "Should be treated as stronger when the deck already wants Strength scaling."
+      ]
+    },
+    "StS2_Ironclad-Whirlwind": {
+      "title": "Whirlwind",
+      "roles": ["strength_payoff", "multi_hit", "aoe_finisher"],
+      "packages": ["strength"],
+      "enables": [],
+      "paysOff": ["strength"],
+      "requires": [
+        {"type": "packageCount", "package": "strength", "min": 1}
+      ],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.5, "mid": 0.7, "late": 0.8},
+      "sourceSupport": ["mobalytics", "gamesgg", "bo3"],
+      "confidence": 0.9,
+      "notes": [
+        "One of the clearest Strength payoffs due to repeated hits.",
+        "Should scale heavily with Strength sources and energy support."
+      ]
+    },
+    "StS2_Ironclad-TwinStrike": {
+      "title": "Twin Strike",
+      "roles": ["multi_hit", "strength_payoff", "strike_support"],
+      "packages": ["strength", "strike"],
+      "enables": ["strike"],
+      "paysOff": ["strength"],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.8, "mid": 0.6, "late": 0.5},
+      "sourceSupport": ["mobalytics", "gamesgg"],
+      "confidence": 0.84,
+      "notes": [
+        "Good early card with upside in both Strength and Strike shells.",
+        "Should not be overvalued in Strike decks if overall defense and scaling are weak."
+      ]
+    },
+    "StS2_Ironclad-PerfectedStrike": {
+      "title": "Perfected Strike",
+      "roles": ["strike_payoff", "finisher"],
+      "packages": ["strike"],
+      "enables": [],
+      "paysOff": ["strike"],
+      "requires": [
+        {"type": "packageCount", "package": "strike", "min": 5}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "strike", "penalty": "high"},
+        {"type": "deckOverstuffedWithLowImpactStrikes", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.7, "mid": 0.6, "late": 0.3},
+      "sourceSupport": ["mobalytics", "keengamer"],
+      "confidence": 0.87,
+      "notes": [
+        "Core payoff card for Strike decks.",
+        "Sources agree this should not justify taking every Strike-tagged card blindly."
+      ]
+    },
+    "StS2_Ironclad-Hellraiser": {
+      "title": "Hellraiser",
+      "roles": ["strike_payoff", "draw_conversion"],
+      "packages": ["strike"],
+      "enables": [],
+      "paysOff": ["strike"],
+      "requires": [
+        {"type": "packageCount", "package": "strike", "min": 5},
+        {"type": "roleCount", "role": "draw_support", "min": 1}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "strike", "penalty": "high"}
+      ],
+      "stageBias": {"early": 0.1, "mid": 0.5, "late": 0.7},
+      "sourceSupport": ["mobalytics"],
+      "confidence": 0.75,
+      "notes": [
+        "High-upside Strike payoff that wants draw support.",
+        "Should stay niche unless the deck is clearly leaning into Strike density and hand cycling."
+      ]
+    },
+    "StS2_Ironclad-Aggression": {
+      "title": "Aggression",
+      "roles": ["draw_support", "utility"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.4, "mid": 0.7, "late": 0.7},
+      "sourceSupport": [],
+      "confidence": 0.58,
+      "notes": [
+        "Recurring attack support for longer fights and attack-heavy decks."
+      ]
+    },
+    "StS2_Ironclad-Anger": {
+      "title": "Anger",
+      "roles": ["frontload"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.8, "mid": 0.5, "late": 0.3},
+      "sourceSupport": [],
+      "confidence": 0.56,
+      "notes": [
+        "Fast early damage card that mainly benefits low-curve or attack-spam decks."
+      ]
+    },
+    "StS2_Ironclad-Armaments": {
+      "title": "Armaments",
+      "roles": ["block_generator", "utility", "stabilizer"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.7, "mid": 0.7, "late": 0.5},
+      "sourceSupport": [],
+      "confidence": 0.66,
+      "notes": [
+        "Generic stabilizer that improves strong upgraded payoffs without needing a dedicated package."
+      ]
+    },
+    "StS2_Ironclad-BattleTrance": {
+      "title": "Battle Trance",
+      "roles": ["draw_engine"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.8, "mid": 0.7, "late": 0.5},
+      "sourceSupport": [],
+      "confidence": 0.71,
+      "notes": [
+        "Pure consistency card that helps setup-heavy or expensive hands play more smoothly."
+      ]
+    },
+    "StS2_Ironclad-BloodWall": {
+      "title": "Blood Wall",
+      "roles": ["block_generator", "self_damage_enabler", "stabilizer"],
+      "packages": ["self_damage", "block"],
+      "enables": ["self_damage", "block"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [
+        {"type": "tooManyHpCostCards", "penalty": "low"}
+      ],
+      "stageBias": {"early": 0.6, "mid": 0.6, "late": 0.4},
+      "sourceSupport": [],
+      "confidence": 0.67,
+      "notes": [
+        "Efficient mitigation that also turns on self-damage payoffs."
+      ]
+    },
+    "StS2_Ironclad-Bludgeon": {
+      "title": "Bludgeon",
+      "roles": ["finisher"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [
+        {"type": "tooMuchTopEnd", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.2, "mid": 0.5, "late": 0.5},
+      "sourceSupport": [],
+      "confidence": 0.62,
+      "notes": [
+        "Raw frontload finisher that wants enough draw or energy support to carry its cost."
+      ]
+    },
+    "StS2_Ironclad-Brand": {
+      "title": "Brand",
+      "roles": ["strength_source", "self_damage_enabler", "exhaust_enabler"],
+      "packages": ["strength", "self_damage", "exhaust"],
+      "enables": ["strength", "self_damage", "exhaust"],
+      "paysOff": ["self_damage", "exhaust"],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.5, "mid": 0.8, "late": 0.8},
+      "sourceSupport": [],
+      "confidence": 0.78,
+      "notes": [
+        "Glue card that cross-connects self-damage, exhaust, and Strength shells."
+      ]
+    },
+    "StS2_Ironclad-Break": {
+      "title": "Break",
+      "roles": ["frontload", "vulnerable_source"],
+      "packages": ["vulnerable"],
+      "enables": ["vulnerable"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [
+        {"type": "tooMuchTopEnd", "penalty": "low"}
+      ],
+      "stageBias": {"early": 0.6, "mid": 0.7, "late": 0.6},
+      "sourceSupport": [],
+      "confidence": 0.73,
+      "notes": [
+        "High-impact Vulnerable source that also supplies immediate damage."
+      ]
+    },
+    "StS2_Ironclad-Breakthrough": {
+      "title": "Breakthrough",
+      "roles": ["aoe", "self_damage_enabler", "frontload"],
+      "packages": ["self_damage"],
+      "enables": ["self_damage"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [
+        {"type": "tooManyHpCostCards", "penalty": "low"}
+      ],
+      "stageBias": {"early": 0.8, "mid": 0.6, "late": 0.4},
+      "sourceSupport": [],
+      "confidence": 0.7,
+      "notes": [
+        "Strong early AoE that incidentally advances self-damage plans."
+      ]
+    },
+    "StS2_Ironclad-Bully": {
+      "title": "Bully",
+      "roles": ["vulnerable_payoff", "frontload"],
+      "packages": ["vulnerable"],
+      "enables": [],
+      "paysOff": ["vulnerable"],
+      "requires": [
+        {"type": "packageCount", "package": "vulnerable", "min": 2}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "vulnerable", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.4, "mid": 0.7, "late": 0.5},
+      "sourceSupport": [],
+      "confidence": 0.72,
+      "notes": [
+        "Simple Vulnerable payoff that should stay mediocre without debuff density."
+      ]
+    },
+    "StS2_Ironclad-Cascade": {
+      "title": "Cascade",
+      "roles": ["utility", "cost_cheat"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.3, "mid": 0.6, "late": 0.7},
+      "sourceSupport": [],
+      "confidence": 0.55,
+      "notes": [
+        "High-variance top-deck acceleration that improves when the deck is dense with hits."
+      ]
+    },
+    "StS2_Ironclad-Cinder": {
+      "title": "Cinder",
+      "roles": ["frontload", "exhaust_enabler"],
+      "packages": ["exhaust"],
+      "enables": ["exhaust"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.5, "mid": 0.6, "late": 0.5},
+      "sourceSupport": [],
+      "confidence": 0.66,
+      "notes": [
+        "Standalone damage card that picks up extra value in exhaust shells."
+      ]
+    },
+    "StS2_Ironclad-Clash": {
+      "title": "Clash",
+      "roles": ["frontload"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [
+        {"type": "missingRoleDensity", "role": "draw_support", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.5, "mid": 0.2, "late": 0.1},
+      "sourceSupport": [],
+      "confidence": 0.56,
+      "notes": [
+        "Conditional damage card that falls off hard unless the deck is unusually streamlined."
+      ]
+    },
+    "StS2_Ironclad-Colossus": {
+      "title": "Colossus",
+      "roles": ["block_generator", "stabilizer", "utility"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.4, "mid": 0.6, "late": 0.5},
+      "sourceSupport": [],
+      "confidence": 0.57,
+      "notes": [
+        "Defensive tech card that gets better when the deck already applies Vulnerable reliably."
+      ]
+    },
+    "StS2_Ironclad-Conflagration": {
+      "title": "Conflagration",
+      "roles": ["aoe_finisher", "frontload"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.5, "mid": 0.7, "late": 0.6},
+      "sourceSupport": [],
+      "confidence": 0.64,
+      "notes": [
+        "AoE payoff for turns where the deck chains multiple attacks together."
+      ]
+    },
+    "StS2_Ironclad-CrimsonMantle": {
+      "title": "Crimson Mantle",
+      "roles": ["block_engine", "self_damage_enabler", "stabilizer"],
+      "packages": ["self_damage", "block"],
+      "enables": ["self_damage", "block"],
+      "paysOff": ["self_damage"],
+      "requires": [],
+      "antiSynergy": [
+        {"type": "tooManyHpCostCards", "penalty": "low"}
+      ],
+      "stageBias": {"early": 0.5, "mid": 0.8, "late": 0.8},
+      "sourceSupport": [],
+      "confidence": 0.79,
+      "notes": [
+        "Excellent bridge card because it pays you off for HP loss while stabilizing the fight."
+      ]
+    },
+    "StS2_Ironclad-Defend": {
+      "title": "Defend (Ironclad)",
+      "roles": ["block_generator", "stabilizer"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.6, "mid": 0.3, "late": 0.1},
+      "sourceSupport": [],
+      "confidence": 0.5,
+      "notes": [
+        "Baseline block card; useful for heuristics but not a dedicated package signal on its own."
+      ]
+    },
+    "StS2_Ironclad-DemonicShield": {
+      "title": "Demonic Shield",
+      "roles": ["block_payoff", "self_damage_enabler", "utility"],
+      "packages": ["block", "self_damage"],
+      "enables": ["self_damage"],
+      "paysOff": ["block"],
+      "requires": [
+        {"type": "packageCount", "package": "block", "min": 2}
+      ],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.3, "mid": 0.6, "late": 0.6},
+      "sourceSupport": [],
+      "confidence": 0.6,
+      "notes": [
+        "Niche block-conversion card that also interacts with self-damage triggers."
+      ]
+    },
+    "StS2_Ironclad-Dismantle": {
+      "title": "Dismantle",
+      "roles": ["vulnerable_payoff", "multi_hit", "frontload"],
+      "packages": ["vulnerable", "strength"],
+      "enables": [],
+      "paysOff": ["vulnerable", "strength"],
+      "requires": [
+        {"type": "packageCount", "package": "vulnerable", "min": 1}
+      ],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.5, "mid": 0.7, "late": 0.7},
+      "sourceSupport": [],
+      "confidence": 0.75,
+      "notes": [
+        "Gets much better once the deck can apply Vulnerable consistently and can also exploit extra hits."
+      ]
+    },
+    "StS2_Ironclad-DrumofBattle": {
+      "title": "Drum of Battle",
+      "roles": ["draw_support", "exhaust_engine"],
+      "packages": ["exhaust"],
+      "enables": ["exhaust"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.3, "mid": 0.7, "late": 0.8},
+      "sourceSupport": [],
+      "confidence": 0.68,
+      "notes": [
+        "Slow exhaust engine support piece that improves deck flow over longer combats."
+      ]
+    },
+    "StS2_Ironclad-DualWield": {
+      "title": "Dual Wield",
+      "roles": ["utility", "draw_support"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.2, "mid": 0.6, "late": 0.7},
+      "sourceSupport": [],
+      "confidence": 0.57,
+      "notes": [
+        "Card-copy tool that is only as good as the attacks or powers already worth duplicating."
+      ]
+    },
+    "StS2_Ironclad-EvilEye": {
+      "title": "Evil Eye",
+      "roles": ["block_generator", "exhaust_payoff", "stabilizer"],
+      "packages": ["block", "exhaust"],
+      "enables": ["block"],
+      "paysOff": ["exhaust"],
+      "requires": [
+        {"type": "packageCount", "package": "exhaust", "min": 1}
+      ],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.4, "mid": 0.7, "late": 0.7},
+      "sourceSupport": [],
+      "confidence": 0.73,
+      "notes": [
+        "Solid block card that upgrades sharply once the deck can exhaust cards on demand."
+      ]
+    },
+    "StS2_Ironclad-ExpectaFight": {
+      "title": "Expect a Fight",
+      "roles": ["utility"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.5, "mid": 0.6, "late": 0.5},
+      "sourceSupport": [],
+      "confidence": 0.4,
+      "notes": [
+        "Local text is incomplete, but it appears to scale with attack-dense hands rather than standing alone."
+      ]
+    },
+    "StS2_Ironclad-Feed": {
+      "title": "Feed",
+      "roles": ["finisher", "boss_scaling", "stabilizer"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.6, "mid": 0.7, "late": 0.7},
+      "sourceSupport": [],
+      "confidence": 0.73,
+      "notes": [
+        "Fatal payoff that improves long-run survivability without needing a dedicated synergy shell."
+      ]
+    },
+    "StS2_Ironclad-FiendFire": {
+      "title": "Fiend Fire",
+      "roles": ["exhaust_enabler", "exhaust_payoff", "finisher"],
+      "packages": ["exhaust"],
+      "enables": ["exhaust"],
+      "paysOff": ["exhaust"],
+      "requires": [
+        {"type": "roleCount", "role": "draw_support", "min": 1}
+      ],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.3, "mid": 0.7, "late": 0.9},
+      "sourceSupport": [],
+      "confidence": 0.84,
+      "notes": [
+        "Premium exhaust finisher that wants enough hand quality and redraw support to convert its cost."
+      ]
+    },
+    "StS2_Ironclad-FlameBarrier": {
+      "title": "Flame Barrier",
+      "roles": ["block_generator", "stabilizer"],
+      "packages": ["block"],
+      "enables": ["block"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.7, "mid": 0.7, "late": 0.6},
+      "sourceSupport": [],
+      "confidence": 0.7,
+      "notes": [
+        "Reliable premium block card that also improves block-payoff shells."
+      ]
+    },
+    "StS2_Ironclad-ForgottenRitual": {
+      "title": "Forgotten Ritual",
+      "roles": ["exhaust_payoff", "utility"],
+      "packages": ["exhaust"],
+      "enables": [],
+      "paysOff": ["exhaust"],
+      "requires": [
+        {"type": "packageCount", "package": "exhaust", "min": 2}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "exhaust", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.2, "mid": 0.7, "late": 0.7},
+      "sourceSupport": [],
+      "confidence": 0.43,
+      "notes": [
+        "Local text is incomplete, but the trigger clearly rewards regular exhausting."
+      ]
+    },
+    "StS2_Ironclad-Grapple": {
+      "title": "Grapple",
+      "roles": ["block_payoff", "frontload"],
+      "packages": ["block"],
+      "enables": [],
+      "paysOff": ["block"],
+      "requires": [
+        {"type": "packageCount", "package": "block", "min": 2}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "block", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.4, "mid": 0.7, "late": 0.7},
+      "sourceSupport": [],
+      "confidence": 0.74,
+      "notes": [
+        "Block payoff that should only rise once the deck can generate Block repeatedly within a turn."
+      ]
+    },
+    "StS2_Ironclad-Havoc": {
+      "title": "Havoc",
+      "roles": ["cost_cheat", "exhaust_enabler", "utility"],
+      "packages": ["exhaust"],
+      "enables": ["exhaust"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.3, "mid": 0.5, "late": 0.5},
+      "sourceSupport": [],
+      "confidence": 0.59,
+      "notes": [
+        "Variance-heavy cheat card that becomes safer in cleaner decks and exhaust shells."
+      ]
+    },
+    "StS2_Ironclad-Headbutt": {
+      "title": "Headbutt",
+      "roles": ["draw_support", "frontload", "utility"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.7, "mid": 0.6, "late": 0.5},
+      "sourceSupport": [],
+      "confidence": 0.66,
+      "notes": [
+        "Flexible recursion tool that improves consistent access to the deck's best cards."
+      ]
+    },
+    "StS2_Ironclad-HowlfromBeyond": {
+      "title": "Howl from Beyond",
+      "roles": ["exhaust_payoff", "aoe_finisher"],
+      "packages": ["exhaust"],
+      "enables": [],
+      "paysOff": ["exhaust"],
+      "requires": [
+        {"type": "packageCount", "package": "exhaust", "min": 2}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "exhaust", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.1, "mid": 0.6, "late": 0.8},
+      "sourceSupport": [],
+      "confidence": 0.73,
+      "notes": [
+        "Recurring AoE payoff that is much more attractive when the exhaust engine is already online."
+      ]
+    },
+    "StS2_Ironclad-Impervious": {
+      "title": "Impervious",
+      "roles": ["block_generator", "stabilizer"],
+      "packages": ["block"],
+      "enables": ["block"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.5, "mid": 0.8, "late": 0.8},
+      "sourceSupport": [],
+      "confidence": 0.77,
+      "notes": [
+        "Massive single-card defense that also feeds block payoffs cleanly."
+      ]
+    },
+    "StS2_Ironclad-InfernalBlade": {
+      "title": "Infernal Blade",
+      "roles": ["cost_cheat", "exhaust_enabler", "utility"],
+      "packages": ["exhaust"],
+      "enables": ["exhaust"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.4, "mid": 0.5, "late": 0.5},
+      "sourceSupport": [],
+      "confidence": 0.6,
+      "notes": [
+        "Cheap tempo card that plays better in decks that want free attacks or extra exhaust triggers."
+      ]
+    },
+    "StS2_Ironclad-IronWave": {
+      "title": "Iron Wave",
+      "roles": ["block_generator", "frontload", "stabilizer"],
+      "packages": ["block"],
+      "enables": ["block"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.7, "mid": 0.5, "late": 0.3},
+      "sourceSupport": [],
+      "confidence": 0.61,
+      "notes": [
+        "Clean early tempo card that lightly contributes to block shells."
+      ]
+    },
+    "StS2_Ironclad-Juggling": {
+      "title": "Juggling",
+      "roles": ["utility"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.2, "mid": 0.6, "late": 0.8},
+      "sourceSupport": [],
+      "confidence": 0.55,
+      "notes": [
+        "Attack-chain payoff that wants the deck to play multiple cheap attacks each turn."
+      ]
+    },
+    "StS2_Ironclad-Mangle": {
+      "title": "Mangle",
+      "roles": ["frontload", "utility"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.7, "mid": 0.5, "late": 0.4},
+      "sourceSupport": [],
+      "confidence": 0.59,
+      "notes": [
+        "Standalone damage plus enemy debuff, mainly valued as frontload and safety."
+      ]
+    },
+    "StS2_Ironclad-MoltenFist": {
+      "title": "Molten Fist",
+      "roles": ["vulnerable_payoff", "frontload"],
+      "packages": ["vulnerable"],
+      "enables": [],
+      "paysOff": ["vulnerable"],
+      "requires": [
+        {"type": "packageCount", "package": "vulnerable", "min": 1}
+      ],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.4, "mid": 0.7, "late": 0.7},
+      "sourceSupport": [],
+      "confidence": 0.72,
+      "notes": [
+        "Burst payoff that sharply improves once the deck can stack Vulnerable."
+      ]
+    },
+    "StS2_Ironclad-One-TwoPunch": {
+      "title": "One-Two Punch",
+      "roles": ["burst_multiplier", "utility"],
+      "packages": ["strength"],
+      "enables": [],
+      "paysOff": ["strength"],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.3, "mid": 0.7, "late": 0.8},
+      "sourceSupport": [],
+      "confidence": 0.67,
+      "notes": [
+        "Attack-duplication payoff that spikes when the deck already has premium attack hits or Strength."
+      ]
+    },
+    "StS2_Ironclad-Pillage": {
+      "title": "Pillage",
+      "roles": ["draw_engine", "frontload"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.7, "mid": 0.7, "late": 0.5},
+      "sourceSupport": [],
+      "confidence": 0.68,
+      "notes": [
+        "Consistency card that becomes stronger the more attack-dense your deck is."
+      ]
+    },
+    "StS2_Ironclad-PommelStrike": {
+      "title": "Pommel Strike",
+      "roles": ["draw_support", "strike_support", "frontload"],
+      "packages": ["strike"],
+      "enables": ["strike"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.8, "mid": 0.7, "late": 0.6},
+      "sourceSupport": [],
+      "confidence": 0.74,
+      "notes": [
+        "One of the best generic Strike-tagged support cards because it improves both damage flow and card flow."
+      ]
+    },
+    "StS2_Ironclad-PrimalForce": {
+      "title": "Primal Force",
+      "roles": ["utility"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.1, "mid": 0.4, "late": 0.6},
+      "sourceSupport": [],
+      "confidence": 0.42,
+      "notes": [
+        "Specialized transformation effect that wants a deck with attacks worth converting rather than generic value."
+      ]
+    },
+    "StS2_Ironclad-Pyre": {
+      "title": "Pyre",
+      "roles": ["boss_scaling", "utility"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.2, "mid": 0.5, "late": 0.7},
+      "sourceSupport": [],
+      "confidence": 0.35,
+      "notes": [
+        "Local text is incomplete, but it appears to be a slower scaling effect rather than frontload."
+      ]
+    },
+    "StS2_Ironclad-Rage": {
+      "title": "Rage",
+      "roles": ["block_engine", "utility"],
+      "packages": ["block"],
+      "enables": ["block"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.5, "mid": 0.7, "late": 0.6},
+      "sourceSupport": [],
+      "confidence": 0.69,
+      "notes": [
+        "Attack-density block engine that helps bridge aggressive decks into block payoffs."
+      ]
+    },
+    "StS2_Ironclad-Rampage": {
+      "title": "Rampage",
+      "roles": ["boss_scaling", "frontload"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.4, "mid": 0.6, "late": 0.7},
+      "sourceSupport": [],
+      "confidence": 0.61,
+      "notes": [
+        "Self-scaling attack that improves with redraw and fight length rather than a named package."
+      ]
+    },
+    "StS2_Ironclad-SetupStrike": {
+      "title": "Setup Strike",
+      "roles": ["strength_source", "strike_support", "frontload"],
+      "packages": ["strength", "strike"],
+      "enables": ["strength", "strike"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.8, "mid": 0.7, "late": 0.5},
+      "sourceSupport": [],
+      "confidence": 0.8,
+      "notes": [
+        "Excellent bridge card because it contributes to both Strike density and Strength scaling."
+      ]
+    },
+    "StS2_Ironclad-ShrugItOff": {
+      "title": "Shrug It Off",
+      "roles": ["draw_support", "block_generator", "stabilizer"],
+      "packages": ["block"],
+      "enables": ["block"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.8, "mid": 0.8, "late": 0.6},
+      "sourceSupport": [],
+      "confidence": 0.78,
+      "notes": [
+        "Premium glue card for almost any slower deck and especially strong in block shells."
+      ]
+    },
+    "StS2_Ironclad-Spite": {
+      "title": "Spite",
+      "roles": ["self_damage_payoff", "draw_support", "frontload"],
+      "packages": ["self_damage"],
+      "enables": [],
+      "paysOff": ["self_damage"],
+      "requires": [
+        {"type": "packageCount", "package": "self_damage", "min": 1}
+      ],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.5, "mid": 0.7, "late": 0.6},
+      "sourceSupport": [],
+      "confidence": 0.74,
+      "notes": [
+        "Clean reward for light self-damage packages because it turns HP loss into both damage and cards."
+      ]
+    },
+    "StS2_Ironclad-Stampede": {
+      "title": "Stampede",
+      "roles": ["utility"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.2, "mid": 0.6, "late": 0.7},
+      "sourceSupport": [],
+      "confidence": 0.55,
+      "notes": [
+        "Delayed attack-conversion payoff that prefers decks packed with good attack hits."
+      ]
+    },
+    "StS2_Ironclad-Stoke": {
+      "title": "Stoke",
+      "roles": ["exhaust_enabler", "draw_engine"],
+      "packages": ["exhaust"],
+      "enables": ["exhaust"],
+      "paysOff": ["exhaust"],
+      "requires": [
+        {"type": "roleCount", "role": "non_attack_density", "min": 2}
+      ],
+      "antiSynergy": [
+        {"type": "lowRoleDensity", "role": "non_attack_density", "min": 2, "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.3, "mid": 0.8, "late": 0.8},
+      "sourceSupport": [],
+      "confidence": 0.79,
+      "notes": [
+        "Big exhaust engine card that wants a hand full of non-attacks worth converting into draw."
+      ]
+    },
+    "StS2_Ironclad-Stomp": {
+      "title": "Stomp",
+      "roles": ["aoe_finisher", "frontload", "cost_cheat"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.6, "mid": 0.8, "late": 0.7},
+      "sourceSupport": [],
+      "confidence": 0.72,
+      "notes": [
+        "Attack-chain AoE payoff that gets dramatically easier to deploy in aggressive low-curve decks."
+      ]
+    },
+    "StS2_Ironclad-StoneArmor": {
+      "title": "Stone Armor",
+      "roles": ["block_engine", "stabilizer"],
+      "packages": ["block"],
+      "enables": ["block"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.6, "mid": 0.8, "late": 0.8},
+      "sourceSupport": [],
+      "confidence": 0.7,
+      "notes": [
+        "Persistent defense source that helps make slower block decks more reliable."
+      ]
+    },
+    "StS2_Ironclad-Strike": {
+      "title": "Strike (Ironclad)",
+      "roles": ["strike_support", "frontload"],
+      "packages": ["strike"],
+      "enables": ["strike"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.7, "mid": 0.3, "late": 0.1},
+      "sourceSupport": [],
+      "confidence": 0.53,
+      "notes": [
+        "Baseline Strike support that mainly matters as fuel for Strike-count payoffs."
+      ]
+    },
+    "StS2_Ironclad-SwordBoomerang": {
+      "title": "Sword Boomerang",
+      "roles": ["strength_payoff", "multi_hit", "frontload"],
+      "packages": ["strength"],
+      "enables": [],
+      "paysOff": ["strength"],
+      "requires": [
+        {"type": "packageCount", "package": "strength", "min": 1}
+      ],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.5, "mid": 0.7, "late": 0.7},
+      "sourceSupport": [],
+      "confidence": 0.73,
+      "notes": [
+        "Classic multi-hit Strength payoff that should improve with any reliable Strength source."
+      ]
+    },
+    "StS2_Ironclad-Tank": {
+      "title": "Tank",
+      "roles": ["utility"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [
+        {"type": "stabilizerCount", "min": 1}
+      ],
+      "antiSynergy": [
+        {"type": "missingStabilizer", "penalty": "high"}
+      ],
+      "stageBias": {"early": 0.0, "mid": 0.2, "late": 0.3},
+      "sourceSupport": [],
+      "confidence": 0.34,
+      "notes": [
+        "Highly specialized defensive tradeoff card that should stay heavily penalized without real mitigation."
+      ]
+    },
+    "StS2_Ironclad-Taunt": {
+      "title": "Taunt",
+      "roles": ["block_generator", "vulnerable_source", "stabilizer"],
+      "packages": ["vulnerable"],
+      "enables": ["vulnerable"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.7, "mid": 0.6, "late": 0.5},
+      "sourceSupport": [],
+      "confidence": 0.72,
+      "notes": [
+        "Good bridge card because it contributes both defense and Vulnerable support in one slot."
+      ]
+    },
+    "StS2_Ironclad-TearAsunder": {
+      "title": "Tear Asunder",
+      "roles": ["self_damage_payoff", "multi_hit", "finisher"],
+      "packages": ["self_damage", "strength"],
+      "enables": [],
+      "paysOff": ["self_damage", "strength"],
+      "requires": [
+        {"type": "packageCount", "package": "self_damage", "min": 2}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "self_damage", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.2, "mid": 0.7, "late": 0.9},
+      "sourceSupport": [],
+      "confidence": 0.8,
+      "notes": [
+        "Major payoff once the deck can repeatedly lose HP and leverage the extra hits."
+      ]
+    },
+    "StS2_Ironclad-Thrash": {
+      "title": "Thrash",
+      "roles": ["exhaust_enabler", "multi_hit", "finisher"],
+      "packages": ["exhaust"],
+      "enables": ["exhaust"],
+      "paysOff": ["exhaust"],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.4, "mid": 0.7, "late": 0.8},
+      "sourceSupport": [],
+      "confidence": 0.72,
+      "notes": [
+        "Attack finisher that gains a real ceiling when the deck has attacks worth exhausting or recurring."
+      ]
+    },
+    "StS2_Ironclad-Tremble": {
+      "title": "Tremble",
+      "roles": ["vulnerable_source"],
+      "packages": ["vulnerable"],
+      "enables": ["vulnerable"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.7, "mid": 0.5, "late": 0.4},
+      "sourceSupport": [],
+      "confidence": 0.62,
+      "notes": [
+        "Low-overhead Vulnerable source mainly valued for enabling stronger follow-up cards."
+      ]
+    },
+    "StS2_Ironclad-TrueGrit": {
+      "title": "True Grit",
+      "roles": ["exhaust_enabler", "block_generator", "stabilizer"],
+      "packages": ["exhaust", "block"],
+      "enables": ["exhaust", "block"],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.6, "mid": 0.8, "late": 0.8},
+      "sourceSupport": [],
+      "confidence": 0.8,
+      "notes": [
+        "One of the best exhaust support cards because it also contributes meaningful defense."
+      ]
+    },
+    "StS2_Ironclad-Unmovable": {
+      "title": "Unmovable",
+      "roles": ["block_multiplier", "block_payoff"],
+      "packages": ["block"],
+      "enables": [],
+      "paysOff": ["block"],
+      "requires": [
+        {"type": "packageCount", "package": "block", "min": 3}
+      ],
+      "antiSynergy": [
+        {"type": "missingPackage", "package": "block", "penalty": "medium"}
+      ],
+      "stageBias": {"early": 0.1, "mid": 0.6, "late": 0.8},
+      "sourceSupport": [],
+      "confidence": 0.73,
+      "notes": [
+        "Block amplifier that should only become attractive once the deck already generates large card-based Block."
+      ]
+    },
+    "StS2_Ironclad-Unrelenting": {
+      "title": "Unrelenting",
+      "roles": ["frontload", "cost_cheat"],
+      "packages": [],
+      "enables": [],
+      "paysOff": [],
+      "requires": [],
+      "antiSynergy": [],
+      "stageBias": {"early": 0.6, "mid": 0.7, "late": 0.6},
+      "sourceSupport": [],
+      "confidence": 0.67,
+      "notes": [
+        "Tempo attack that improves decks looking to chain a second premium attack in the same turn."
+      ]
+    }
+  }
+}

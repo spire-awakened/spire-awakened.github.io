@@ -30,8 +30,13 @@
     const overlayAddDeck = document.getElementById('overlayAddDeck');
 
     const plusAvailabilityCache = new Map();
+    const cardTraitsCache = new Map();
 
     let cardDescriptions = {};
+    let synergyMetadata = {
+        packages: {},
+        cards: {}
+    };
     let showPlus = false;
     let toggleInProgress = false;
     let activeOverlayItem = null;
@@ -287,66 +292,634 @@
     function getDeckCardText(cardKey) {
         const normalized = normalizeCardKey(cardKey).toLowerCase();
         const entry = cardDescriptions[normalizeCardKey(cardKey)] || {};
+        const title = typeof entry.title === 'string' ? entry.title.toLowerCase() : '';
         const description = typeof entry.description === 'string' ? entry.description.toLowerCase() : '';
         const upgraded = typeof entry.upgraded_description === 'string' ? entry.upgraded_description.toLowerCase() : '';
-        return `${normalized} ${description} ${upgraded}`;
+        return `${normalized} ${title} ${description} ${upgraded}`;
     }
 
     function includesAny(text, terms) {
         return terms.some(term => text.includes(term));
     }
 
+    function uniqueValues(items) {
+        return Array.from(new Set(items.filter(Boolean)));
+    }
+
+    function incrementCount(map, key, amount) {
+        if (!key) {
+            return;
+        }
+
+        map[key] = (map[key] || 0) + (amount || 1);
+    }
+
+    function getCardMetadata(cardKey) {
+        return synergyMetadata.cards[normalizeCardKey(cardKey)] || null;
+    }
+
+    function getPackageMetadata(packageName) {
+        return synergyMetadata.packages[packageName] || null;
+    }
+
+    function getMetadataPenaltyWeight(penalty) {
+        if (penalty === 'high') {
+            return 8;
+        }
+        if (penalty === 'medium') {
+            return 5;
+        }
+        return 3;
+    }
+
+    function getRoleMetricAdjustments(roles) {
+        const metrics = {
+            frontload: 0,
+            block: 0,
+            scaling: 0,
+            consistency: 0,
+            utility: 0
+        };
+
+        roles.forEach(role => {
+            if (role === 'strength_source') {
+                metrics.scaling += 8;
+            }
+            if (role === 'strength_payoff' || role === 'burst_multiplier') {
+                metrics.frontload += 6;
+                metrics.scaling += 4;
+            }
+            if (role === 'block_engine' || role === 'block_generator') {
+                metrics.block += 8;
+            }
+            if (role === 'block_payoff' || role === 'block_multiplier') {
+                metrics.block += 6;
+                metrics.scaling += 3;
+            }
+            if (role === 'exhaust_engine' || role === 'exhaust_enabler') {
+                metrics.utility += 5;
+                metrics.consistency += 3;
+            }
+            if (role === 'exhaust_payoff') {
+                metrics.scaling += 7;
+                metrics.utility += 4;
+            }
+            if (role === 'self_damage_enabler') {
+                metrics.frontload += 3;
+                metrics.utility += 3;
+            }
+            if (role === 'self_damage_payoff') {
+                metrics.scaling += 7;
+            }
+            if (role === 'vulnerable_source') {
+                metrics.frontload += 4;
+                metrics.utility += 4;
+            }
+            if (role === 'vulnerable_payoff') {
+                metrics.frontload += 5;
+                metrics.scaling += 3;
+            }
+            if (role === 'draw_engine' || role === 'draw_support') {
+                metrics.consistency += 8;
+            }
+            if (role === 'energy_engine' || role === 'cost_cheat') {
+                metrics.consistency += 6;
+            }
+            if (role === 'aoe' || role === 'aoe_finisher') {
+                metrics.frontload += 4;
+                metrics.utility += 6;
+            }
+            if (role === 'finisher') {
+                metrics.frontload += 4;
+            }
+            if (role === 'boss_scaling') {
+                metrics.scaling += 5;
+            }
+            if (role === 'utility') {
+                metrics.utility += 4;
+            }
+        });
+
+        return metrics;
+    }
+
+    function inferPackagesFromTraits(traits) {
+        const packages = [];
+
+        if (traits.scaling || traits.multiHit || traits.attackPayoff) {
+            packages.push('strength');
+        }
+        if (traits.block || traits.blockPayoff) {
+            packages.push('block');
+        }
+        if (traits.exhaustEnabler || traits.exhaustPayoff) {
+            packages.push('exhaust');
+        }
+        if (traits.selfDamage || traits.selfDamagePayoff) {
+            packages.push('self_damage');
+        }
+        if (traits.vulnerable || traits.vulnerablePayoff) {
+            packages.push('vulnerable');
+        }
+        if (traits.strike || traits.strikePayoff) {
+            packages.push('strike');
+        }
+
+        return uniqueValues(packages);
+    }
+
+    function inferRolesFromTraits(traits) {
+        const roles = [];
+
+        if (traits.draw || traits.deckManipulation) {
+            roles.push('draw_support');
+        }
+        if (traits.block) {
+            roles.push('repeatable_block');
+        }
+        if (traits.scaling) {
+            roles.push('strength_source');
+        }
+        if (traits.multiHit) {
+            roles.push('strength_payoff');
+        }
+        if (traits.exhaustEnabler) {
+            roles.push('exhaust_enabler');
+        }
+        if (traits.exhaustPayoff) {
+            roles.push('exhaust_payoff');
+        }
+        if (traits.vulnerable) {
+            roles.push('vulnerable_source');
+        }
+        if (traits.vulnerablePayoff) {
+            roles.push('vulnerable_payoff');
+        }
+        if (traits.selfDamage) {
+            roles.push('self_damage_enabler');
+        }
+        if (traits.selfDamagePayoff) {
+            roles.push('self_damage_payoff');
+        }
+        if (traits.strikePayoff) {
+            roles.push('strike_payoff');
+        }
+        if (traits.strike) {
+            roles.push('strike_support');
+        }
+        if (traits.costCheat) {
+            roles.push('cost_cheat');
+        }
+        if (traits.energyGain) {
+            roles.push('energy_engine');
+        }
+        if (traits.block || traits.status || traits.draw) {
+            roles.push('stabilizer');
+        }
+        if (!traits.attack || traits.block || traits.draw || traits.exhaust) {
+            roles.push('non_attack_density');
+            roles.push('skill_density');
+        }
+        if (traits.block || traits.draw || traits.status) {
+            roles.push('setup_time');
+        }
+
+        return uniqueValues(roles);
+    }
+
+    function getProfileMetricValue(profile, packageName, metricKey) {
+        if (metricKey === 'strengthSources') {
+            return profile.roleCounts.strength_source || 0;
+        }
+        if (metricKey === 'multiHitPayoffs') {
+            return profile.multiHit || 0;
+        }
+        if (metricKey === 'repeatableBlockCards') {
+            return profile.roleCounts.repeatable_block || 0;
+        }
+        if (metricKey === 'corePayoffs') {
+            return profile.blockPayoffCards || 0;
+        }
+        if (metricKey === 'exhaustEnablers') {
+            return profile.exhaustEnablerCards || 0;
+        }
+        if (metricKey === 'enginePieces') {
+            return profile.exhaustEnginePieces || 0;
+        }
+        if (metricKey === 'repeatableHpLoss') {
+            return profile.selfDamageEnablerCards || 0;
+        }
+        if (metricKey === 'payoffCards') {
+            if (packageName === 'self_damage') {
+                return profile.selfDamagePayoffCards || 0;
+            }
+            if (packageName === 'vulnerable') {
+                return profile.vulnerablePayoffCards || 0;
+            }
+            return 0;
+        }
+        if (metricKey === 'stabilizers') {
+            return profile.stabilizers || 0;
+        }
+        if (metricKey === 'vulnerableSources') {
+            return profile.vulnerableEnablerCards || 0;
+        }
+        if (metricKey === 'strikeCards') {
+            return profile.strikeCards || 0;
+        }
+        if (metricKey === 'drawOrEnergySupport') {
+            return (profile.roleCounts.draw_support || 0) + (profile.roleCounts.energy_engine || 0) + (profile.roleCounts.cost_cheat || 0);
+        }
+
+        return 0;
+    }
+
+    function getPackageActivation(profile, packageName) {
+        const packageMetadata = getPackageMetadata(packageName);
+        const enabledAt = packageMetadata?.thresholds?.enabledAt;
+        if (!enabledAt) {
+            return profile.packageCounts[packageName] > 0 ? 1 : 0;
+        }
+
+        const keys = Object.keys(enabledAt);
+        if (keys.length === 0) {
+            return 1;
+        }
+
+        const ratios = keys.map(key => {
+            const actual = getProfileMetricValue(profile, packageName, key);
+            const target = Math.max(enabledAt[key], 1);
+            return clamp01(actual / target);
+        });
+
+        return sumValues(ratios) / ratios.length;
+    }
+
+    function requirementIsSatisfied(requirement, profile) {
+        if (!requirement) {
+            return true;
+        }
+
+        if (requirement.type === 'packageCount') {
+            return (profile.packageCounts[requirement.package] || 0) >= (requirement.min || 0);
+        }
+        if (requirement.type === 'roleCount') {
+            return (profile.roleCounts[requirement.role] || 0) >= (requirement.min || 0);
+        }
+        if (requirement.type === 'rolePresence') {
+            return (profile.roleCounts[requirement.role] || 0) > 0;
+        }
+        if (requirement.type === 'cardPresence') {
+            return (requirement.anyOf || []).some(cardKey => profile.cardPresence.has(cardKey));
+        }
+        if (requirement.type === 'stabilizerCount') {
+            return (profile.stabilizers || 0) >= (requirement.min || 0);
+        }
+
+        return true;
+    }
+
+    function getRequirementReason(requirement) {
+        if (requirement.type === 'packageCount') {
+            return `Needs a real ${requirement.package.replace('_', ' ')} shell`;
+        }
+        if (requirement.type === 'roleCount') {
+            return `Needs more ${requirement.role.replace(/_/g, ' ')}`;
+        }
+        if (requirement.type === 'cardPresence') {
+            return 'Needs one of its anchor cards to come together';
+        }
+        if (requirement.type === 'stabilizerCount') {
+            return 'Needs more sustain or mitigation first';
+        }
+
+        return 'Needs more deck support';
+    }
+
+    function sumValues(items) {
+        return items.reduce((total, value) => total + value, 0);
+    }
+
+    function scaledContribution(deckValue, cardValue, factor) {
+        if (deckValue <= 0 || cardValue <= 0) {
+            return 0;
+        }
+
+        return Math.min(deckValue, 6) * Math.min(cardValue, 3) * factor;
+    }
+
+    function getCardTraits(cardKey) {
+        const normalized = normalizeCardKey(cardKey);
+        if (cardTraitsCache.has(normalized)) {
+            return cardTraitsCache.get(normalized);
+        }
+
+        const text = getDeckCardText(normalized);
+        const entry = cardDescriptions[normalized] || {};
+        const title = typeof entry.title === 'string' ? entry.title.toLowerCase() : normalized.toLowerCase();
+
+        const metadata = getCardMetadata(normalized);
+        const metadataRoles = metadata?.roles || [];
+        const metadataPackages = metadata?.packages || [];
+
+        let attack = includesAny(text, ['deal', 'hits', 'attack', 'fatal']);
+        let block = includesAny(text, [' block', 'gain block', 'gain 5 block', 'gain 7 block', 'gain 8 block', 'gain 12 block', 'gain 16 block', 'gain 30 block', 'gain 40 block', 'plating', 'double your block', 'block is not removed']);
+        let scaling = includesAny(text, ['strength', 'dexterity', 'at the start of your turn', 'increase this card\'s damage', 'max hp']) || includesAny(title, ['demon form', 'inflame', 'rampage', 'feed']);
+        let draw = includesAny(text, ['draw', 'into your hand', 'on top of your draw pile']);
+        let exhaust = includesAny(text, ['exhaust']);
+        let vulnerable = includesAny(text, ['vulnerable']);
+        let aoe = includesAny(text, ['all enemies', 'each enemy']);
+        let status = includesAny(text, ['weak', 'frail', 'artifact', 'enemy loses', 'status', 'wound', 'burn', 'dazed']);
+        let highCost = includesAny(text, ['cost 2', 'costs 2', 'cost 3', 'costs 3']) || includesAny(title, ['bludgeon', 'demon form', 'barricade', 'impervious', 'fiend fire', 'offering', 'corruption']);
+        let lowCost = includesAny(text, ['cost 0', 'costs 0', 'free to play', 'costs 1 less', 'skills cost 0']) || includesAny(title, ['anger', 'battle trance', 'infernal blade']);
+        let conditional = includesAny(text, ['if ', 'can only be played', 'only be played']) || title.includes('clash');
+        let multiHit = includesAny(text, ['twice', '3 times', '4 times', 'x times', 'hits an additional time', 'played an extra time']);
+        let selfDamage = includesAny(text, ['lose 1 hp', 'lose 2 hp', 'lose 3 hp', 'lose 6 hp']);
+        let strike = title.includes('strike') || includesAny(text, ['containing “strike”', 'containing "strike"', 'containing strike']);
+        let deckManipulation = includesAny(text, ['top card of your draw pile', 'discard pile', 'transform', 'copy of', 'choose an attack or power card']);
+        let costCheat = includesAny(text, ['costs 0', 'cost 0', 'free to play', 'costs 1 less', 'skills cost 0']);
+        let energyGain = includesAny(text, ['gain 1 energy', 'gain 2 energy', 'gain 3 energy', 'gain x energy', 'gain energy', 'energy for each attack']);
+        let attackPayoff = includesAny(text, ['attack you play', 'attacks in your hand', 'for each other attack', 'for each attack in your hand', 'third attack', 'next attack', 'random attack']);
+        let exhaustEnabler = includesAny(text, ['exhaust 1 card', 'exhaust your hand', 'exhaust all', 'exhaust the top card', 'whenever you play a skill, exhaust it']) ? 2 : (exhaust ? 1 : 0);
+        let exhaustPayoff = includesAny(text, ['whenever a card is exhausted', 'for each card exhausted', 'exhaust pile', 'if you exhausted', 'plays from the exhaust pile']) ? 2 : 0;
+        let blockPayoff = includesAny(text, ['damage equal to your block', 'whenever you gain block', 'block is not removed', 'double your block', 'first time you gain block']) ? 2 : 0;
+        let vulnerablePayoff = includesAny(text, ['for each vulnerable', 'vulnerable enemies', 'double the enemy\'s vulnerable', 'whenever you apply vulnerable']) ? 2 : 0;
+        let selfDamagePayoff = includesAny(text, ['whenever you lose hp on your turn', 'if you lost hp this turn', 'for each time you lost hp', 'whenever you lose hp']) ? 2 : 0;
+        let strikePayoff = includesAny(text, ['containing “strike”', 'containing "strike"', 'containing strike']) ? 2 : 0;
+
+        if (metadataRoles.includes('strength_source') || metadataRoles.includes('boss_scaling')) {
+            scaling = true;
+        }
+        if (metadataRoles.includes('strength_payoff')) {
+            multiHit = true;
+            attackPayoff = true;
+        }
+        if (metadataRoles.includes('block_engine') || metadataRoles.includes('block_generator')) {
+            block = true;
+        }
+        if (metadataRoles.includes('block_payoff') || metadataRoles.includes('block_multiplier')) {
+            blockPayoff = Math.max(blockPayoff, 2);
+        }
+        if (metadataRoles.includes('draw_engine') || metadataRoles.includes('draw_support')) {
+            draw = true;
+        }
+        if (metadataRoles.includes('vulnerable_source')) {
+            vulnerable = true;
+        }
+        if (metadataRoles.includes('vulnerable_payoff')) {
+            vulnerablePayoff = Math.max(vulnerablePayoff, 2);
+        }
+        if (metadataRoles.includes('self_damage_enabler')) {
+            selfDamage = true;
+        }
+        if (metadataRoles.includes('self_damage_payoff')) {
+            selfDamagePayoff = Math.max(selfDamagePayoff, 2);
+        }
+        if (metadataRoles.includes('exhaust_enabler') || metadataRoles.includes('exhaust_engine')) {
+            exhaust = true;
+            exhaustEnabler = Math.max(exhaustEnabler, 2);
+        }
+        if (metadataRoles.includes('exhaust_payoff')) {
+            exhaustPayoff = Math.max(exhaustPayoff, 2);
+        }
+        if (metadataRoles.includes('strike_support')) {
+            strike = true;
+        }
+        if (metadataRoles.includes('strike_payoff')) {
+            strikePayoff = Math.max(strikePayoff, 2);
+        }
+        if (metadataRoles.includes('cost_cheat') || metadataRoles.includes('energy_engine')) {
+            costCheat = true;
+            lowCost = true;
+            energyGain = true;
+        }
+        if (metadataRoles.includes('aoe') || metadataRoles.includes('aoe_finisher')) {
+            aoe = true;
+        }
+        if (metadataRoles.includes('finisher') || metadataRoles.includes('frontload')) {
+            attack = true;
+        }
+
+        const metrics = {
+            frontload: 0,
+            block: 0,
+            scaling: 0,
+            consistency: 0,
+            utility: 0
+        };
+
+        if (attack) {
+            metrics.frontload += 14;
+        }
+        if (block) {
+            metrics.block += 16;
+        }
+        if (scaling) {
+            metrics.scaling += 16;
+        }
+        if (draw) {
+            metrics.consistency += 14;
+        }
+        if (aoe) {
+            metrics.frontload += 6;
+            metrics.utility += 12;
+        }
+        if (vulnerable) {
+            metrics.frontload += 5;
+            metrics.utility += 8;
+        }
+        if (status) {
+            metrics.utility += 10;
+            metrics.block += 2;
+        }
+        if (exhaust) {
+            metrics.utility += 4;
+        }
+        if (exhaustPayoff) {
+            metrics.scaling += 8;
+            metrics.utility += 4;
+        }
+        if (blockPayoff) {
+            metrics.block += 8;
+            metrics.scaling += 6;
+        }
+        if (vulnerablePayoff) {
+            metrics.frontload += 7;
+            metrics.scaling += 4;
+        }
+        if (selfDamagePayoff) {
+            metrics.scaling += 8;
+            metrics.utility += 4;
+        }
+        if (attackPayoff) {
+            metrics.frontload += 8;
+            metrics.consistency += 3;
+        }
+        if (strikePayoff) {
+            metrics.frontload += 7;
+        }
+        if (multiHit) {
+            metrics.frontload += 4;
+            metrics.scaling += scaling ? 4 : 0;
+        }
+        if (lowCost || costCheat) {
+            metrics.consistency += 8;
+        }
+        if (energyGain) {
+            metrics.consistency += 10;
+            metrics.utility += 2;
+        }
+        if (deckManipulation) {
+            metrics.consistency += 5;
+        }
+        if (selfDamage) {
+            metrics.frontload += 4;
+            metrics.utility += 3;
+        }
+        if (highCost) {
+            metrics.scaling += 4;
+            metrics.consistency -= 8;
+        }
+        if (conditional) {
+            metrics.consistency -= 7;
+        }
+
+        const metadataMetricAdjustments = getRoleMetricAdjustments(metadataRoles);
+        metrics.frontload += metadataMetricAdjustments.frontload;
+        metrics.block += metadataMetricAdjustments.block;
+        metrics.scaling += metadataMetricAdjustments.scaling;
+        metrics.consistency += metadataMetricAdjustments.consistency;
+        metrics.utility += metadataMetricAdjustments.utility;
+
+        const packages = uniqueValues(metadataPackages.concat(inferPackagesFromTraits({
+            attack,
+            block,
+            scaling,
+            draw,
+            exhaust,
+            vulnerable,
+            aoe,
+            status,
+            highCost,
+            lowCost,
+            conditional,
+            multiHit,
+            selfDamage,
+            strike,
+            deckManipulation,
+            costCheat,
+            energyGain,
+            attackPayoff,
+            exhaustEnabler,
+            exhaustPayoff,
+            blockPayoff,
+            vulnerablePayoff,
+            selfDamagePayoff,
+            strikePayoff
+        })));
+        const roles = uniqueValues(metadataRoles.concat(inferRolesFromTraits({
+            attack,
+            block,
+            scaling,
+            draw,
+            exhaust,
+            vulnerable,
+            aoe,
+            status,
+            highCost,
+            lowCost,
+            conditional,
+            multiHit,
+            selfDamage,
+            strike,
+            deckManipulation,
+            costCheat,
+            energyGain,
+            attackPayoff,
+            exhaustEnabler,
+            exhaustPayoff,
+            blockPayoff,
+            vulnerablePayoff,
+            selfDamagePayoff,
+            strikePayoff
+        })));
+
+        const traits = {
+            attack,
+            block,
+            scaling,
+            draw,
+            exhaust,
+            vulnerable,
+            aoe,
+            status,
+            highCost,
+            lowCost,
+            conditional,
+            multiHit,
+            selfDamage,
+            strike,
+            deckManipulation,
+            costCheat,
+            energyGain,
+            attackPayoff,
+            exhaustEnabler,
+            exhaustPayoff,
+            blockPayoff,
+            vulnerablePayoff,
+            selfDamagePayoff,
+            strikePayoff,
+            metadata,
+            packages,
+            roles,
+            metrics
+        };
+
+        cardTraitsCache.set(normalized, traits);
+        return traits;
+    }
+
     function analyzeDeckHealth() {
         const summary = {
-            frontloadCards: 0,
-            blockCards: 0,
-            scalingCards: 0,
-            drawCards: 0,
-            utilityCards: 0,
+            frontload: 0,
+            block: 0,
+            scaling: 0,
+            consistency: 0,
+            utility: 0,
             aoeCards: 0,
-            lowCurveCards: 0,
+            drawCards: 0,
             highCurveCards: 0,
             conditionalCards: 0
         };
 
         deckState.forEach(cardKey => {
-            const text = getDeckCardText(cardKey);
+            const traits = getCardTraits(cardKey);
+            summary.frontload += traits.metrics.frontload;
+            summary.block += traits.metrics.block;
+            summary.scaling += traits.metrics.scaling;
+            summary.consistency += traits.metrics.consistency;
+            summary.utility += traits.metrics.utility;
 
-            if (includesAny(text, ['damage', 'strike', 'bash', 'attack'])) {
-                summary.frontloadCards += 1;
-            }
-            if (includesAny(text, ['block', 'defend', 'armor', 'plated'])) {
-                summary.blockCards += 1;
-            }
-            if (includesAny(text, ['strength', 'dexterity', 'gain 1 strength', 'at the start of each turn', 'power'])) {
-                summary.scalingCards += 1;
-            }
-            if (includesAny(text, ['draw', 'drawn', 'exhaust to draw'])) {
-                summary.drawCards += 1;
-            }
-            if (includesAny(text, ['all enemies', 'each enemy'])) {
+            if (traits.aoe) {
                 summary.aoeCards += 1;
             }
-            if (includesAny(text, ['vulnerable', 'weak', 'frail', 'exhaust', 'status', 'artifact', 'disarm'])) {
-                summary.utilityCards += 1;
+            if (traits.draw || traits.deckManipulation || traits.costCheat) {
+                summary.drawCards += 1;
             }
-            if (includesAny(text, ['cost 0', 'costs 0', 'cost 1', 'costs 1'])) {
-                summary.lowCurveCards += 1;
-            }
-            if (includesAny(text, ['cost 2', 'costs 2', 'cost 3', 'costs 3', 'demon form', 'bludgeon', 'barricade'])) {
+            if (traits.highCost) {
                 summary.highCurveCards += 1;
             }
-            if (includesAny(text, ['if', 'only', 'when', 'clash'])) {
+            if (traits.conditional && !traits.exhaustPayoff && !traits.vulnerablePayoff) {
                 summary.conditionalCards += 1;
             }
         });
 
         const deckSize = Math.max(deckState.length, 1);
-        const frontload = clampScore((summary.frontloadCards / deckSize) * 140 + summary.aoeCards * 6);
-        const block = clampScore((summary.blockCards / deckSize) * 150 + summary.utilityCards * 2);
-        const scaling = clampScore((summary.scalingCards / deckSize) * 180 + summary.drawCards * 4);
-        const consistency = clampScore(60 + summary.drawCards * 8 + summary.lowCurveCards * 3 - summary.highCurveCards * 6 - summary.conditionalCards * 4 - Math.max(0, deckSize - 22) * 2);
-        const utility = clampScore((summary.utilityCards / deckSize) * 170 + summary.aoeCards * 8);
+        const frontload = clampScore(24 + (summary.frontload / deckSize) * 3.1 + summary.aoeCards * 4);
+        const block = clampScore(20 + (summary.block / deckSize) * 3.3 + summary.utility * 0.18);
+        const scaling = clampScore(18 + (summary.scaling / deckSize) * 3.4 + summary.drawCards * 2);
+        const consistency = clampScore(45 + (summary.consistency / deckSize) * 2.9 + summary.drawCards * 3 - summary.highCurveCards * 5 - summary.conditionalCards * 4 - Math.max(0, deckSize - 22) * 2);
+        const utility = clampScore(18 + (summary.utility / deckSize) * 3 + summary.aoeCards * 5);
         const overall = clampScore(frontload * 0.25 + block * 0.25 + scaling * 0.2 + consistency * 0.2 + utility * 0.1);
 
         return {
@@ -485,35 +1058,29 @@
     }
 
     function getBasePowerScore(traits, context) {
-        let score = 30;
-        if (traits.attack) {
-            score += 14;
-        }
-        if (traits.block) {
-            score += 14;
-        }
-        if (traits.scaling) {
-            score += 12;
-        }
-        if (traits.draw) {
-            score += 9;
-        }
-        if (traits.aoe) {
-            score += 8;
-        }
-        if (traits.vulnerable || traits.status) {
-            score += 7;
-        }
+        let score = 18;
+        score += traits.metrics.frontload * 0.6;
+        score += traits.metrics.block * 0.48;
+        score += traits.metrics.scaling * 0.55;
+        score += traits.metrics.consistency * 0.42;
+        score += traits.metrics.utility * 0.35;
+
         if (traits.highCost) {
-            score -= 8;
+            score -= 4;
         }
         if (traits.conditional) {
-            score -= 6;
+            score -= 4;
         }
 
         if (context === 'short') {
             if (traits.attack) {
-                score += 6;
+                score += 7;
+            }
+            if (traits.aoe) {
+                score += 4;
+            }
+            if (traits.costCheat || traits.lowCost) {
+                score += 4;
             }
             if (traits.highCost) {
                 score -= 5;
@@ -526,6 +1093,9 @@
             if (traits.scaling) {
                 score += 4;
             }
+            if (traits.aoe) {
+                score += 3;
+            }
         }
         if (context === 'boss') {
             if (traits.scaling) {
@@ -533,6 +1103,12 @@
             }
             if (traits.draw) {
                 score += 4;
+            }
+            if (traits.blockPayoff) {
+                score += 3;
+            }
+            if (traits.highCost) {
+                score += 2;
             }
             if (traits.attack && !traits.scaling) {
                 score -= 2;
@@ -542,22 +1118,30 @@
         return clampScore(score);
     }
 
+    function getMetricNeedContribution(metricValue, deficit, divisor) {
+        if (metricValue <= 0 || deficit <= 0) {
+            return 0;
+        }
+
+        return deficit * Math.min(metricValue, divisor) / divisor;
+    }
+
     function getNeedMatchScore(traits, deficits, context) {
         let score = 0;
-        score += (traits.attack || traits.vulnerable ? deficits.frontload * 0.32 : 0);
-        score += (traits.block ? deficits.block * 0.42 : 0);
-        score += (traits.scaling ? deficits.scaling * 0.5 : 0);
-        score += (traits.draw || traits.exhaust ? deficits.consistency * 0.34 : 0);
-        score += (traits.aoe || traits.status || traits.exhaust ? deficits.utility * 0.36 : 0);
+        score += getMetricNeedContribution(traits.metrics.frontload, deficits.frontload, 34);
+        score += getMetricNeedContribution(traits.metrics.block, deficits.block, 34);
+        score += getMetricNeedContribution(traits.metrics.scaling, deficits.scaling, 30);
+        score += getMetricNeedContribution(traits.metrics.consistency, deficits.consistency, 34);
+        score += getMetricNeedContribution(traits.metrics.utility, deficits.utility, 34);
 
         if (context === 'short') {
-            score += traits.attack ? 8 : 0;
+            score += traits.attack || traits.aoe ? 7 : 0;
         }
         if (context === 'elite') {
-            score += traits.block ? 6 : 0;
+            score += traits.block || traits.blockPayoff ? 6 : 0;
         }
         if (context === 'boss') {
-            score += traits.scaling ? 10 : 0;
+            score += traits.scaling || traits.exhaustPayoff || traits.selfDamagePayoff ? 10 : 0;
         }
 
         return clampScore(score);
@@ -579,36 +1163,316 @@
         return { className: 'pickup-skip', label: 'Skip Lean' };
     }
 
-    function buildStrengthReasons(traits, profile, deficits) {
+    function buildStrengthReasons(traits, profile, deficits, synergy) {
         const reasons = [];
 
-        if (profile.exhaust >= 2 && traits.exhaust) {
-            reasons.push('Supports your exhaust package');
+        synergy.positiveReasons.slice(0, 2).forEach(reason => reasons.push(reason));
+
+        if (reasons.length < 2 && deficits.block >= 20 && (traits.block || traits.blockPayoff)) {
+            reasons.push('Patches your current block weakness');
         }
-        if (deficits.block >= 20 && traits.block) {
-            reasons.push('Patches current block weakness');
-        }
-        if (deficits.scaling >= 20 && traits.scaling) {
+        if (reasons.length < 2 && deficits.scaling >= 20 && (traits.scaling || traits.exhaustPayoff || traits.selfDamagePayoff)) {
             reasons.push('Improves long-fight scaling');
         }
-        if (deficits.frontload >= 20 && (traits.attack || traits.vulnerable)) {
-            reasons.push('Adds early fight pressure');
+        if (reasons.length < 2 && deficits.frontload >= 20 && (traits.attack || traits.vulnerable || traits.aoe)) {
+            reasons.push('Adds early-fight pressure');
         }
-        if (deficits.consistency >= 20 && (traits.draw || traits.exhaust)) {
-            reasons.push('Smooths draw and consistency');
+        if (reasons.length < 2 && deficits.consistency >= 20 && (traits.draw || traits.deckManipulation || traits.costCheat)) {
+            reasons.push('Smooths clunky draws and setup turns');
         }
-        if (traits.highCost && profile.highCost >= 4) {
-            reasons.push('Curve risk: already heavy on high-cost cards');
-        }
-        if (traits.conditional && profile.conditional >= 3) {
-            reasons.push('Can be unreliable in current deck shape');
-        }
+
+        synergy.negativeReasons.slice(0, 1).forEach(reason => reasons.push(reason));
 
         if (reasons.length === 0) {
             reasons.push('Neutral impact for current deck and context');
         }
 
-        return reasons.slice(0, 3);
+        return Array.from(new Set(reasons)).slice(0, 3);
+    }
+
+    function getDeckSynergyProfile() {
+        const profile = {
+            attack: 0,
+            block: 0,
+            scaling: 0,
+            draw: 0,
+            exhaust: 0,
+            vulnerable: 0,
+            aoe: 0,
+            status: 0,
+            highCost: 0,
+            lowCost: 0,
+            conditional: 0,
+            multiHit: 0,
+            attackEnablers: 0,
+            attackPayoffs: 0,
+            exhaustEnablers: 0,
+            exhaustPayoffs: 0,
+            blockEnablers: 0,
+            blockPayoffs: 0,
+            vulnerableEnablers: 0,
+            vulnerablePayoffs: 0,
+            selfDamageEnablers: 0,
+            selfDamagePayoffs: 0,
+            strikeCards: 0,
+            strikePayoffs: 0,
+            packageCounts: {},
+            roleCounts: {},
+            cardPresence: new Set(),
+            blockPayoffCards: 0,
+            exhaustEnablerCards: 0,
+            exhaustPayoffCards: 0,
+            exhaustEnginePieces: 0,
+            selfDamageEnablerCards: 0,
+            selfDamagePayoffCards: 0,
+            vulnerableEnablerCards: 0,
+            vulnerablePayoffCards: 0,
+            stabilizers: 0
+        };
+
+        deckState.forEach(cardKey => {
+            const traits = getCardTraits(cardKey);
+            profile.cardPresence.add(normalizeCardKey(cardKey));
+
+            if (traits.attack) {
+                profile.attack += 1;
+                profile.attackEnablers += traits.highCost ? 1 : 2;
+            }
+            if (traits.block) {
+                profile.block += 1;
+                profile.blockEnablers += 2;
+            }
+            if (traits.scaling) {
+                profile.scaling += 1;
+            }
+            if (traits.draw || traits.deckManipulation || traits.costCheat) {
+                profile.draw += 1;
+            }
+            if (traits.exhaust) {
+                profile.exhaust += 1;
+            }
+            if (traits.vulnerable) {
+                profile.vulnerable += 1;
+                profile.vulnerableEnablers += 2;
+                profile.vulnerableEnablerCards += 1;
+            }
+            if (traits.aoe) {
+                profile.aoe += 1;
+            }
+            if (traits.status) {
+                profile.status += 1;
+            }
+            if (traits.highCost) {
+                profile.highCost += 1;
+            }
+            if (traits.lowCost || traits.costCheat) {
+                profile.lowCost += 1;
+            }
+            if (traits.conditional) {
+                profile.conditional += 1;
+            }
+            if (traits.multiHit) {
+                profile.multiHit += 1;
+            }
+
+            profile.attackPayoffs += traits.attackPayoff;
+            profile.exhaustEnablers += traits.exhaustEnabler;
+            profile.exhaustPayoffs += traits.exhaustPayoff;
+            profile.blockPayoffs += traits.blockPayoff;
+            profile.vulnerablePayoffs += traits.vulnerablePayoff;
+            profile.selfDamageEnablers += traits.selfDamage ? 2 : 0;
+            profile.selfDamagePayoffs += traits.selfDamagePayoff;
+            profile.strikeCards += traits.strike ? 1 : 0;
+            profile.strikePayoffs += traits.strikePayoff;
+
+            if (traits.blockPayoff) {
+                profile.blockPayoffCards += 1;
+            }
+            if (traits.exhaustEnabler) {
+                profile.exhaustEnablerCards += 1;
+            }
+            if (traits.exhaustPayoff) {
+                profile.exhaustPayoffCards += 1;
+            }
+            if (traits.selfDamage) {
+                profile.selfDamageEnablerCards += 1;
+            }
+            if (traits.selfDamagePayoff) {
+                profile.selfDamagePayoffCards += 1;
+            }
+            if (traits.vulnerablePayoff) {
+                profile.vulnerablePayoffCards += 1;
+            }
+            if (traits.roles.includes('stabilizer')) {
+                profile.stabilizers += 1;
+            }
+            if (traits.roles.includes('exhaust_engine') || ['StS2_Ironclad-Corruption', 'StS2_Ironclad-DarkEmbrace', 'StS2_Ironclad-FeelNoPain'].includes(normalizeCardKey(cardKey))) {
+                profile.exhaustEnginePieces += 1;
+            }
+
+            traits.packages.forEach(packageName => incrementCount(profile.packageCounts, packageName));
+            traits.roles.forEach(roleName => incrementCount(profile.roleCounts, roleName));
+        });
+
+        return profile;
+    }
+
+    function getSynergyScore(profile, traits) {
+        const contributions = [];
+        const addContribution = function (value, reason) {
+            if (Math.abs(value) < 0.5) {
+                return;
+            }
+
+            contributions.push({ value, reason });
+        };
+
+        addContribution(scaledContribution(profile.exhaustEnablers, traits.exhaustPayoff, 2.4), 'Pays off your exhaust shell');
+        addContribution(scaledContribution(profile.exhaustPayoffs, traits.exhaustEnabler, 2), 'Adds fuel to your exhaust payoffs');
+        addContribution(scaledContribution(profile.blockEnablers, traits.blockPayoff, 2.2), 'Converts your block package into extra value');
+        addContribution(scaledContribution(profile.blockPayoffs, traits.block ? 2 : 0, 1.8), 'Feeds existing block payoffs');
+        addContribution(scaledContribution(profile.vulnerableEnablers, traits.vulnerablePayoff, 2.6), 'Capitalizes on your Vulnerable package');
+        addContribution(scaledContribution(profile.vulnerablePayoffs, traits.vulnerable ? 2 : 0, 2.2), 'Adds more Vulnerable for current payoffs');
+        addContribution(scaledContribution(profile.selfDamageEnablers, traits.selfDamagePayoff, 2.7), 'Turns HP loss into upside');
+        addContribution(scaledContribution(profile.selfDamagePayoffs, traits.selfDamage ? 2 : 0, 2.3), 'Feeds existing self-damage payoffs');
+        addContribution(scaledContribution(profile.attackEnablers, traits.attackPayoff, 1.8), 'Rewards your attack-dense deck');
+        addContribution(scaledContribution(profile.attackPayoffs, traits.attack ? (traits.highCost ? 1 : 2) : 0, 1.5), 'Adds attacks for current attack payoffs');
+        addContribution(scaledContribution(profile.strikeCards, traits.strikePayoff, 1.7), 'Uses your current Strike count');
+        addContribution(scaledContribution(profile.strikePayoffs, traits.strike ? 2 : 0, 1.2), 'Adds another Strike for existing payoffs');
+        addContribution(scaledContribution(profile.scaling, traits.multiHit ? 2 : 0, 1.4), 'Existing scaling boosts this multi-hit card');
+        addContribution(scaledContribution(profile.multiHit, traits.scaling ? 2 : 0, 1.6), 'Adds scaling for your multi-hit attacks');
+        addContribution(scaledContribution(profile.draw, traits.highCost ? 1 : 0, 1.6), 'Draw support makes the curve safer');
+
+        if (profile.aoe < 2 && traits.aoe) {
+            addContribution(6, 'Adds missing AoE coverage');
+        }
+        if (profile.scaling < 2 && traits.scaling) {
+            addContribution(5, 'Adds missing long-fight scaling');
+        }
+        if (profile.block < 3 && traits.block) {
+            addContribution(4, 'Adds reliable block density');
+        }
+
+        if (traits.highCost) {
+            const curvePressure = Math.max(0, profile.highCost - Math.min(profile.draw + profile.lowCost, 5));
+            if (curvePressure > 1) {
+                addContribution(-Math.min(12, curvePressure * 3), 'Deck is already clunky at the top end');
+            }
+        }
+        if (traits.conditional) {
+            const consistencyGap = Math.max(0, profile.conditional + 1 - profile.draw);
+            if (consistencyGap > 0) {
+                addContribution(-Math.min(10, consistencyGap * 3), 'Current deck may not enable this consistently');
+            }
+        }
+        if (traits.vulnerablePayoff && profile.vulnerableEnablers === 0 && !traits.vulnerable) {
+            addContribution(-10, 'Needs more Vulnerable support');
+        }
+        if (traits.exhaustPayoff && profile.exhaustEnablers === 0 && !traits.exhaust) {
+            addContribution(-10, 'Needs more exhaust support');
+        }
+        if (traits.blockPayoff && profile.blockEnablers === 0 && !traits.block) {
+            addContribution(-9, 'Needs more reliable block generation');
+        }
+        if (traits.selfDamagePayoff && profile.selfDamageEnablers === 0 && !traits.selfDamage) {
+            addContribution(-10, 'Needs HP-loss enablers');
+        }
+        if (traits.strikePayoff && profile.strikeCards < 5 && !traits.strike) {
+            addContribution(-8, 'Needs a larger Strike count');
+        }
+
+        if (traits.metadata) {
+            const confidence = traits.metadata.confidence || 0.75;
+
+            (traits.metadata.paysOff || []).forEach(packageName => {
+                const activation = getPackageActivation(profile, packageName);
+                if (activation >= 0.9) {
+                    addContribution(9 * confidence, `Strong payoff for your ${packageName.replace('_', ' ')} deck`);
+                } else if (activation >= 0.55) {
+                    addContribution(5 * confidence, `Has support in your ${packageName.replace('_', ' ')} shell`);
+                } else {
+                    addContribution(-8 * confidence, `Not enough ${packageName.replace('_', ' ')} support yet`);
+                }
+            });
+
+            (traits.metadata.enables || []).forEach(packageName => {
+                const payoffPresence = (traits.metadata.paysOff || []).includes(packageName)
+                    ? 0
+                    : getPackageActivation(profile, packageName);
+                if (payoffPresence >= 0.55) {
+                    addContribution(5 * confidence, `Feeds your existing ${packageName.replace('_', ' ')} payoffs`);
+                } else if ((profile.packageCounts[packageName] || 0) > 0) {
+                    addContribution(3 * confidence, `Keeps your ${packageName.replace('_', ' ')} lane open`);
+                }
+            });
+
+            (traits.metadata.requires || []).forEach(requirement => {
+                if (!requirementIsSatisfied(requirement, profile)) {
+                    addContribution(-getMetadataPenaltyWeight('medium') * confidence, getRequirementReason(requirement));
+                }
+            });
+
+            (traits.metadata.antiSynergy || []).forEach(rule => {
+                if (rule.type === 'missingPackage' && (profile.packageCounts[rule.package] || 0) === 0) {
+                    addContribution(-getMetadataPenaltyWeight(rule.penalty) * confidence, `Missing ${rule.package.replace('_', ' ')} support`);
+                }
+                if (rule.type === 'missingRoleDensity' && (profile.roleCounts[rule.role] || 0) === 0) {
+                    addContribution(-getMetadataPenaltyWeight(rule.penalty) * confidence, `Needs more ${rule.role.replace(/_/g, ' ')}`);
+                }
+                if (rule.type === 'lowRoleDensity' && (profile.roleCounts[rule.role] || 0) < (rule.min || 2)) {
+                    addContribution(-getMetadataPenaltyWeight(rule.penalty) * confidence, `Needs more ${rule.role.replace(/_/g, ' ')}`);
+                }
+                if (rule.type === 'missingStabilizer' && (profile.stabilizers || 0) === 0) {
+                    addContribution(-getMetadataPenaltyWeight(rule.penalty) * confidence, 'Needs sustain or mitigation first');
+                }
+                if (rule.type === 'tooManyHpCostCards' && profile.selfDamageEnablerCards >= 4) {
+                    addContribution(-getMetadataPenaltyWeight(rule.penalty) * confidence, 'Deck is already heavy on HP-cost cards');
+                }
+                if (rule.type === 'tooMuchTopEnd' && profile.highCost >= 4) {
+                    addContribution(-getMetadataPenaltyWeight(rule.penalty) * confidence, 'Deck already has enough expensive setup');
+                }
+                if (rule.type === 'deckOverstuffedWithLowImpactStrikes' && profile.strikeCards >= 7 && profile.block < 3 && profile.scaling < 2) {
+                    addContribution(-getMetadataPenaltyWeight(rule.penalty) * confidence, 'Too many Strike cards without enough payoff support');
+                }
+            });
+        }
+
+        const positiveReasons = contributions
+            .filter(item => item.value > 0)
+            .sort((left, right) => right.value - left.value)
+            .map(item => item.reason);
+        const negativeReasons = contributions
+            .filter(item => item.value < 0)
+            .sort((left, right) => left.value - right.value)
+            .map(item => item.reason);
+
+        return {
+            score: sumValues(contributions.map(item => item.value)),
+            positiveReasons,
+            negativeReasons
+        };
+    }
+
+    function evaluateCardStrength(cardKey, deficits, profile, context) {
+        const traits = getCardTraits(cardKey);
+        const synergy = getSynergyScore(profile, traits);
+        const basePower = getBasePowerScore(traits, context);
+        const fit = clampScore(52 + synergy.score);
+        const need = getNeedMatchScore(traits, deficits, context);
+        const pickup = clampScore(basePower * 0.3 + fit * 0.38 + need * 0.32);
+        const band = toPickupBand(pickup);
+        const reasons = buildStrengthReasons(traits, profile, deficits, synergy);
+
+        return {
+            traits,
+            basePower,
+            fit,
+            need,
+            pickup,
+            band,
+            reasons,
+            synergy
+        };
     }
 
     function ensureStrengthBlock(item) {
@@ -721,21 +1585,15 @@
             item.classList.remove('pickup-snap', 'pickup-strong', 'pickup-playable', 'pickup-niche', 'pickup-skip');
 
             const key = item.getAttribute('data-card-key') || '';
-            const traits = getCardTraits(key);
-            const basePower = getBasePowerScore(traits, strengthContext);
-            const fit = clampScore(50 + getSynergyScore(profile, traits) * 2);
-            const need = getNeedMatchScore(traits, deficits, strengthContext);
-            const pickup = clampScore(basePower * 0.25 + fit * 0.45 + need * 0.3);
-            const band = toPickupBand(pickup);
-            const reasons = buildStrengthReasons(traits, profile, deficits);
+            const evaluation = evaluateCardStrength(key, deficits, profile, strengthContext);
 
-            item.classList.add(band.className);
+            item.classList.add(evaluation.band.className);
 
             const cornerBadge = ensurePickupCornerScore(item);
             if (cornerBadge) {
                 cornerBadge.hidden = false;
-                cornerBadge.textContent = String(pickup);
-                cornerBadge.title = reasons.join(' | ');
+                cornerBadge.textContent = String(evaluation.pickup);
+                cornerBadge.title = evaluation.reasons.join(' | ');
             }
 
             if (!showDetails) {
@@ -743,108 +1601,28 @@
                 if (existing) {
                     existing.remove();
                 }
-                item.title = reasons.join(' | ');
+                item.title = evaluation.reasons.join(' | ');
                 return;
             }
 
             const block = renderComparisonStrengthBlock(item, {
-                pickup,
-                band: band.label,
-                base: basePower,
-                need,
-                fit,
-                reasons,
+                pickup: evaluation.pickup,
+                band: evaluation.band.label,
+                base: evaluation.basePower,
+                need: evaluation.need,
+                fit: evaluation.fit,
+                reasons: evaluation.reasons,
                 context: strengthContext
             }) || ensureStrengthBlock(item);
             if (!block) {
                 return;
             }
 
-            item.title = reasons.join(' | ');
+            item.title = evaluation.reasons.join(' | ');
         };
 
         allCardItems.forEach(item => renderOne(item, false));
         comparisonItems.forEach(item => renderOne(item, true));
-    }
-
-    function getCardTraits(cardKey) {
-        const text = getDeckCardText(cardKey);
-        return {
-            attack: includesAny(text, [' attack', 'deal', 'strike', 'bash', 'whirlwind', 'heavy blade']),
-            block: includesAny(text, [' block', 'defend', 'plated armor', 'gain armor']),
-            scaling: includesAny(text, ['strength', 'dexterity', 'power', 'at the start of each turn']),
-            draw: includesAny(text, ['draw', 'drawn']),
-            exhaust: includesAny(text, ['exhaust', 'exhausted']),
-            vulnerable: includesAny(text, ['vulnerable']),
-            aoe: includesAny(text, ['all enemies', 'each enemy']),
-            status: includesAny(text, ['status', 'wound', 'burn', 'dazed']),
-            highCost: includesAny(text, ['cost 2', 'costs 2', 'cost 3', 'costs 3', 'bludgeon', 'barricade', 'demon form']),
-            conditional: includesAny(text, ['if', 'only', 'when', 'clash'])
-        };
-    }
-
-    function getDeckSynergyProfile() {
-        const profile = {
-            attack: 0,
-            block: 0,
-            scaling: 0,
-            draw: 0,
-            exhaust: 0,
-            vulnerable: 0,
-            aoe: 0,
-            status: 0,
-            highCost: 0,
-            conditional: 0
-        };
-
-        deckState.forEach(cardKey => {
-            const traits = getCardTraits(cardKey);
-            Object.keys(profile).forEach(key => {
-                if (traits[key]) {
-                    profile[key] += 1;
-                }
-            });
-        });
-
-        return profile;
-    }
-
-    function getSynergyScore(profile, traits) {
-        let score = 0;
-
-        if (profile.exhaust >= 2 && traits.exhaust) {
-            score += 28;
-        }
-        if (profile.scaling >= 2 && (traits.scaling || traits.draw)) {
-            score += 18;
-        }
-        if (profile.attack >= 5 && traits.vulnerable) {
-            score += 18;
-        }
-        if (profile.block >= 4 && traits.block) {
-            score += 14;
-        }
-        if (profile.draw >= 2 && traits.highCost) {
-            score += 10;
-        }
-        if (profile.status >= 1 && (traits.exhaust || traits.status)) {
-            score += 14;
-        }
-        if (profile.aoe < 2 && traits.aoe) {
-            score += 12;
-        }
-        if (profile.scaling < 2 && traits.scaling) {
-            score += 12;
-        }
-
-        if (profile.highCost >= 4 && traits.highCost) {
-            score -= 16;
-        }
-        if (profile.conditional >= 3 && traits.conditional) {
-            score -= 8;
-        }
-
-        return score;
     }
 
     function renderSynergyHighlights() {
@@ -853,6 +1631,7 @@
         }
 
         const profile = getDeckSynergyProfile();
+        const deficits = getNeedDeficits(analyzeDeckHealth());
         const allItems = Array.from(allCardsGrid.querySelectorAll('.card-grid-item'));
         const deckSize = deckState.length;
 
@@ -864,15 +1643,14 @@
             }
 
             const key = item.getAttribute('data-card-key') || '';
-            const traits = getCardTraits(key);
-            const score = getSynergyScore(profile, traits);
+            const score = evaluateCardStrength(key, deficits, profile, strengthContext).synergy.score;
 
-            if (score >= 28) {
+            if (score >= 16) {
                 item.classList.add('synergy-high');
                 return;
             }
 
-            if (score >= 14) {
+            if (score >= 8) {
                 item.classList.add('synergy-medium');
             }
         });
@@ -939,8 +1717,31 @@
                 return;
             }
             cardDescriptions = await response.json();
+            cardTraitsCache.clear();
         } catch {
             cardDescriptions = {};
+            cardTraitsCache.clear();
+        }
+    }
+
+    async function loadSynergyMetadata() {
+        try {
+            const response = await fetch('images/cards/ironclad_synergy_metadata.json', { cache: 'no-store' });
+            if (!response.ok) {
+                synergyMetadata = { packages: {}, cards: {} };
+                cardTraitsCache.clear();
+                return;
+            }
+
+            const payload = await response.json();
+            synergyMetadata = {
+                packages: payload?.packages || {},
+                cards: payload?.cards || {}
+            };
+            cardTraitsCache.clear();
+        } catch {
+            synergyMetadata = { packages: {}, cards: {} };
+            cardTraitsCache.clear();
         }
     }
 
@@ -1093,7 +1894,7 @@
     }
 
     Promise.resolve()
-        .then(() => loadDescriptions())
+        .then(() => Promise.all([loadDescriptions(), loadSynergyMetadata()]))
         .then(async () => {
             await refreshGridModeAndBadges(allCardsGrid);
             await renderCollection(currentDeckGrid, deckState);
