@@ -123,7 +123,10 @@ internal static class StaticSiteExporter
                         <div class="search-title-wrap">
                             <span class="search-title">Ironclad</span>
                             <span class="stats">Total cards: <strong>{cards.Count}</strong></span>
-                            <span id="upgradeHint" class="stats">Press Q to view upgraded cards</span>
+                        </div>
+                        <div class="upgrade-mode-toggle" role="group" aria-label="Card view mode">
+                            <button id="viewBaseBtn" type="button" class="upgrade-mode-btn is-active" data-upgrade-mode="base" aria-pressed="true">Base</button>
+                            <button id="viewUpgradedBtn" type="button" class="upgrade-mode-btn" data-upgrade-mode="upgraded" aria-pressed="false">Upgraded</button>
                         </div>
                     </div>
                     <input id="cardSearchInput" type="search" class="form-control" placeholder="Type to filter cards..." aria-label="Search cards" autofocus />
@@ -135,7 +138,7 @@ internal static class StaticSiteExporter
                                 <li><strong>Compare</strong>: add card to pick comparison</li>
                                 <li><strong>Deck</strong>: add card to current deck</li>
                                 <li><strong>B / N / F</strong>: Base power, Need match, Fit</li>
-                                <li><strong>Q</strong>: toggle upgraded card view</li>
+                                <li><strong>U</strong>: toggle base and upgraded view</li>
                             </ul>
                         </div>
                     </details>

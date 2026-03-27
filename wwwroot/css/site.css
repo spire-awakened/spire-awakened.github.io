@@ -1278,6 +1278,50 @@ body {
     font-size: 1.04rem;
 }
 
+.upgrade-mode-toggle {
+    display: inline-flex;
+    gap: 0.18rem;
+    border: 1px solid rgba(157, 185, 236, 0.3);
+    border-radius: 999px;
+    padding: 0.18rem;
+    background: rgba(9, 14, 26, 0.72);
+}
+
+.upgrade-mode-btn {
+    border: 0;
+    border-radius: 999px;
+    padding: 0.22rem 0.58rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.28px;
+    text-transform: uppercase;
+    color: #b9cceb;
+    background: transparent;
+    line-height: 1.2;
+    transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.upgrade-mode-btn:hover {
+    color: #e8f3ff;
+}
+
+.upgrade-mode-btn.is-active {
+    color: #eef9ff;
+    background: rgba(43, 103, 169, 0.85);
+}
+
+.upgrade-mode-btn:focus-visible {
+    outline: 2px solid rgba(121, 198, 255, 0.8);
+    outline-offset: 1px;
+}
+
+@media (max-width: 760px) {
+    .upgrade-mode-btn {
+        font-size: 0.68rem;
+        padding: 0.2rem 0.5rem;
+    }
+}
+
 .help-panel {
     margin-top: 0.55rem;
     border: 1px solid rgba(157, 185, 236, 0.24);

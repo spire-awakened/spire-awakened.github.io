@@ -39,6 +39,8 @@
     const rightPanels = document.querySelector('.right-panels');
     const tabComparisonBtn = document.getElementById('tabComparisonBtn');
     const tabDeckBtn = document.getElementById('tabDeckBtn');
+    const viewBaseBtn = document.getElementById('viewBaseBtn');
+    const viewUpgradedBtn = document.getElementById('viewUpgradedBtn');
 
     const overlay = document.getElementById('cardOverlay');
     const overlayCard = document.getElementById('overlayCard');
@@ -65,22 +67,54 @@
     let toggleInProgress = false;
     let activeOverlayItem = null;
     let activeOverlayCardKey = '';
+    let activeOverlayIsUpgraded = false;
     let activeOverlaySource = '';
     let overlayImageRequestId = 0;
     let activeRightPanel = 'comparison';
+    let stateIdCounter = 0;
 
     const cardCatalog = new Map();
     const deckState = Array.from(currentDeckGrid.querySelectorAll('.card-grid-item'))
-        .map(item => item.getAttribute('data-card-key'))
+        .map(item => createCardState(item.getAttribute('data-card-key'), false))
         .filter(Boolean);
     const comparisonState = [];
 
-    function allGridItems() {
-        return Array.from(document.querySelectorAll('.card-grid-item'));
+    function createCardState(cardKey, isUpgraded) {
+        const normalized = normalizeCardKey(cardKey);
+        if (!normalized) {
+            return null;
+        }
+
+        stateIdCounter += 1;
+        return {
+            id: `state-${stateIdCounter}`,
+            cardKey: normalized,
+            isUpgraded: !!isUpgraded
+        };
+    }
+
+    function getStateCardKey(stateEntry) {
+        if (stateEntry && typeof stateEntry === 'object') {
+            return normalizeCardKey(stateEntry.cardKey);
+        }
+
+        return normalizeCardKey(stateEntry);
+    }
+
+    function getStateUpgraded(stateEntry) {
+        if (stateEntry && typeof stateEntry === 'object') {
+            return !!stateEntry.isUpgraded;
+        }
+
+        return /Plus$/i.test(String(stateEntry || ''));
+    }
+
+    function allCardsGridItems() {
+        return Array.from(allCardsGrid.querySelectorAll('.card-grid-item'));
     }
 
     function prepareItem(item) {
-        const img = item.querySelector('.card-image-wrap > img:last-child');
+        const img = item.querySelector('.card-image-wrap > img.card-art');
         const small = item.querySelector('small');
         if (!img || !small) {
             return;
@@ -96,6 +130,10 @@
     }
 
     function normalizeCardKey(cardKey) {
+        if (cardKey && typeof cardKey === 'object') {
+            cardKey = cardKey.cardKey;
+        }
+
         return (cardKey || '').replace(/Plus$/i, '');
     }
 
@@ -125,7 +163,7 @@
     async function applyCardMode(item, enablePlus) {
         prepareItem(item);
 
-        const img = item.querySelector('.card-image-wrap > img:last-child');
+        const img = item.querySelector('.card-image-wrap > img.card-art');
         const small = item.querySelector('small');
         if (!img || !small) {
             return;
@@ -215,7 +253,7 @@
 
     function getBaseImageSource(cardKey, item) {
         if (item) {
-            const img = item.querySelector('.card-image-wrap > img:last-child');
+            const img = item.querySelector('.card-image-wrap > img.card-art');
             if (img?.dataset?.baseSrc) {
                 return img.dataset.baseSrc;
             }
@@ -287,6 +325,7 @@
 
         activeOverlayItem = item;
         activeOverlayCardKey = cardKey;
+        activeOverlayIsUpgraded = useUpgraded;
         activeOverlaySource = source || activeOverlaySource;
     }
 
@@ -314,7 +353,9 @@
         return badge;
     }
 
-    function createCardTile(key, actionMode, stateIndex) {
+    function createCardTile(stateEntry, actionMode, stateIndex) {
+        const key = getStateCardKey(stateEntry);
+        const isUpgraded = getStateUpgraded(stateEntry);
         const card = cardCatalog.get(key);
         if (!card) {
             return null;
@@ -324,6 +365,10 @@
         item.className = 'card-grid-item';
         item.setAttribute('data-card-name', card.name);
         item.setAttribute('data-card-key', key);
+        item.setAttribute('data-card-upgraded', String(isUpgraded));
+        if (stateEntry && typeof stateEntry === 'object' && stateEntry.id) {
+            item.setAttribute('data-state-id', stateEntry.id);
+        }
         if (typeof stateIndex === 'number') {
             item.setAttribute('data-state-index', String(stateIndex));
         }
@@ -358,12 +403,14 @@
                         <div class="card-strength-why"></div>
                     </div>
                 </div>`;
-            actionsHtml = `<div class="card-actions">
+                actionsHtml = `<div class="card-actions">
                     <button type="button" class="action-btn btn-deck" data-action="add-deck">Deck</button>
-               </div>`;
+                    <button type="button" class="action-btn" data-action="toggle-upgrade">${isUpgraded ? 'Base' : 'Upg'}</button>
+                   </div>`;
         }
         if (actionMode === 'deck') {
             actionsHtml = `<div class="card-actions">
+                    <button type="button" class="action-btn" data-action="toggle-upgrade">${isUpgraded ? 'Base' : 'Upg'}</button>
                     <button type="button" class="action-btn btn-remove" data-action="remove-deck">Remove</button>
                </div>`;
         }
@@ -386,10 +433,15 @@
     async function refreshGridModeAndBadges(grid) {
         const gridItems = Array.from(grid.querySelectorAll('.card-grid-item'));
         gridItems.forEach(prepareItem);
-        await Promise.all(gridItems.map(item => applyCardMode(item, showPlus)));
+        await Promise.all(gridItems.map(item => {
+            const enablePlus = grid === allCardsGrid
+                ? showPlus
+                : item.getAttribute('data-card-upgraded') === 'true';
+            return applyCardMode(item, enablePlus);
+        }));
     }
 
-    async function renderCollection(grid, keys) {
+    async function renderCollection(grid, stateEntries) {
         grid.innerHTML = '';
         let actionMode = null;
         if (grid === comparisonGrid) {
@@ -399,8 +451,8 @@
             actionMode = 'deck';
         }
 
-        keys.forEach((key, index) => {
-            const item = createCardTile(key, actionMode, index);
+        stateEntries.forEach((stateEntry, index) => {
+            const item = createCardTile(stateEntry, actionMode, index);
             if (item) {
                 grid.appendChild(item);
             }
@@ -1244,17 +1296,18 @@
     }
 
     function getCardLabel(cardKey) {
-        const fromCatalog = cardCatalog.get(cardKey)?.label;
+        const normalized = normalizeCardKey(cardKey);
+        const fromCatalog = cardCatalog.get(normalized)?.label;
         if (fromCatalog) {
             return fromCatalog;
         }
 
-        const fromEntry = getCardEntryByKey(cardKey)?.title;
+        const fromEntry = getCardEntryByKey(normalized)?.title;
         if (typeof fromEntry === 'string' && fromEntry.trim()) {
             return fromEntry.trim();
         }
 
-        return normalizeCardKey(cardKey).replace(/^StS2_Ironclad-/, '').replace(/[_-]/g, ' ');
+        return normalized.replace(/^StS2_Ironclad-/, '').replace(/[_-]/g, ' ');
     }
 
     function buildReasonSummary(reasons) {
@@ -1337,7 +1390,7 @@
             .map(item => item.text);
 
         return {
-            cardKey,
+            cardKey: normalized,
             label: getCardLabel(cardKey),
             score: finalScore,
             summary: buildReasonSummary(sortedReasons),
@@ -1403,7 +1456,7 @@
             .map(item => item.text);
 
         return {
-            cardKey,
+            cardKey: normalized,
             label: getCardLabel(cardKey),
             score: finalScore,
             pickup: overall.pickup,
@@ -1456,10 +1509,12 @@
         const duplicateCounts = {};
         deckState.forEach(cardKey => incrementCount(duplicateCounts, normalizeCardKey(cardKey)));
 
-        const upgradeCandidates = deckState.map(cardKey => scoreDeckUpgradeCandidate(cardKey, deficits, profile, duplicateCounts));
+        const baseUpgradeCandidates = deckState
+            .filter(stateEntry => !getStateUpgraded(stateEntry))
+            .map(stateEntry => scoreDeckUpgradeCandidate(getStateCardKey(stateEntry), deficits, profile, duplicateCounts));
         const removalCandidates = deckState.map(cardKey => scoreDeckRemovalCandidate(cardKey, deficits, profile));
 
-        const upgradeChoice = upgradeCandidates
+        const upgradeChoice = baseUpgradeCandidates
             .slice()
             .sort((left, right) => right.score - left.score)[0] || null;
         const removalChoice = removalCandidates
@@ -1471,7 +1526,17 @@
                 return left.pickup - right.pickup;
             })[0] || null;
 
-        renderDeckActionPriority(upgradePriorityScore, upgradePriorityName, upgradePriorityReason, upgradePriorityWhy, upgradeChoice, defaults.upgrade);
+        if (!upgradeChoice && deckState.length > 0 && baseUpgradeCandidates.length === 0) {
+            renderDeckActionPriority(upgradePriorityScore, upgradePriorityName, upgradePriorityReason, upgradePriorityWhy, {
+                score: 0,
+                label: 'All cards upgraded',
+                summary: 'No base cards remain to upgrade.',
+                reasons: ['Deck currently has no non-upgraded card copies.']
+            }, defaults.upgrade);
+        } else {
+            renderDeckActionPriority(upgradePriorityScore, upgradePriorityName, upgradePriorityReason, upgradePriorityWhy, upgradeChoice, defaults.upgrade);
+        }
+
         renderDeckActionPriority(removalPriorityScore, removalPriorityName, removalPriorityReason, removalPriorityWhy, removalChoice, defaults.removal);
     }
 
@@ -2284,7 +2349,12 @@
     }
 
     function withSimulatedCard(cardKey, action) {
-        deckState.push(cardKey);
+        const simulatedState = createCardState(cardKey, false);
+        if (!simulatedState) {
+            return action();
+        }
+
+        deckState.push(simulatedState);
         try {
             return action();
         } finally {
@@ -2336,7 +2406,7 @@
             lowCost: (simulated.profile.lowCost || 0) - (profile.lowCost || 0)
         };
 
-        const comparePool = uniqueValues(comparisonState.concat(cardKey));
+        const comparePool = uniqueValues(comparisonState.map(getStateCardKey).concat(normalizeCardKey(cardKey)));
         const compareScores = comparePool.map(key => {
             const ev = evaluateCardStrengthOverall(key, deficits, profile);
             return {
@@ -2646,10 +2716,12 @@
         const deficits = getNeedDeficits(analyzeDeckHealth());
         const profile = getDeckSynergyProfile();
 
-        const scored = comparisonState.map(key => {
+        const scored = comparisonState.map((stateEntry, index) => {
+            const key = getStateCardKey(stateEntry);
             const ev = evaluateCardStrengthOverall(key, deficits, profile);
             const card = cardCatalog.get(key);
             return {
+                stateId: stateEntry?.id || `comparison-${index}`,
                 key,
                 label: card ? card.label : key,
                 pickup: ev.pickup,
@@ -2659,8 +2731,8 @@
 
         scored.sort((a, b) => b.pickup - a.pickup);
 
-        scored.forEach(({ key }) => {
-            const item = comparisonGrid.querySelector(`.card-grid-item[data-card-key="${key}"]`);
+        scored.forEach(({ key, stateId }) => {
+            const item = comparisonGrid.querySelector(`.card-grid-item[data-state-id="${stateId}"]`) || comparisonGrid.querySelector(`.card-grid-item[data-card-key="${key}"]`);
             if (item) {
                 comparisonGrid.appendChild(item);
             }
@@ -2704,12 +2776,18 @@
         });
     }
 
-    async function addToDeck(key) {
-        if (!cardCatalog.has(key)) {
+    async function addToDeck(key, isUpgraded) {
+        const normalized = normalizeCardKey(key);
+        if (!cardCatalog.has(normalized)) {
             return;
         }
 
-        deckState.push(key);
+        const state = createCardState(normalized, !!isUpgraded);
+        if (!state) {
+            return;
+        }
+
+        deckState.push(state);
         await renderCollection(currentDeckGrid, deckState);
         updateCounts();
         if (comparisonState.length > 0) {
@@ -2720,11 +2798,12 @@
         requestAnimationFrame(() => renderCardStrengthSignals());
     }
 
-    async function removeFromDeck(stateIndex, cardKey) {
+    async function removeFromDeck(stateIndex, cardKey, isUpgraded) {
         if (Number.isInteger(stateIndex) && stateIndex >= 0 && stateIndex < deckState.length) {
             deckState.splice(stateIndex, 1);
         } else {
-            const fallbackIndex = deckState.lastIndexOf(cardKey);
+            const normalized = normalizeCardKey(cardKey);
+            const fallbackIndex = deckState.findLastIndex(entry => getStateCardKey(entry) === normalized && getStateUpgraded(entry) === !!isUpgraded);
             if (fallbackIndex >= 0) {
                 deckState.splice(fallbackIndex, 1);
             }
@@ -2740,12 +2819,39 @@
         requestAnimationFrame(() => renderCardStrengthSignals());
     }
 
-    async function addToComparison(key) {
-        if (!cardCatalog.has(key)) {
+    async function toggleDeckUpgrade(stateIndex, cardKey, isUpgraded) {
+        if (Number.isInteger(stateIndex) && stateIndex >= 0 && stateIndex < deckState.length) {
+            deckState[stateIndex].isUpgraded = !deckState[stateIndex].isUpgraded;
+        } else {
+            const normalized = normalizeCardKey(cardKey);
+            const fallbackIndex = deckState.findLastIndex(entry => getStateCardKey(entry) === normalized && getStateUpgraded(entry) === !!isUpgraded);
+            if (fallbackIndex >= 0) {
+                deckState[fallbackIndex].isUpgraded = !deckState[fallbackIndex].isUpgraded;
+            }
+        }
+
+        await renderCollection(currentDeckGrid, deckState);
+        updateCounts();
+        if (comparisonState.length > 0) {
+            await renderCollection(comparisonGrid, comparisonState);
+        }
+        renderCardStrengthSignals();
+        refreshOverlayIfOpen();
+        requestAnimationFrame(() => renderCardStrengthSignals());
+    }
+
+    async function addToComparison(key, isUpgraded) {
+        const normalized = normalizeCardKey(key);
+        if (!cardCatalog.has(normalized)) {
             return;
         }
 
-        comparisonState.push(key);
+        const state = createCardState(normalized, !!isUpgraded);
+        if (!state) {
+            return;
+        }
+
+        comparisonState.push(state);
         await renderCollection(comparisonGrid, comparisonState);
         updateCounts();
         renderCardStrengthSignals();
@@ -2755,6 +2861,24 @@
 
     async function clearComparison() {
         comparisonState.length = 0;
+        await renderCollection(comparisonGrid, comparisonState);
+        updateCounts();
+        renderCardStrengthSignals();
+        refreshOverlayIfOpen();
+        requestAnimationFrame(() => renderCardStrengthSignals());
+    }
+
+    async function toggleComparisonUpgrade(stateIndex, cardKey, isUpgraded) {
+        if (Number.isInteger(stateIndex) && stateIndex >= 0 && stateIndex < comparisonState.length) {
+            comparisonState[stateIndex].isUpgraded = !comparisonState[stateIndex].isUpgraded;
+        } else {
+            const normalized = normalizeCardKey(cardKey);
+            const fallbackIndex = comparisonState.findLastIndex(entry => getStateCardKey(entry) === normalized && getStateUpgraded(entry) === !!isUpgraded);
+            if (fallbackIndex >= 0) {
+                comparisonState[fallbackIndex].isUpgraded = !comparisonState[fallbackIndex].isUpgraded;
+            }
+        }
+
         await renderCollection(comparisonGrid, comparisonState);
         updateCounts();
         renderCardStrengthSignals();
@@ -2825,6 +2949,7 @@
         overlay.style.pointerEvents = 'none';
         activeOverlayItem = null;
         activeOverlayCardKey = '';
+        activeOverlayIsUpgraded = false;
         activeOverlaySource = '';
     }
 
@@ -2833,7 +2958,7 @@
 
         const key = item.getAttribute('data-card-key');
         const small = item.querySelector('small');
-        const img = item.querySelector('.card-image-wrap > img:last-child');
+        const img = item.querySelector('.card-image-wrap > img.card-art');
         if (!key || !small || !img) {
             return;
         }
@@ -2866,10 +2991,10 @@
             event.stopPropagation();
             const action = actionButton.getAttribute('data-action');
             if (action === 'add-compare') {
-                await addToComparison(cardKey);
+                await addToComparison(cardKey, showPlus);
             }
             if (action === 'add-deck') {
-                await addToDeck(cardKey);
+                await addToDeck(cardKey, showPlus);
             }
             return;
         }
@@ -2885,11 +3010,16 @@
         }
 
         const cardKey = item.getAttribute('data-card-key');
+        const itemIsUpgraded = item.getAttribute('data-card-upgraded') === 'true';
         if (actionButton && cardKey) {
             event.stopPropagation();
             const action = actionButton.getAttribute('data-action');
+            const stateIndex = Number.parseInt(item.getAttribute('data-state-index') || '', 10);
             if (action === 'add-deck') {
-                await addToDeck(cardKey);
+                await addToDeck(cardKey, itemIsUpgraded);
+            }
+            if (action === 'toggle-upgrade') {
+                await toggleComparisonUpgrade(stateIndex, cardKey, itemIsUpgraded);
             }
             return;
         }
@@ -2905,12 +3035,16 @@
         }
 
         const cardKey = item.getAttribute('data-card-key');
+        const itemIsUpgraded = item.getAttribute('data-card-upgraded') === 'true';
         if (actionButton && cardKey) {
             event.stopPropagation();
             const action = actionButton.getAttribute('data-action');
+            const stateIndex = Number.parseInt(item.getAttribute('data-state-index') || '', 10);
             if (action === 'remove-deck') {
-                const stateIndex = Number.parseInt(item.getAttribute('data-state-index') || '', 10);
-                await removeFromDeck(stateIndex, cardKey);
+                await removeFromDeck(stateIndex, cardKey, itemIsUpgraded);
+            }
+            if (action === 'toggle-upgrade') {
+                await toggleDeckUpgrade(stateIndex, cardKey, itemIsUpgraded);
             }
             return;
         }
@@ -2922,14 +3056,14 @@
         if (!activeOverlayCardKey) {
             return;
         }
-        await addToComparison(activeOverlayCardKey);
+        await addToComparison(activeOverlayCardKey, activeOverlayIsUpgraded);
     });
 
     overlayAddDeck.addEventListener('click', async function () {
         if (!activeOverlayCardKey) {
             return;
         }
-        await addToDeck(activeOverlayCardKey);
+        await addToDeck(activeOverlayCardKey, activeOverlayIsUpgraded);
     });
 
     const clearComparisonBtn = document.getElementById('clearComparisonBtn');
@@ -2959,10 +3093,82 @@
         });
     });
 
-    const upgradeHint = document.getElementById('upgradeHint');
-    const toggleKey = 'q';
-    if (upgradeHint) {
-        upgradeHint.textContent = `Press ${toggleKey.toUpperCase()} to view upgraded cards`;
+    const toggleKey = 'u';
+    const upgradeModeStorageKey = 'spire-helper-upgrade-mode';
+
+    function isHotkeyEditableTarget(target) {
+        if (!(target instanceof Element)) {
+            return false;
+        }
+
+        return !!target.closest('input, textarea, select, [contenteditable], [contenteditable="true"]');
+    }
+
+    function setUpgradeToggleState() {
+        if (viewBaseBtn) {
+            viewBaseBtn.classList.toggle('is-active', !showPlus);
+            viewBaseBtn.setAttribute('aria-pressed', String(!showPlus));
+        }
+
+        if (viewUpgradedBtn) {
+            viewUpgradedBtn.classList.toggle('is-active', showPlus);
+            viewUpgradedBtn.setAttribute('aria-pressed', String(showPlus));
+        }
+    }
+
+    function readSavedUpgradeMode() {
+        try {
+            return localStorage.getItem(upgradeModeStorageKey) === 'upgraded';
+        } catch {
+            return false;
+        }
+    }
+
+    function saveUpgradeMode() {
+        try {
+            localStorage.setItem(upgradeModeStorageKey, showPlus ? 'upgraded' : 'base');
+        } catch {
+            // Ignore storage errors to keep the UI responsive in restricted contexts.
+        }
+    }
+
+    async function setUpgradeMode(nextShowPlus, shouldPersist) {
+        if (toggleInProgress || showPlus === nextShowPlus) {
+            setUpgradeToggleState();
+            return;
+        }
+
+        toggleInProgress = true;
+        showPlus = nextShowPlus;
+        setUpgradeToggleState();
+
+        if (shouldPersist) {
+            saveUpgradeMode();
+        }
+
+        const updates = allCardsGridItems().map(item => applyCardMode(item, showPlus));
+        await Promise.all(updates);
+
+        if (overlay.style.opacity === '1') {
+            syncOverlayFromCardKey(activeOverlayCardKey, activeOverlaySource, activeOverlayItem);
+        }
+
+        toggleInProgress = false;
+    }
+
+    showPlus = readSavedUpgradeMode();
+    setUpgradeToggleState();
+
+    if (viewBaseBtn) {
+        viewBaseBtn.addEventListener('click', async function () {
+            await setUpgradeMode(false, true);
+        });
+    }
+
+    if (viewUpgradedBtn) {
+        viewUpgradedBtn.addEventListener('click', async function () {
+            await setUpgradeMode(true, true);
+        });
     }
 
     document.body.classList.remove('ui-preset-review');
@@ -2982,23 +3188,13 @@
     document.addEventListener('keydown', async function (event) {
         const pressedKey = (event.key || '').toLowerCase();
 
+        if (event.altKey || event.ctrlKey || event.metaKey || isHotkeyEditableTarget(event.target)) {
+            return;
+        }
+
         if (pressedKey === toggleKey) {
             event.preventDefault();
-            if (toggleInProgress) {
-                return;
-            }
-
-            toggleInProgress = true;
-            showPlus = !showPlus;
-
-            const updates = allGridItems().map(item => applyCardMode(item, showPlus));
-            await Promise.all(updates);
-
-            if (overlay.style.opacity === '1') {
-                syncOverlayFromCardKey(activeOverlayCardKey, activeOverlaySource, activeOverlayItem);
-            }
-
-            toggleInProgress = false;
+            await setUpgradeMode(!showPlus, true);
         }
     });
 })();
