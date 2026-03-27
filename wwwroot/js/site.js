@@ -19,6 +19,8 @@
     const metricUtilityBar = document.getElementById('metricUtilityBar');
     const deckHealthWeaknesses = document.getElementById('deckHealthWeaknesses');
     const deckHealthNextPicks = document.getElementById('deckHealthNextPicks');
+    const pickAdvisorBanner = document.getElementById('pickAdvisorBanner');
+    const pickAdvisorList = document.getElementById('pickAdvisorList');
 
     const overlay = document.getElementById('cardOverlay');
     const overlayCard = document.getElementById('overlayCard');
@@ -1650,6 +1652,7 @@
 
         allCardItems.forEach(item => renderOne(item, false));
         comparisonItems.forEach(item => renderOne(item, true));
+        renderPickAdvisor();
     }
 
     function renderSynergyHighlights() {
@@ -1681,6 +1684,62 @@
                 item.classList.add('synergy-medium');
             }
         });
+    }
+
+    function renderPickAdvisor() {
+        if (!pickAdvisorBanner || !pickAdvisorList) {
+            return;
+        }
+
+        if (comparisonState.length < 2) {
+            pickAdvisorBanner.hidden = true;
+            return;
+        }
+
+        const deficits = getNeedDeficits(analyzeDeckHealth());
+        const profile = getDeckSynergyProfile();
+
+        const scored = comparisonState.map(key => {
+            const ev = evaluateCardStrengthOverall(key, deficits, profile);
+            const card = cardCatalog.get(key);
+            return {
+                key,
+                label: card ? card.label : key,
+                pickup: ev.pickup,
+                reason: ev.reasons[0] || 'Neutral impact'
+            };
+        });
+
+        scored.sort((a, b) => b.pickup - a.pickup);
+
+        scored.forEach(({ key }) => {
+            const item = comparisonGrid.querySelector(`.card-grid-item[data-card-key="${key}"]`);
+            if (item) {
+                comparisonGrid.appendChild(item);
+            }
+        });
+
+        const verdictLabel = index => {
+            if (index === 0) return 'TAKE';
+            if (index === 1) return 'CONSIDER';
+            return 'SKIP';
+        };
+
+        const verdictClass = index => {
+            if (index === 0) return 'pick-take';
+            if (index === 1) return 'pick-consider';
+            return 'pick-skip';
+        };
+
+        pickAdvisorList.innerHTML = scored.map((card, i) => `
+            <li class="pick-advisor-row ${verdictClass(i)}">
+                <span class="pick-verdict-label">${verdictLabel(i)}</span>
+                <span class="pick-card-name">${card.label}</span>
+                <span class="pick-score">${card.pickup}</span>
+                <span class="pick-reason">${card.reason}</span>
+            </li>`).join('');
+
+        pickAdvisorBanner.hidden = false;
     }
 
     async function addToDeck(key) {
