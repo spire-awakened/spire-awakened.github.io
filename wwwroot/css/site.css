@@ -627,6 +627,90 @@ body {
     color: #f2f7ff;
 }
 
+.deck-priority-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.55rem;
+    margin-bottom: 0.6rem;
+}
+
+.deck-priority-card {
+    border: 1px solid rgba(155, 178, 220, 0.28);
+    border-radius: 0.55rem;
+    background: rgba(19, 28, 46, 0.72);
+    padding: 0.45rem 0.5rem;
+}
+
+.deck-priority-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    letter-spacing: 0.35px;
+    text-transform: uppercase;
+    color: #a9bfeb;
+    margin-bottom: 0.2rem;
+}
+
+.deck-priority-score {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #f3fbff;
+    background: rgba(35, 69, 118, 0.8);
+    border: 1px solid rgba(127, 190, 255, 0.56);
+    border-radius: 999px;
+    padding: 0.02rem 0.36rem;
+    min-width: 34px;
+    text-align: center;
+}
+
+.deck-priority-name {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #ebf3ff;
+    line-height: 1.2;
+}
+
+.deck-priority-reason {
+    margin-top: 0.12rem;
+    font-size: 0.7rem;
+    color: #b8c9ea;
+    line-height: 1.25;
+}
+
+.deck-priority-details {
+    margin-top: 0.2rem;
+}
+
+.deck-priority-details > summary {
+    cursor: pointer;
+    font-size: 0.66rem;
+    color: #8fb2de;
+    font-weight: 700;
+    user-select: none;
+}
+
+.deck-priority-why {
+    margin: 0.2rem 0 0;
+    padding-left: 0.95rem;
+}
+
+.deck-priority-why li {
+    font-size: 0.68rem;
+    color: #d4e3ff;
+    margin-bottom: 0.14rem;
+}
+
+.upgrade-priority .deck-priority-score {
+    background: rgba(39, 118, 75, 0.82);
+    border-color: rgba(112, 240, 168, 0.65);
+}
+
+.removal-priority .deck-priority-score {
+    background: rgba(125, 70, 34, 0.82);
+    border-color: rgba(233, 175, 99, 0.68);
+}
+
 .deck-health-metric {
     margin-bottom: 0.45rem;
 }
@@ -684,6 +768,16 @@ body {
 @media (max-width: 1600px) {
     .deck-health-notes {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .deck-priority-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .deck-priority-card {
+        padding: 0.42rem 0.45rem;
     }
 }
 

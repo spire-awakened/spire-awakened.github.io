@@ -158,6 +158,36 @@
                         </div>
                         <div id="deckHealthPanel" class="deck-health-panel">
                             <h3>Deck Health <span id="deckHealthOverall" class="stats-inline">0</span></h3>
+                            <div class="deck-priority-grid" id="deckPriorityGrid">
+                                <div class="deck-priority-card upgrade-priority">
+                                    <div class="deck-priority-head">
+                                        <span>Upgrade Priority</span>
+                                        <span id="upgradePriorityScore" class="deck-priority-score">-</span>
+                                    </div>
+                                    <div id="upgradePriorityName" class="deck-priority-name">Add cards to evaluate.</div>
+                                    <div id="upgradePriorityReason" class="deck-priority-reason">Upgrade recommendation will appear here.</div>
+                                    <details class="deck-priority-details">
+                                        <summary>Why?</summary>
+                                        <ul id="upgradePriorityWhy" class="deck-priority-why">
+                                            <li>No deck data yet.</li>
+                                        </ul>
+                                    </details>
+                                </div>
+                                <div class="deck-priority-card removal-priority">
+                                    <div class="deck-priority-head">
+                                        <span>Removal Priority</span>
+                                        <span id="removalPriorityScore" class="deck-priority-score">-</span>
+                                    </div>
+                                    <div id="removalPriorityName" class="deck-priority-name">Add cards to evaluate.</div>
+                                    <div id="removalPriorityReason" class="deck-priority-reason">Removal recommendation will appear here.</div>
+                                    <details class="deck-priority-details">
+                                        <summary>Why?</summary>
+                                        <ul id="removalPriorityWhy" class="deck-priority-why">
+                                            <li>No deck data yet.</li>
+                                        </ul>
+                                    </details>
+                                </div>
+                            </div>
                             <div class="deck-health-metric">
                                 <div class="deck-health-head"><span>Frontload</span><span id="metricFrontloadValue">0</span></div>
                                 <div class="deck-health-bar"><div id="metricFrontloadBar" class="deck-health-fill"></div></div>

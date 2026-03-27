@@ -19,6 +19,14 @@
     const metricUtilityBar = document.getElementById('metricUtilityBar');
     const deckHealthWeaknesses = document.getElementById('deckHealthWeaknesses');
     const deckHealthNextPicks = document.getElementById('deckHealthNextPicks');
+    const upgradePriorityScore = document.getElementById('upgradePriorityScore');
+    const upgradePriorityName = document.getElementById('upgradePriorityName');
+    const upgradePriorityReason = document.getElementById('upgradePriorityReason');
+    const upgradePriorityWhy = document.getElementById('upgradePriorityWhy');
+    const removalPriorityScore = document.getElementById('removalPriorityScore');
+    const removalPriorityName = document.getElementById('removalPriorityName');
+    const removalPriorityReason = document.getElementById('removalPriorityReason');
+    const removalPriorityWhy = document.getElementById('removalPriorityWhy');
     const pickAdvisorBanner = document.getElementById('pickAdvisorBanner');
     const pickAdvisorList = document.getElementById('pickAdvisorList');
     const rightPanels = document.querySelector('.right-panels');
@@ -1122,6 +1130,238 @@
         });
     }
 
+    function getCardLabel(cardKey) {
+        const fromCatalog = cardCatalog.get(cardKey)?.label;
+        if (fromCatalog) {
+            return fromCatalog;
+        }
+
+        const fromEntry = getCardEntryByKey(cardKey)?.title;
+        if (typeof fromEntry === 'string' && fromEntry.trim()) {
+            return fromEntry.trim();
+        }
+
+        return normalizeCardKey(cardKey).replace(/^StS2_Ironclad-/, '').replace(/[_-]/g, ' ');
+    }
+
+    function buildReasonSummary(reasons) {
+        if (!Array.isArray(reasons) || reasons.length === 0) {
+            return 'No strong signal yet.';
+        }
+
+        const primary = reasons[0] || '';
+        return primary || 'No strong signal yet.';
+    }
+
+    function scoreDeckUpgradeCandidate(cardKey, deficits, profile, duplicateCounts) {
+        const traits = getCardTraits(cardKey);
+        const entry = getCardEntryByKey(cardKey) || {};
+        const normalized = normalizeCardKey(cardKey);
+        const hasUpgradeText = typeof entry.upgraded_description === 'string'
+            && entry.upgraded_description.trim()
+            && entry.upgraded_description.trim() !== (entry.description || '').trim();
+
+        let score = 18;
+        const reasons = [];
+
+        const pushReason = function (weight, text) {
+            reasons.push({ weight, text });
+            score += weight;
+        };
+
+        const needFrontload = getMetricNeedContribution(traits.metrics.frontload, deficits.frontload, 28);
+        if (needFrontload >= 6) {
+            pushReason(needFrontload, 'Improves an immediate frontload weakness');
+        }
+
+        const needBlock = getMetricNeedContribution(traits.metrics.block, deficits.block, 28);
+        if (needBlock >= 6) {
+            pushReason(needBlock, 'Adds needed defensive consistency');
+        }
+
+        const needScaling = getMetricNeedContribution(traits.metrics.scaling, deficits.scaling, 26);
+        if (needScaling >= 6) {
+            pushReason(needScaling, 'Strengthens long-fight scaling pressure');
+        }
+
+        const needConsistency = getMetricNeedContribution(traits.metrics.consistency, deficits.consistency, 28);
+        if (needConsistency >= 5) {
+            pushReason(needConsistency, 'Smooths awkward draw and energy turns');
+        }
+
+        if (traits.scaling || traits.blockPayoff || traits.exhaustPayoff || traits.vulnerablePayoff || traits.selfDamagePayoff) {
+            pushReason(8, 'Core engine piece scales harder with upgrades');
+        }
+
+        if (traits.highCost) {
+            pushReason(3, 'Top-end cards usually gain a high-value breakpoint');
+        }
+
+        if (normalized.includes('Strike') && profile.strikePayoffs === 0) {
+            pushReason(-10, 'Starter Strike upgrade is low impact without Strike payoffs');
+        }
+
+        if (normalized.includes('Defend') && deficits.block >= 16) {
+            pushReason(5, 'Extra block now helps stabilize weak openings');
+        }
+
+        if ((duplicateCounts[normalized] || 0) >= 3 && normalized.includes('Strike') && profile.strikePayoffs === 0) {
+            pushReason(-5, 'Many similar copies reduce marginal upgrade value');
+        }
+
+        if (!hasUpgradeText) {
+            pushReason(-9, 'Upgrade text delta is limited in current data');
+        }
+
+        if (traits.conditional && deficits.consistency >= 14) {
+            pushReason(-5, 'Conditional cards are harder to capitalize on right now');
+        }
+
+        const finalScore = clampScore(score);
+        const sortedReasons = reasons
+            .slice()
+            .sort((left, right) => Math.abs(right.weight) - Math.abs(left.weight))
+            .map(item => item.text);
+
+        return {
+            cardKey,
+            label: getCardLabel(cardKey),
+            score: finalScore,
+            summary: buildReasonSummary(sortedReasons),
+            reasons: Array.from(new Set(sortedReasons)).slice(0, 3)
+        };
+    }
+
+    function scoreDeckRemovalCandidate(cardKey, deficits, profile) {
+        const traits = getCardTraits(cardKey);
+        const normalized = normalizeCardKey(cardKey);
+        const overall = evaluateCardStrengthOverall(cardKey, deficits, profile);
+
+        let score = 8;
+        const reasons = [];
+
+        const pushReason = function (weight, text) {
+            reasons.push({ weight, text });
+            score += weight;
+        };
+
+        if (normalized.includes('Strike') && profile.strikePayoffs === 0) {
+            pushReason(30, 'Starter Strike is low-value without Strike payoff support');
+        }
+
+        if (traits.conditional) {
+            pushReason(16, 'Conditional play pattern lowers reliability');
+        }
+
+        if (traits.highCost && (deficits.consistency >= 14 || profile.highCost >= 4)) {
+            pushReason(14, 'Curve is strained by expensive setup cards');
+        }
+
+        if (traits.selfDamage && profile.selfDamagePayoffCards === 0) {
+            pushReason(10, 'HP-loss downside lacks payoff support');
+        }
+
+        const rawImpact = traits.metrics.frontload + traits.metrics.block + traits.metrics.scaling + traits.metrics.consistency + traits.metrics.utility;
+        if (rawImpact < 28) {
+            pushReason(10, 'Low-impact card compared with current deck needs');
+        }
+
+        if (traits.scaling && deficits.scaling >= 16) {
+            pushReason(-12, 'Keep this because scaling is currently a weakness');
+        }
+        if (traits.block && deficits.block >= 16) {
+            pushReason(-10, 'Keep this because deck still needs stable block');
+        }
+        if ((traits.draw || traits.deckManipulation || traits.costCheat || traits.energyGain) && deficits.consistency >= 16) {
+            pushReason(-10, 'Keep this because consistency support is needed');
+        }
+        if (traits.vulnerable && deficits.frontload >= 16) {
+            pushReason(-6, 'Vulnerable support helps close early damage gaps');
+        }
+
+        if (overall.pickup <= 35) {
+            pushReason(8, 'Overall fit score is currently very low');
+        }
+
+        const finalScore = clampScore(score);
+        const sortedReasons = reasons
+            .slice()
+            .sort((left, right) => Math.abs(right.weight) - Math.abs(left.weight))
+            .map(item => item.text);
+
+        return {
+            cardKey,
+            label: getCardLabel(cardKey),
+            score: finalScore,
+            pickup: overall.pickup,
+            summary: buildReasonSummary(sortedReasons),
+            reasons: Array.from(new Set(sortedReasons)).slice(0, 3)
+        };
+    }
+
+    function renderDeckActionPriority(scoreElement, nameElement, reasonElement, whyElement, candidate, defaults) {
+        if (!scoreElement || !nameElement || !reasonElement || !whyElement) {
+            return;
+        }
+
+        if (!candidate) {
+            scoreElement.textContent = '-';
+            nameElement.textContent = defaults.emptyName;
+            reasonElement.textContent = defaults.emptyReason;
+            setListItems(whyElement, [defaults.emptyWhy]);
+            return;
+        }
+
+        scoreElement.textContent = String(candidate.score);
+        nameElement.textContent = candidate.label;
+        reasonElement.textContent = candidate.summary;
+        setListItems(whyElement, candidate.reasons.length > 0 ? candidate.reasons : [defaults.emptyWhy]);
+    }
+
+    function renderDeckPriorities(scores) {
+        const defaults = {
+            upgrade: {
+                emptyName: 'Add cards to evaluate.',
+                emptyReason: 'Upgrade recommendation will appear here.',
+                emptyWhy: 'No deck data yet.'
+            },
+            removal: {
+                emptyName: 'Add cards to evaluate.',
+                emptyReason: 'Removal recommendation will appear here.',
+                emptyWhy: 'No deck data yet.'
+            }
+        };
+
+        if (!scores || deckState.length === 0) {
+            renderDeckActionPriority(upgradePriorityScore, upgradePriorityName, upgradePriorityReason, upgradePriorityWhy, null, defaults.upgrade);
+            renderDeckActionPriority(removalPriorityScore, removalPriorityName, removalPriorityReason, removalPriorityWhy, null, defaults.removal);
+            return;
+        }
+
+        const deficits = getNeedDeficits(scores);
+        const profile = getDeckSynergyProfile();
+        const duplicateCounts = {};
+        deckState.forEach(cardKey => incrementCount(duplicateCounts, normalizeCardKey(cardKey)));
+
+        const upgradeCandidates = deckState.map(cardKey => scoreDeckUpgradeCandidate(cardKey, deficits, profile, duplicateCounts));
+        const removalCandidates = deckState.map(cardKey => scoreDeckRemovalCandidate(cardKey, deficits, profile));
+
+        const upgradeChoice = upgradeCandidates
+            .slice()
+            .sort((left, right) => right.score - left.score)[0] || null;
+        const removalChoice = removalCandidates
+            .slice()
+            .sort((left, right) => {
+                if (right.score !== left.score) {
+                    return right.score - left.score;
+                }
+                return left.pickup - right.pickup;
+            })[0] || null;
+
+        renderDeckActionPriority(upgradePriorityScore, upgradePriorityName, upgradePriorityReason, upgradePriorityWhy, upgradeChoice, defaults.upgrade);
+        renderDeckActionPriority(removalPriorityScore, removalPriorityName, removalPriorityReason, removalPriorityWhy, removalChoice, defaults.removal);
+    }
+
     function renderDeckHealth() {
         if (!deckHealthOverall) {
             return;
@@ -1158,6 +1398,7 @@
 
         setListItems(deckHealthWeaknesses, weaknessItems);
         setListItems(deckHealthNextPicks, suggestionItems);
+        renderDeckPriorities(scores);
     }
 
     function getNeedDeficits(scores) {
