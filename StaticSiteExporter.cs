@@ -65,8 +65,8 @@ internal static class StaticSiteExporter
             allCardsHtml.AppendLine("                        </small>");
             allCardsHtml.AppendLine("                    </div>");
             allCardsHtml.AppendLine("                    <div class=\"card-actions\">");
-            allCardsHtml.AppendLine("                        <button type=\"button\" class=\"action-btn btn-compare\" data-action=\"add-compare\">Add to Comparison</button>");
-            allCardsHtml.AppendLine("                        <button type=\"button\" class=\"action-btn btn-deck\" data-action=\"add-deck\">Add to Deck</button>");
+            allCardsHtml.AppendLine("                        <button type=\"button\" class=\"action-btn btn-compare\" data-action=\"add-compare\">Compare</button>");
+            allCardsHtml.AppendLine("                        <button type=\"button\" class=\"action-btn btn-deck\" data-action=\"add-deck\">Deck</button>");
             allCardsHtml.AppendLine("                    </div>");
             allCardsHtml.AppendLine("                </div>");
             allCardsHtml.AppendLine("            </div>");
@@ -119,23 +119,26 @@ internal static class StaticSiteExporter
         <div class="card-columns">
             <section class="cards-section">
                 <div class="search-box mb-4">
-                    <div class="d-flex align-items-center gap-2 mb-3">
-                        <span style="color:#a1b1d7;font-weight:600; font-size: 1.1rem;">Ironclad</span>
-                        <span class="stats">Total cards: <strong>{cards.Count}</strong></span>
+                    <div class="search-topline">
+                        <div class="search-title-wrap">
+                            <span class="search-title">Ironclad</span>
+                            <span class="stats">Total cards: <strong>{cards.Count}</strong></span>
+                            <span id="upgradeHint" class="stats">Press Q to view upgraded cards</span>
+                        </div>
                     </div>
-                    <label for="cardSearchInput">Search Card Name</label>
                     <input id="cardSearchInput" type="search" class="form-control" placeholder="Type to filter cards..." aria-label="Search cards" autofocus />
-                    <div style="margin-top: 0.5rem;">
-                        <span id="upgradeHint" class="stats" style="display: block;">Press Q to view upgraded cards</span>
-                    </div>
-                    <div class="strength-context-row">
-                        <label for="strengthContextSelect">Strength Context</label>
-                        <select id="strengthContextSelect" class="form-select form-select-sm" aria-label="Card strength context">
-                            <option value="short">Short Fight</option>
-                            <option value="elite">Elite</option>
-                            <option value="boss">Boss</option>
-                        </select>
-                    </div>
+                    <details class="help-panel" id="uiHelpPanel">
+                        <summary>Help</summary>
+                        <div class="help-panel-body">
+                            <p>Hover a card to reveal quick actions. Click the card art for full details.</p>
+                            <ul>
+                                <li><strong>Compare</strong>: add card to pick comparison</li>
+                                <li><strong>Deck</strong>: add card to current deck</li>
+                                <li><strong>B / N / F</strong>: Base power, Need match, Fit</li>
+                                <li><strong>Q</strong>: toggle upgraded card view</li>
+                            </ul>
+                        </div>
+                    </details>
                 </div>
                 <h2>All Cards</h2>
                 <div id="allCardsPanel" class="cards-panel-body">
@@ -144,18 +147,25 @@ internal static class StaticSiteExporter
                 </div>
             </section>
             <section class="cards-section right-panels">
+                <div class="right-panel-tabs" role="tablist" aria-label="Comparison and deck tabs">
+                    <button id="tabComparisonBtn" type="button" class="panel-tab is-active" data-panel="comparison" aria-selected="true">Comparison</button>
+                    <button id="tabDeckBtn" type="button" class="panel-tab" data-panel="deck" aria-selected="false">Deck Health</button>
+                </div>
                 <div class="panel-split">
-                    <div class="panel-block">
+                    <div class="panel-block comparison-panel" data-panel="comparison">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
                             <h2 style="margin: 0; flex: 1;">Card Comparison <span id="comparisonCountLabel" class="stats-inline">0 cards</span></h2>
-                            <button id="clearComparisonBtn" type="button" class="action-btn btn-compare" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; white-space: nowrap;">Clear</button>
+                            <button id="clearComparisonBtn" type="button" class="action-btn btn-compare" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; white-space: nowrap;">Reset</button>
                         </div>
                         <div id="comparisonPanel" class="cards-panel-body">
+                            <div id="pickAdvisorBanner" class="pick-advisor-banner" hidden>
+                                <ul id="pickAdvisorList" class="pick-advisor-list"></ul>
+                            </div>
                             <div id="comparisonGrid" class="card-grid"></div>
                             <div id="comparisonEmpty" class="panel-empty">No cards in comparison yet.</div>
                         </div>
                     </div>
-                    <div class="panel-block">
+                    <div class="panel-block deck-panel" data-panel="deck">
                         <h2>Current Deck <span id="deckCountLabel" class="stats-inline">{ironcladStartingDeckKeys.Length} cards</span></h2>
                         <div id="deckPanel" class="cards-panel-body">
                             <div id="currentDeckGrid" class="card-grid">
@@ -228,8 +238,8 @@ internal static class StaticSiteExporter
                 <h2 id="overlayTitle" class="text-light fw-semibold"></h2>
                 <p id="overlayDescription"></p>
                 <div class="overlay-actions">
-                    <button id="overlayAddCompare" type="button" class="action-btn btn-compare">Add to Comparison</button>
-                    <button id="overlayAddDeck" type="button" class="action-btn btn-deck">Add to Deck</button>
+                    <button id="overlayAddCompare" type="button" class="action-btn btn-compare">Compare</button>
+                    <button id="overlayAddDeck" type="button" class="action-btn btn-deck">Deck</button>
                 </div>
             </div>
         </div>

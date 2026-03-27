@@ -33,6 +33,10 @@
     const overlayAddCompare = document.getElementById('overlayAddCompare');
     const overlayAddDeck = document.getElementById('overlayAddDeck');
 
+    if (!input || !allCardsGrid || !comparisonGrid || !currentDeckGrid || !comparisonEmpty || !comparisonCountLabel || !deckCountLabel || !overlay || !overlayCard || !overlayImg || !overlayTitle || !overlayDescription || !overlayAddCompare || !overlayAddDeck) {
+        return;
+    }
+
     const plusAvailabilityCache = new Map();
     const cardTraitsCache = new Map();
 
