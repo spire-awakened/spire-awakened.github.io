@@ -704,8 +704,8 @@ body {
 }
 
 .overlay-meta {
-    max-width: 360px;
-    min-width: 240px;
+    max-width: min(760px, 72vw);
+    min-width: 280px;
 }
 
 .overlay-meta h2 {
@@ -727,6 +727,155 @@ body {
     display: grid;
     grid-template-columns: 1fr;
     gap: 0.45rem;
+}
+
+.overlay-insights {
+    margin-top: 0.75rem;
+    max-height: 52vh;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.overlay-section {
+    border: 1px solid rgba(140, 168, 218, 0.28);
+    border-radius: 0.55rem;
+    background: rgba(11, 17, 30, 0.74);
+    padding: 0.45rem 0.5rem;
+}
+
+.overlay-section h3 {
+    margin: 0 0 0.34rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.38px;
+    color: #9fb7e2;
+}
+
+.overlay-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.26rem;
+}
+
+.overlay-chip {
+    font-size: 0.66rem;
+    color: #dce9ff;
+    border: 1px solid rgba(148, 180, 234, 0.34);
+    border-radius: 999px;
+    padding: 0.08rem 0.38rem;
+    background: rgba(34, 49, 77, 0.66);
+}
+
+.overlay-chip strong {
+    color: #f0f6ff;
+}
+
+.overlay-mini-list {
+    margin: 0.3rem 0 0;
+    padding-left: 1rem;
+}
+
+.overlay-mini-list li {
+    font-size: 0.71rem;
+    color: #d8e7ff;
+    margin-bottom: 0.14rem;
+}
+
+.overlay-subtle {
+    margin: 0.3rem 0 0;
+    font-size: 0.7rem;
+    color: #a7bedf;
+}
+
+.overlay-score-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.3rem;
+}
+
+.overlay-score-grid > div {
+    border: 1px solid rgba(147, 183, 240, 0.32);
+    border-radius: 0.4rem;
+    background: rgba(29, 45, 73, 0.62);
+    padding: 0.25rem 0.3rem;
+    display: grid;
+    gap: 0.1rem;
+}
+
+.overlay-score-label {
+    font-size: 0.6rem;
+    color: #a6bee2;
+    text-transform: uppercase;
+    letter-spacing: 0.25px;
+}
+
+.overlay-score-value {
+    font-size: 0.84rem;
+    color: #f2f7ff;
+    font-weight: 800;
+}
+
+.overlay-context-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.34rem;
+}
+
+.overlay-context-grid > div {
+    border: 1px solid rgba(145, 179, 233, 0.3);
+    border-radius: 0.45rem;
+    background: rgba(28, 43, 69, 0.62);
+    padding: 0.25rem 0.34rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.68rem;
+    color: #cde0ff;
+}
+
+.overlay-context-grid strong {
+    color: #f2f8ff;
+    font-size: 0.84rem;
+}
+
+.overlay-mini-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+.overlay-mini-metrics span {
+    font-size: 0.66rem;
+    color: #d8e6ff;
+    border: 1px solid rgba(141, 176, 232, 0.28);
+    border-radius: 999px;
+    padding: 0.08rem 0.34rem;
+    background: rgba(26, 40, 63, 0.65);
+}
+
+@media (max-width: 900px) {
+    .overlay-card {
+        width: 95vw;
+        max-height: 90vh;
+        overflow-y: auto;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .overlay-meta {
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .overlay-insights {
+        max-height: none;
+    }
+
+    .overlay-score-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 1199px) {

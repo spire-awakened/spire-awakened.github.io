@@ -49,6 +49,8 @@
     let toggleInProgress = false;
     let activeOverlayItem = null;
     let activeOverlayCardKey = '';
+    let activeOverlaySource = '';
+    let overlayImageRequestId = 0;
     let activeRightPanel = 'comparison';
 
     const cardCatalog = new Map();
@@ -141,6 +143,10 @@
         return cardDescriptions[cardKey] || null;
     }
 
+    function getCardEntryByKey(cardKey) {
+        return cardDescriptions[normalizeCardKey(cardKey)] || null;
+    }
+
     function getCardDescription(item, fallbackTitle, useUpgraded) {
         const entry = getCardEntry(item);
         if (entry) {
@@ -154,24 +160,126 @@
         return `No description found for ${fallbackTitle}.`;
     }
 
-    function syncOverlayFromItem(item) {
-        if (!item) {
+    function getCardDescriptionByKey(cardKey, fallbackTitle, useUpgraded) {
+        const entry = getCardEntryByKey(cardKey);
+        if (entry) {
+            if (useUpgraded && typeof entry.upgraded_description === 'string' && entry.upgraded_description.trim()) {
+                return entry.upgraded_description;
+            }
+            if (typeof entry.description === 'string' && entry.description.trim()) {
+                return entry.description;
+            }
+        }
+
+        return `No description found for ${fallbackTitle}.`;
+    }
+
+    function resolveOverlaySourceElement(cardKey, source) {
+        if (!cardKey) {
+            return null;
+        }
+
+        const selectorsBySource = {
+            all: '#allCardsGrid',
+            comparison: '#comparisonGrid',
+            deck: '#currentDeckGrid'
+        };
+
+        const sourceSelector = selectorsBySource[source] || '';
+        if (sourceSelector) {
+            const sourceRoot = document.querySelector(sourceSelector);
+            const fromSource = sourceRoot?.querySelector(`.card-grid-item[data-card-key="${cardKey}"]`);
+            if (fromSource) {
+                return fromSource;
+            }
+        }
+
+        return document.querySelector(`.card-grid-item[data-card-key="${cardKey}"]`);
+    }
+
+    function getBaseImageSource(cardKey, item) {
+        if (item) {
+            const img = item.querySelector('.card-image-wrap > img:last-child');
+            if (img?.dataset?.baseSrc) {
+                return img.dataset.baseSrc;
+            }
+        }
+
+        return cardCatalog.get(cardKey)?.src || '';
+    }
+
+    function setOverlayImage(cardKey, useUpgraded, item) {
+        const baseSrc = getBaseImageSource(cardKey, item);
+        if (!baseSrc) {
             return;
         }
 
-        prepareItem(item);
-        const img = item.querySelector('.card-image-wrap > img:last-child');
-        const small = item.querySelector('small');
-        if (!img || !small) {
+        overlayImg.dataset.baseSrc = baseSrc;
+        const requestId = ++overlayImageRequestId;
+
+        if (!useUpgraded) {
+            overlayImg.src = baseSrc;
             return;
         }
 
-        overlayImg.src = img.src;
-        overlayImg.dataset.baseSrc = img.dataset.baseSrc;
-        overlayTitle.textContent = small.textContent;
-        overlayTitle.classList.toggle('plus-mode', small.classList.contains('plus-mode'));
-        overlayTitle.dataset.originalText = small.dataset.originalText;
-        overlayDescription.textContent = getCardDescription(item, small.dataset.originalText, small.classList.contains('plus-mode'));
+        const plusSrc = getPlusSrc(baseSrc);
+        canLoadImage(plusSrc).then(exists => {
+            if (requestId !== overlayImageRequestId) {
+                return;
+            }
+
+            overlayImg.src = exists ? plusSrc : baseSrc;
+        });
+    }
+
+    function syncOverlayFromCardKey(cardKey, source, preferredItem) {
+        if (!cardKey) {
+            return;
+        }
+
+        let item = preferredItem;
+        if (!item || !document.body.contains(item) || item.getAttribute('data-card-key') !== cardKey) {
+            item = resolveOverlaySourceElement(cardKey, source);
+        }
+
+        let useUpgraded = showPlus;
+        const fallbackLabel = cardCatalog.get(cardKey)?.label || cardKey;
+
+        if (item) {
+            prepareItem(item);
+            const small = item.querySelector('small');
+            if (small) {
+                overlayTitle.textContent = small.textContent;
+                overlayTitle.classList.toggle('plus-mode', small.classList.contains('plus-mode'));
+                overlayTitle.dataset.originalText = small.dataset.originalText || fallbackLabel;
+                useUpgraded = small.classList.contains('plus-mode');
+            } else {
+                overlayTitle.textContent = useUpgraded ? `${fallbackLabel}+` : fallbackLabel;
+                overlayTitle.classList.toggle('plus-mode', useUpgraded);
+                overlayTitle.dataset.originalText = fallbackLabel;
+            }
+        } else {
+            overlayTitle.textContent = useUpgraded ? `${fallbackLabel}+` : fallbackLabel;
+            overlayTitle.classList.toggle('plus-mode', useUpgraded);
+            overlayTitle.dataset.originalText = fallbackLabel;
+        }
+
+        setOverlayImage(cardKey, useUpgraded, item);
+
+        overlayDescription.textContent = getCardDescriptionByKey(cardKey, fallbackLabel, useUpgraded);
+        renderOverlayInsights(cardKey, useUpgraded);
+
+        activeOverlayItem = item;
+        activeOverlayCardKey = cardKey;
+        activeOverlaySource = source || activeOverlaySource;
+    }
+
+    function refreshOverlayIfOpen() {
+        if (overlay.style.opacity !== '1') {
+            return;
+        }
+
+        syncOverlayFromCardKey(activeOverlayCardKey, activeOverlaySource, activeOverlayItem);
     }
 
     function ensurePickupCornerScore(item) {
@@ -1513,6 +1621,296 @@
         };
     }
 
+    function describeMetric(metricKey) {
+        if (metricKey === 'frontload') {
+            return 'frontload';
+        }
+        if (metricKey === 'block') {
+            return 'block';
+        }
+        if (metricKey === 'scaling') {
+            return 'scaling';
+        }
+        if (metricKey === 'consistency') {
+            return 'consistency';
+        }
+        return 'utility';
+    }
+
+    function summarizeCardFundamentals(cardKey, entry, upgradedText, traits) {
+        const baseText = `${entry?.description || ''} ${upgradedText || ''}`.toLowerCase();
+        const costMatch = baseText.match(/costs?\s+([0-9x]+)/i);
+        const costLabel = costMatch ? costMatch[1].toUpperCase() : (traits.highCost ? '2+' : (traits.lowCost ? '0-1' : '1'));
+        const type = traits.attack && !traits.block
+            ? 'Attack'
+            : (!traits.attack && (traits.block || traits.draw || traits.exhaust || traits.deckManipulation) ? 'Skill' : 'Mixed');
+        const flags = [];
+        if (baseText.includes('exhaust')) {
+            flags.push('Exhaust');
+        }
+        if (baseText.includes('ethereal')) {
+            flags.push('Ethereal');
+        }
+        if (baseText.includes('innate')) {
+            flags.push('Innate');
+        }
+        if (baseText.includes('retain')) {
+            flags.push('Retain');
+        }
+
+        return {
+            cost: costLabel,
+            type,
+            rarity: 'Unknown',
+            flags
+        };
+    }
+
+    function summarizeUpgradeDelta(entry) {
+        const base = typeof entry?.description === 'string' ? entry.description : '';
+        const upgraded = typeof entry?.upgraded_description === 'string' ? entry.upgraded_description : '';
+        if (!upgraded || upgraded.trim() === '' || upgraded.trim() === base.trim()) {
+            return ['No text delta on upgrade (usually numeric scaling only or already optimized).'];
+        }
+
+        const changes = [];
+        const patterns = [
+            { label: 'Damage', regex: /deal\s+(\d+)\s+damage/i },
+            { label: 'Block', regex: /gain\s+(\d+)\s+block/i },
+            { label: 'Vulnerable', regex: /apply\s+(\d+)\s+vulnerable/i },
+            { label: 'Weak', regex: /apply\s+(\d+)\s+weak/i },
+            { label: 'Energy', regex: /gain\s+(\d+)\s+energy/i }
+        ];
+
+        patterns.forEach(pattern => {
+            const before = base.match(pattern.regex);
+            const after = upgraded.match(pattern.regex);
+            if (before && after) {
+                const delta = Number.parseInt(after[1], 10) - Number.parseInt(before[1], 10);
+                if (delta > 0) {
+                    changes.push(`${pattern.label} +${delta}`);
+                }
+            }
+        });
+
+        if (changes.length === 0) {
+            changes.push('Upgrade changes card behavior text or conditions.');
+        }
+
+        return changes;
+    }
+
+    function summarizeRealEffects(traits) {
+        const notes = [];
+        if (traits.attack) {
+            notes.push('Immediate damage');
+        }
+        if (traits.block) {
+            notes.push('Defensive value');
+        }
+        if (traits.scaling) {
+            notes.push('Long-fight scaling');
+        }
+        if (traits.draw || traits.deckManipulation || traits.costCheat || traits.energyGain) {
+            notes.push('Turn smoothing');
+        }
+        if (traits.aoe) {
+            notes.push('AoE coverage');
+        }
+        if (traits.conditional) {
+            notes.push('Conditional timing');
+        }
+        return notes;
+    }
+
+    function getBestNeed(deficits) {
+        return Object.keys(deficits).sort((left, right) => deficits[right] - deficits[left])[0] || 'frontload';
+    }
+
+    function getPracticalTips(traits, overall, deficits) {
+        const tips = [];
+        if (traits.highCost && deficits.consistency >= 15) {
+            tips.push('Play when energy and draw are stabilized; avoid early hand clogs.');
+        }
+        if (traits.conditional) {
+            tips.push('Sequence around the condition first, then cash out this card.');
+        }
+        if (traits.scaling) {
+            tips.push('Prioritize in elite and boss paths where scaling decides outcomes.');
+        }
+        if (traits.attack && deficits.frontload >= 18) {
+            tips.push('Use for turn 1-3 tempo to avoid early HP leaks.');
+        }
+        if (traits.block && deficits.block >= 18) {
+            tips.push('Treat as mitigation glue when your opening draws miss defense.');
+        }
+        if (overall.band.className === 'pickup-skip') {
+            tips.push('Skip unless the offered alternatives are even less aligned with deck needs.');
+        }
+
+        if (tips.length === 0) {
+            tips.push('Draft when it strengthens your weakest metric without bending curve too hard.');
+        }
+
+        return Array.from(new Set(tips)).slice(0, 3);
+    }
+
+    function withSimulatedCard(cardKey, action) {
+        deckState.push(cardKey);
+        try {
+            return action();
+        } finally {
+            deckState.pop();
+        }
+    }
+
+    function renderOverlayInsights(cardKey, useUpgraded) {
+        if (!cardKey) {
+            return;
+        }
+
+        const entry = getCardEntryByKey(cardKey) || {};
+        const traits = getCardTraits(cardKey);
+        const deckScores = analyzeDeckHealth();
+        const deficits = getNeedDeficits(deckScores);
+        const profile = getDeckSynergyProfile();
+        const overall = evaluateCardStrengthOverall(cardKey, deficits, profile);
+        const shortCtx = evaluateCardStrength(cardKey, deficits, profile, 'short');
+        const eliteCtx = evaluateCardStrength(cardKey, deficits, profile, 'elite');
+        const bossCtx = evaluateCardStrength(cardKey, deficits, profile, 'boss');
+        const upgradedText = useUpgraded ? entry.upgraded_description : entry.description;
+        const fundamentals = summarizeCardFundamentals(cardKey, entry, upgradedText, traits);
+        const upgradeDelta = summarizeUpgradeDelta(entry);
+        const realEffects = summarizeRealEffects(traits);
+        const bestNeed = getBestNeed(deficits);
+        const tips = getPracticalTips(traits, overall, deficits);
+
+        const packageTags = (traits.packages || []).slice(0, 4).map(name => name.replace(/_/g, ' '));
+        const roleTags = (traits.roles || []).slice(0, 4).map(name => name.replace(/_/g, ' '));
+        const missingRequirements = ((traits.metadata?.requires || [])
+            .filter(req => !requirementIsSatisfied(req, profile))
+            .map(getRequirementReason)
+            .slice(0, 2));
+
+        const simulated = withSimulatedCard(cardKey, () => ({
+            scores: analyzeDeckHealth(),
+            profile: getDeckSynergyProfile()
+        }));
+
+        const curveDelta = {
+            frontload: simulated.scores.frontload - deckScores.frontload,
+            block: simulated.scores.block - deckScores.block,
+            scaling: simulated.scores.scaling - deckScores.scaling,
+            consistency: simulated.scores.consistency - deckScores.consistency,
+            utility: simulated.scores.utility - deckScores.utility,
+            overall: simulated.scores.overall - deckScores.overall,
+            highCost: (simulated.profile.highCost || 0) - (profile.highCost || 0),
+            lowCost: (simulated.profile.lowCost || 0) - (profile.lowCost || 0)
+        };
+
+        const comparePool = uniqueValues(comparisonState.concat(cardKey));
+        const compareScores = comparePool.map(key => {
+            const ev = evaluateCardStrengthOverall(key, deficits, profile);
+            return {
+                key,
+                pickup: ev.pickup,
+                label: cardCatalog.get(key)?.label || key
+            };
+        }).sort((left, right) => right.pickup - left.pickup);
+        const rankIndex = compareScores.findIndex(entryScore => entryScore.key === cardKey);
+
+        let insights = document.getElementById('overlayInsights');
+        if (!insights) {
+            insights = document.createElement('div');
+            insights.id = 'overlayInsights';
+            insights.className = 'overlay-insights';
+            overlayDescription.insertAdjacentElement('afterend', insights);
+        }
+
+        insights.innerHTML = `
+            <section class="overlay-section">
+                <h3>Card Fundamentals</h3>
+                <div class="overlay-chip-row">
+                    <span class="overlay-chip"><strong>Cost:</strong> ${fundamentals.cost}</span>
+                    <span class="overlay-chip"><strong>Type:</strong> ${fundamentals.type}</span>
+                    <span class="overlay-chip"><strong>Rarity:</strong> ${fundamentals.rarity}</span>
+                    ${fundamentals.flags.map(flag => `<span class="overlay-chip">${flag}</span>`).join('')}
+                </div>
+                <ul class="overlay-mini-list">
+                    ${upgradeDelta.map(line => `<li>${line}</li>`).join('')}
+                </ul>
+            </section>
+
+            <section class="overlay-section">
+                <h3>Real Effect Summary</h3>
+                <div class="overlay-chip-row">
+                    ${realEffects.map(effect => `<span class="overlay-chip">${effect}</span>`).join('')}
+                </div>
+                <p class="overlay-subtle">Best immediate fit: ${describeMetric(bestNeed)} gap.</p>
+            </section>
+
+            <section class="overlay-section">
+                <h3>Deck Fit Breakdown</h3>
+                <div class="overlay-score-grid">
+                    <div><span class="overlay-score-label">Pickup</span><span class="overlay-score-value">${overall.pickup}</span></div>
+                    <div><span class="overlay-score-label">Base</span><span class="overlay-score-value">${overall.basePower}</span></div>
+                    <div><span class="overlay-score-label">Need</span><span class="overlay-score-value">${overall.need}</span></div>
+                    <div><span class="overlay-score-label">Fit</span><span class="overlay-score-value">${overall.fit}</span></div>
+                </div>
+                <ul class="overlay-mini-list">
+                    ${overall.reasons.slice(0, 3).map(reason => `<li>${reason}</li>`).join('')}
+                </ul>
+            </section>
+
+            <section class="overlay-section">
+                <h3>Synergy and Anti-Synergy</h3>
+                <div class="overlay-chip-row">
+                    ${packageTags.map(tag => `<span class="overlay-chip">Pkg: ${tag}</span>`).join('')}
+                    ${roleTags.map(tag => `<span class="overlay-chip">Role: ${tag}</span>`).join('')}
+                </div>
+                <ul class="overlay-mini-list">
+                    ${overall.synergy.positiveReasons.slice(0, 2).map(reason => `<li>+ ${reason}</li>`).join('')}
+                    ${overall.synergy.negativeReasons.slice(0, 2).map(reason => `<li>- ${reason}</li>`).join('')}
+                    ${missingRequirements.map(reason => `<li>- ${reason}</li>`).join('')}
+                </ul>
+            </section>
+
+            <section class="overlay-section">
+                <h3>Fight Context Impact</h3>
+                <div class="overlay-context-grid">
+                    <div><span>Hallway</span><strong>${shortCtx.pickup}</strong></div>
+                    <div><span>Elite</span><strong>${eliteCtx.pickup}</strong></div>
+                    <div><span>Boss</span><strong>${bossCtx.pickup}</strong></div>
+                </div>
+            </section>
+
+            <section class="overlay-section">
+                <h3>Curve and Consistency Impact</h3>
+                <div class="overlay-mini-metrics">
+                    <span>Overall ${curveDelta.overall >= 0 ? '+' : ''}${curveDelta.overall}</span>
+                    <span>Consistency ${curveDelta.consistency >= 0 ? '+' : ''}${curveDelta.consistency}</span>
+                    <span>Scaling ${curveDelta.scaling >= 0 ? '+' : ''}${curveDelta.scaling}</span>
+                    <span>High Cost ${curveDelta.highCost >= 0 ? '+' : ''}${curveDelta.highCost}</span>
+                    <span>Low Cost ${curveDelta.lowCost >= 0 ? '+' : ''}${curveDelta.lowCost}</span>
+                </div>
+            </section>
+
+            <section class="overlay-section">
+                <h3>Compare Ready</h3>
+                <p class="overlay-subtle">Rank ${rankIndex >= 0 ? rankIndex + 1 : '-'} of ${compareScores.length} in current comparison pool.</p>
+                <ul class="overlay-mini-list">
+                    ${compareScores.slice(0, 3).map((entryScore, idx) => `<li>${idx + 1}. ${entryScore.label} (${entryScore.pickup})</li>`).join('')}
+                </ul>
+            </section>
+
+            <section class="overlay-section">
+                <h3>Practical Play Tips</h3>
+                <ul class="overlay-mini-list">
+                    ${tips.map(tip => `<li>${tip}</li>`).join('')}
+                </ul>
+            </section>`;
+    }
+
     function ensureStrengthBlock(item) {
         const slot = item.querySelector('.comparison-strength-slot');
         const container = slot || item.querySelector('.card-body');
@@ -1777,6 +2175,7 @@
             await renderCollection(comparisonGrid, comparisonState);
         }
         renderCardStrengthSignals();
+        refreshOverlayIfOpen();
         requestAnimationFrame(() => renderCardStrengthSignals());
     }
 
@@ -1796,6 +2195,7 @@
             await renderCollection(comparisonGrid, comparisonState);
         }
         renderCardStrengthSignals();
+        refreshOverlayIfOpen();
         requestAnimationFrame(() => renderCardStrengthSignals());
     }
 
@@ -1808,6 +2208,7 @@
         await renderCollection(comparisonGrid, comparisonState);
         updateCounts();
         renderCardStrengthSignals();
+        refreshOverlayIfOpen();
         requestAnimationFrame(() => renderCardStrengthSignals());
     }
 
@@ -1816,6 +2217,7 @@
         await renderCollection(comparisonGrid, comparisonState);
         updateCounts();
         renderCardStrengthSignals();
+        refreshOverlayIfOpen();
         requestAnimationFrame(() => renderCardStrengthSignals());
     }
 
@@ -1854,10 +2256,10 @@
         }
     }
 
-    function openOverlayForItem(item) {
-        activeOverlayItem = item;
-        activeOverlayCardKey = item?.getAttribute('data-card-key') || '';
-        syncOverlayFromItem(item);
+    function openOverlayForItem(item, source) {
+        const cardKey = item?.getAttribute('data-card-key') || '';
+        activeOverlaySource = source || '';
+        syncOverlayFromCardKey(cardKey, activeOverlaySource, item);
         overlay.style.opacity = '1';
         overlay.style.pointerEvents = 'auto';
     }
@@ -1867,6 +2269,7 @@
         overlay.style.pointerEvents = 'none';
         activeOverlayItem = null;
         activeOverlayCardKey = '';
+        activeOverlaySource = '';
     }
 
     Array.from(allCardsGrid.querySelectorAll('.card-grid-item')).forEach(item => {
@@ -1915,7 +2318,7 @@
             return;
         }
 
-        openOverlayForItem(item);
+        openOverlayForItem(item, 'all');
     });
 
     comparisonGrid.addEventListener('click', async function (event) {
@@ -1935,7 +2338,7 @@
             return;
         }
 
-        openOverlayForItem(item);
+        openOverlayForItem(item, 'comparison');
     });
 
     currentDeckGrid.addEventListener('click', async function (event) {
@@ -1956,7 +2359,7 @@
             return;
         }
 
-        openOverlayForItem(item);
+        openOverlayForItem(item, 'deck');
     });
 
     overlayAddCompare.addEventListener('click', async function () {
@@ -2017,6 +2420,7 @@
             await renderCollection(currentDeckGrid, deckState);
             updateCounts();
             renderCardStrengthSignals();
+            refreshOverlayIfOpen();
         });
 
     document.addEventListener('keydown', async function (event) {
@@ -2035,15 +2439,7 @@
             await Promise.all(updates);
 
             if (overlay.style.opacity === '1') {
-                let sourceItem = activeOverlayItem;
-                if (!sourceItem || !document.body.contains(sourceItem)) {
-                    sourceItem = document.querySelector(`.card-grid-item[data-card-key="${activeOverlayCardKey}"]`);
-                }
-
-                if (sourceItem) {
-                    syncOverlayFromItem(sourceItem);
-                    activeOverlayItem = sourceItem;
-                }
+                syncOverlayFromCardKey(activeOverlayCardKey, activeOverlaySource, activeOverlayItem);
             }
 
             toggleInProgress = false;
