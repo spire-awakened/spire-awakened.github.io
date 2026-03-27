@@ -3095,6 +3095,7 @@
 
     const toggleKey = 'u';
     const upgradeModeStorageKey = 'spire-helper-upgrade-mode';
+    const managedWheelRegionIds = new Set(['comparisonPanel', 'deck']);
 
     function isHotkeyEditableTarget(target) {
         if (!(target instanceof Element)) {
@@ -3102,6 +3103,90 @@
         }
 
         return !!target.closest('input, textarea, select, [contenteditable], [contenteditable="true"]');
+    }
+
+    function getScrollRegionFromTarget(target) {
+        if (!(target instanceof Element)) {
+            return null;
+        }
+
+        return target.closest('[data-scroll-region]');
+    }
+
+    function canRegionScroll(region) {
+        if (!region) {
+            return false;
+        }
+
+        return region.scrollHeight > region.clientHeight + 1;
+    }
+
+    function wheelShouldBeHandled(region, deltaY) {
+        if (!canRegionScroll(region)) {
+            return false;
+        }
+
+        if (deltaY < 0) {
+            return region.scrollTop > 0;
+        }
+
+        if (deltaY > 0) {
+            return region.scrollTop + region.clientHeight < region.scrollHeight - 1;
+        }
+
+        return true;
+    }
+
+    function normalizeWheelDelta(event) {
+        let deltaY = event.deltaY;
+
+        // Delta can be expressed in lines or pages depending on browser/device.
+        if (event.deltaMode === 1) {
+            deltaY *= 16;
+        } else if (event.deltaMode === 2) {
+            deltaY *= window.innerHeight;
+        }
+
+        return deltaY;
+    }
+
+    function bindIndependentPaneScroll() {
+        document.addEventListener('wheel', function (event) {
+            if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.shiftKey) {
+                return;
+            }
+
+            if (isHotkeyEditableTarget(event.target)) {
+                return;
+            }
+
+            if (overlay.style.opacity === '1' && overlay.contains(event.target)) {
+                return;
+            }
+
+            const region = getScrollRegionFromTarget(event.target);
+            if (!region) {
+                return;
+            }
+
+            // Keep all-cards on native wheel behavior; only manage right-side panes.
+            if (!managedWheelRegionIds.has(region.id)) {
+                return;
+            }
+
+            const deltaY = normalizeWheelDelta(event);
+            if (!wheelShouldBeHandled(region, deltaY)) {
+                return;
+            }
+
+            const previousTop = region.scrollTop;
+            region.scrollTop = previousTop + deltaY;
+
+            if (region.scrollTop !== previousTop) {
+                // Keep wheel input scoped to the hovered pane instead of chaining to page scroll.
+                event.preventDefault();
+            }
+        }, { passive: false });
     }
 
     function setUpgradeToggleState() {
@@ -3174,6 +3259,7 @@
     document.body.classList.remove('ui-preset-review');
     document.body.classList.add('ui-preset-focus');
     setActiveRightPanel('comparison');
+    bindIndependentPaneScroll();
 
     Promise.resolve()
         .then(() => Promise.all([loadDescriptions(), loadCanonicalCardData(), loadSynergyMetadata()]))

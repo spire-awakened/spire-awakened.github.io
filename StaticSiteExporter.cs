@@ -117,7 +117,7 @@ internal static class StaticSiteExporter
             ? noCardsHtml
             : $"""
         <div class="card-columns">
-            <section class="cards-section">
+            <section class="cards-section all-cards-section">
                 <div class="search-box mb-4">
                     <div class="search-topline">
                         <div class="search-title-wrap">
@@ -144,7 +144,7 @@ internal static class StaticSiteExporter
                     </details>
                 </div>
                 <h2>All Cards</h2>
-                <div id="allCardsPanel" class="cards-panel-body">
+                <div id="allCardsPanel" class="cards-panel-body" data-scroll-region="all-cards" tabindex="0">
                     <div id="allCardsGrid" class="card-grid">
 {allCardsHtml}                </div>
                 </div>
@@ -160,7 +160,7 @@ internal static class StaticSiteExporter
                             <h2 style="margin: 0; flex: 1;">Card Comparison <span id="comparisonCountLabel" class="stats-inline">0 cards</span></h2>
                             <button id="clearComparisonBtn" type="button" class="action-btn btn-compare" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; white-space: nowrap;">Reset</button>
                         </div>
-                        <div id="comparisonPanel" class="cards-panel-body">
+                        <div id="comparisonPanel" class="cards-panel-body" data-scroll-region="comparison" tabindex="0">
                             <div id="synergyReadinessBar" class="synergy-readiness-bar" hidden>
                                 <span class="synergy-readiness-title">Deck Lanes</span>
                                 <div id="synergyReadinessChips" class="synergy-readiness-chips"></div>
@@ -172,7 +172,7 @@ internal static class StaticSiteExporter
                             <div id="comparisonEmpty" class="panel-empty">No cards in comparison yet.</div>
                         </div>
                     </div>
-                    <div class="panel-block deck-panel" data-panel="deck">
+                    <div class="panel-block deck-panel" data-panel="deck" data-scroll-region="deck" tabindex="0">
                         <h2>Current Deck <span id="deckCountLabel" class="stats-inline">{ironcladStartingDeckKeys.Length} cards</span></h2>
                         <div id="deckPanel" class="cards-panel-body">
                             <div id="currentDeckGrid" class="card-grid">
