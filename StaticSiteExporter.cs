@@ -158,6 +158,10 @@ internal static class StaticSiteExporter
                             <button id="clearComparisonBtn" type="button" class="action-btn btn-compare" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; white-space: nowrap;">Reset</button>
                         </div>
                         <div id="comparisonPanel" class="cards-panel-body">
+                            <div id="synergyReadinessBar" class="synergy-readiness-bar" hidden>
+                                <span class="synergy-readiness-title">Deck Lanes</span>
+                                <div id="synergyReadinessChips" class="synergy-readiness-chips"></div>
+                            </div>
                             <div id="pickAdvisorBanner" class="pick-advisor-banner" hidden>
                                 <ul id="pickAdvisorList" class="pick-advisor-list"></ul>
                             </div>
@@ -215,6 +219,15 @@ internal static class StaticSiteExporter
                                         <li>No deck data yet.</li>
                                     </ul>
                                 </details>
+                            </div>
+                            <div class="deck-next-two-card" id="deckNextTwoCard">
+                                <div class="deck-next-two-head">
+                                    <span>Next 2 Picks</span>
+                                    <span id="deckNextTwoTag" class="deck-next-two-tag">Plan</span>
+                                </div>
+                                <ul id="deckNextTwoList" class="deck-next-two-list">
+                                    <li>Add cards to generate a pick path.</li>
+                                </ul>
                             </div>
                             <div class="deck-health-metric">
                                 <div class="deck-health-head"><span>Frontload</span><span id="metricFrontloadValue">0</span></div>

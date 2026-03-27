@@ -30,8 +30,12 @@
     const deckStrategyTag = document.getElementById('deckStrategyTag');
     const deckStrategySummary = document.getElementById('deckStrategySummary');
     const deckStrategyPlan = document.getElementById('deckStrategyPlan');
+    const deckNextTwoTag = document.getElementById('deckNextTwoTag');
+    const deckNextTwoList = document.getElementById('deckNextTwoList');
     const pickAdvisorBanner = document.getElementById('pickAdvisorBanner');
     const pickAdvisorList = document.getElementById('pickAdvisorList');
+    const synergyReadinessBar = document.getElementById('synergyReadinessBar');
+    const synergyReadinessChips = document.getElementById('synergyReadinessChips');
     const rightPanels = document.querySelector('.right-panels');
     const tabComparisonBtn = document.getElementById('tabComparisonBtn');
     const tabDeckBtn = document.getElementById('tabDeckBtn');
@@ -448,6 +452,112 @@
 
     function getPackageMetadata(packageName) {
         return synergyMetadata.packages[packageName] || null;
+    }
+
+    function toTitleLabel(text) {
+        if (!text) {
+            return '';
+        }
+
+        return text
+            .split('_')
+            .filter(Boolean)
+            .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+            .join(' ');
+    }
+
+    function getPackageProgressInfo(profile, packageName) {
+        const metadata = getPackageMetadata(packageName);
+        const enabledAt = metadata?.thresholds?.enabledAt || {};
+        const keys = Object.keys(enabledAt);
+
+        if (keys.length === 0) {
+            const activeCount = profile.packageCounts[packageName] || 0;
+            return {
+                text: activeCount > 0 ? 'active' : '0',
+                missingHint: activeCount > 0 ? '' : `Need ${toTitleLabel(packageName)} support`
+            };
+        }
+
+        const weakest = keys
+            .map(key => {
+                const target = Math.max(enabledAt[key], 1);
+                const actual = getProfileMetricValue(profile, packageName, key);
+                return {
+                    key,
+                    actual,
+                    target,
+                    ratio: actual / target
+                };
+            })
+            .sort((left, right) => left.ratio - right.ratio)[0];
+
+        const progressCount = `${Math.min(weakest.actual, weakest.target)}/${weakest.target}`;
+        const missingAmount = Math.max(0, weakest.target - weakest.actual);
+        const missingHint = missingAmount > 0
+            ? `Need ${missingAmount} more ${weakest.key.replace(/([A-Z])/g, ' $1').trim().toLowerCase()}`
+            : '';
+
+        return {
+            text: progressCount,
+            missingHint
+        };
+    }
+
+    function renderSynergyReadiness() {
+        if (!synergyReadinessBar || !synergyReadinessChips) {
+            return;
+        }
+
+        if (deckState.length === 0) {
+            synergyReadinessBar.hidden = true;
+            synergyReadinessChips.innerHTML = '';
+            return;
+        }
+
+        const profile = getDeckSynergyProfile();
+        const packageOrder = ['strength', 'block', 'exhaust', 'vulnerable', 'self_damage', 'strike'];
+        const metadataPackages = Object.keys(synergyMetadata.packages || {});
+        const packageNames = uniqueValues(packageOrder.concat(metadataPackages));
+
+        const packageStates = packageNames.map(packageName => {
+            const activation = getPackageActivation(profile, packageName);
+            const progress = getPackageProgressInfo(profile, packageName);
+            let status = 'is-missing';
+            let statusText = 'Missing';
+
+            if (activation >= 0.9) {
+                status = 'is-ready';
+                statusText = 'Ready';
+            } else if (activation >= 0.45 || (profile.packageCounts[packageName] || 0) > 0) {
+                status = 'is-growing';
+                statusText = 'Growing';
+            }
+
+            const titleParts = [
+                `${toTitleLabel(packageName)}: ${statusText}`,
+                progress.missingHint
+            ].filter(Boolean);
+
+            return {
+                packageName,
+                status,
+                statusText,
+                activation,
+                progressText: progress.text,
+                title: titleParts.join(' | ')
+            };
+        });
+
+        packageStates.sort((left, right) => right.activation - left.activation);
+        const topStates = packageStates.slice(0, 6);
+
+        synergyReadinessChips.innerHTML = topStates.map(item => `
+            <span class="synergy-readiness-chip ${item.status}" title="${item.title}">
+                <span>${toTitleLabel(item.packageName)}</span>
+                <span class="synergy-chip-count">${item.progressText}</span>
+            </span>`).join('');
+        synergyReadinessBar.hidden = topStates.length === 0;
     }
 
     function getMetadataPenaltyWeight(penalty) {
@@ -1446,6 +1556,76 @@
         setListItems(deckStrategyPlan, Array.from(new Set(plans)).slice(0, 4));
     }
 
+    function toPrimaryNeedLabel(metricKey) {
+        if (metricKey === 'frontload') {
+            return 'frontload and quick damage';
+        }
+        if (metricKey === 'block') {
+            return 'stable block density';
+        }
+        if (metricKey === 'scaling') {
+            return 'late-fight scaling';
+        }
+        if (metricKey === 'consistency') {
+            return 'draw and energy smoothing';
+        }
+        return 'utility coverage';
+    }
+
+    function getPackageGapPlan(profile) {
+        const packageNames = Object.keys(synergyMetadata.packages || {});
+        const candidates = packageNames.map(packageName => {
+            const activation = getPackageActivation(profile, packageName);
+            const progress = getPackageProgressInfo(profile, packageName);
+            return {
+                packageName,
+                activation,
+                progressHint: progress.missingHint
+            };
+        });
+
+        const nearReady = candidates
+            .filter(item => item.activation >= 0.35 && item.activation < 0.9)
+            .sort((left, right) => right.activation - left.activation)[0];
+
+        if (!nearReady) {
+            return null;
+        }
+
+        return {
+            packageName: nearReady.packageName,
+            text: nearReady.progressHint || `Finish ${toTitleLabel(nearReady.packageName)} package support`
+        };
+    }
+
+    function renderNextTwoPickPlan(scores, deficits, profile) {
+        if (!deckNextTwoTag || !deckNextTwoList) {
+            return;
+        }
+
+        if (!scores || deckState.length === 0) {
+            deckNextTwoTag.textContent = 'Plan';
+            setListItems(deckNextTwoList, ['Add cards to generate a pick path.']);
+            return;
+        }
+
+        const biggestGap = Object.keys(deficits).sort((left, right) => deficits[right] - deficits[left])[0] || 'frontload';
+        const secondGap = Object.keys(deficits).sort((left, right) => deficits[right] - deficits[left])[1] || 'block';
+        const packagePlan = getPackageGapPlan(profile);
+        const steps = [];
+
+        steps.push(`Pick 1: Prioritize ${toPrimaryNeedLabel(biggestGap)}.`);
+        if (packagePlan) {
+            steps.push(`Pick 2: ${packagePlan.text}.`);
+            deckNextTwoTag.textContent = `${toTitleLabel(packagePlan.packageName)} lane`;
+        } else {
+            steps.push(`Pick 2: Reinforce ${toPrimaryNeedLabel(secondGap)} or skip for quality.`);
+            deckNextTwoTag.textContent = 'Adaptive';
+        }
+
+        setListItems(deckNextTwoList, steps.slice(0, 2));
+    }
+
     function renderDeckHealth() {
         if (!deckHealthOverall) {
             return;
@@ -1484,6 +1664,10 @@
         setListItems(deckHealthNextPicks, suggestionItems);
         renderDeckPriorities(scores);
         renderFightStrategy(scores);
+        const deficits = getNeedDeficits(scores);
+        const profile = getDeckSynergyProfile();
+        renderNextTwoPickPlan(scores, deficits, profile);
+        renderSynergyReadiness();
     }
 
     function getNeedDeficits(scores) {
@@ -2307,6 +2491,16 @@
         const pickup = clampScore(data.pickup);
         const reason = data.reasons[0] || 'Neutral impact for current deck and context';
         const reasonTitle = data.reasons.join(' | ');
+        const deltaReasons = [];
+        if (data.deltaPositive) {
+            deltaReasons.push(`<li class="delta-positive">+ ${data.deltaPositive}</li>`);
+        }
+        if (data.deltaNegative) {
+            deltaReasons.push(`<li class="delta-negative">- ${data.deltaNegative}</li>`);
+        }
+        const deltaHtml = deltaReasons.length > 0
+            ? `<ul class="card-strength-delta">${deltaReasons.join('')}</ul>`
+            : '';
 
         slot.innerHTML = `
             <div class="card-strength-block">
@@ -2332,6 +2526,7 @@
                     </div>
                 </div>
                 <div class="card-strength-why" title="${reasonTitle}">${reason}</div>
+                ${deltaHtml}
             </div>`;
 
         return slot.querySelector('.card-strength-block');
@@ -2391,7 +2586,9 @@
                 base: evaluation.basePower,
                 need: evaluation.need,
                 fit: evaluation.fit,
-                reasons: evaluation.reasons
+                reasons: evaluation.reasons,
+                deltaPositive: (evaluation.synergy.positiveReasons || [])[0] || '',
+                deltaNegative: (evaluation.synergy.negativeReasons || [])[0] || ''
             }) || ensureStrengthBlock(item);
             if (!block) {
                 return;
