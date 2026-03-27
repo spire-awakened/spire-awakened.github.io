@@ -72,6 +72,12 @@
     let overlayImageRequestId = 0;
     let activeRightPanel = 'comparison';
     let stateIdCounter = 0;
+    let activeOfferSnapshot = null;
+    const runContextStorageKey = 'spire-helper-run-context-v1';
+    const runLogger = window.SpireRecommender?.createRunLogger('spire-helper-run-logs-v1') || null;
+    let runContext = {
+        act: 1
+    };
 
     const cardCatalog = new Map();
     const deckState = Array.from(currentDeckGrid.querySelectorAll('.card-grid-item'))
@@ -1295,6 +1301,169 @@
         });
     }
 
+    function loadRunContext() {
+        try {
+            const raw = localStorage.getItem(runContextStorageKey);
+            if (!raw) {
+                return;
+            }
+
+            const parsed = JSON.parse(raw);
+            runContext.act = Math.max(1, Math.min(3, Number.parseInt(parsed.act || 1, 10) || 1));
+        } catch {
+            runContext = {
+                act: 1
+            };
+        }
+    }
+
+    function saveRunContext() {
+        try {
+            localStorage.setItem(runContextStorageKey, JSON.stringify(runContext));
+        } catch {
+            // Ignore storage errors to keep recommendations responsive.
+        }
+    }
+
+    function getRunContext() {
+        return {
+            act: runContext.act
+        };
+    }
+
+    function getDeckSnapshotKeys() {
+        return deckState.map(stateEntry => {
+            const key = getStateCardKey(stateEntry);
+            return getStateUpgraded(stateEntry) ? `${key}Plus` : key;
+        });
+    }
+
+    function recordOfferSnapshot(scoredCards, skipScore) {
+        if (!Array.isArray(scoredCards) || scoredCards.length === 0) {
+            activeOfferSnapshot = null;
+            return;
+        }
+
+        activeOfferSnapshot = {
+            id: `offer-${Date.now()}`,
+            timestampUtc: new Date().toISOString(),
+            context: getRunContext(),
+            deck: getDeckSnapshotKeys(),
+            skipScore,
+            offers: scoredCards.map(card => ({
+                key: card.key,
+                label: card.label,
+                score: card.score,
+                immediatePickup: card.immediatePickup,
+                lookaheadPickup: card.lookaheadPickup,
+                risk: card.risk,
+                confidence: card.confidence,
+                marginVsSkip: card.marginVsSkip
+            }))
+        };
+    }
+
+    function recordPickedCard(cardKey) {
+        if (!runLogger || !activeOfferSnapshot) {
+            return;
+        }
+
+        const picked = normalizeCardKey(cardKey);
+        const top = activeOfferSnapshot.offers[0] || null;
+
+        runLogger.append({
+            ...activeOfferSnapshot,
+            picked,
+            topRecommended: top ? top.key : '',
+            matchedRecommendation: !!top && top.key === picked
+        });
+
+        activeOfferSnapshot = null;
+    }
+
+    function exportRunLogs() {
+        if (!runLogger) {
+            return;
+        }
+
+        const payload = runLogger.export();
+        const blob = new Blob([payload], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `spire-helper-run-logs-${Date.now()}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function clearRunLogs() {
+        if (!runLogger) {
+            return;
+        }
+
+        runLogger.clear();
+    }
+
+    function initRunContextControls() {
+        const searchBox = document.querySelector('.search-box');
+        if (!searchBox) {
+            return;
+        }
+
+        const existing = document.getElementById('runContextControls');
+        if (existing) {
+            return;
+        }
+
+        const wrapper = document.createElement('div');
+        wrapper.id = 'runContextControls';
+        wrapper.className = 'strength-context-row';
+        wrapper.innerHTML = `
+            <label for="runActSelect">Run Context</label>
+            <div class="run-context-grid">
+                <select id="runActSelect" class="form-select form-select-sm" aria-label="Act selector">
+                    <option value="1">Act 1</option>
+                    <option value="2">Act 2</option>
+                    <option value="3">Act 3</option>
+                </select>
+            </div>
+            <div class="run-log-actions">
+                <button id="exportRunLogsBtn" type="button" class="action-btn btn-compare">Export Logs</button>
+                <button id="clearRunLogsBtn" type="button" class="action-btn btn-remove">Clear Logs</button>
+            </div>`;
+        searchBox.appendChild(wrapper);
+
+        const actSelect = document.getElementById('runActSelect');
+        const exportBtn = document.getElementById('exportRunLogsBtn');
+        const clearBtn = document.getElementById('clearRunLogsBtn');
+
+        if (!actSelect) {
+            return;
+        }
+
+        actSelect.value = String(runContext.act);
+
+        const onContextChange = function () {
+            runContext.act = Math.max(1, Math.min(3, Number.parseInt(actSelect.value || '1', 10) || 1));
+
+            saveRunContext();
+            renderCardStrengthSignals();
+            renderDeckHealth();
+            refreshOverlayIfOpen();
+        };
+
+        actSelect.addEventListener('change', onContextChange);
+
+        if (exportBtn) {
+            exportBtn.addEventListener('click', exportRunLogs);
+        }
+        if (clearBtn) {
+            clearBtn.addEventListener('click', clearRunLogs);
+        }
+    }
+
     function getCardLabel(cardKey) {
         const normalized = normalizeCardKey(cardKey);
         const fromCatalog = cardCatalog.get(normalized)?.label;
@@ -2167,22 +2336,25 @@
         };
     }
 
-    function evaluateCardStrengthOverall(cardKey, deficits, profile) {
-        // Adaptive weights: base 0.35/0.30/0.35, shifted by current deck deficits
-        let shortWeight = 0.35;
-        let bossWeight = 0.35;
-        shortWeight += Math.min((deficits.frontload || 0) / 60, 0.10);
-        bossWeight += Math.min((deficits.scaling || 0) / 60, 0.10);
-        const eliteWeight = Math.max(0, 1 - shortWeight - bossWeight);
+    function evaluateCardStrengthOverall(cardKey, deficits, profile, contextState) {
+        const context = contextState || getRunContext();
+        const fallbackWeights = {
+            short: 0.35,
+            elite: 0.3,
+            boss: 0.35
+        };
+        const weights = window.SpireRecommender?.computeContextWeights
+            ? window.SpireRecommender.computeContextWeights(deficits, context)
+            : fallbackWeights;
 
         const short = evaluateCardStrength(cardKey, deficits, profile, 'short');
         const elite = evaluateCardStrength(cardKey, deficits, profile, 'elite');
         const boss = evaluateCardStrength(cardKey, deficits, profile, 'boss');
 
-        const pickup = clampScore(short.pickup * shortWeight + elite.pickup * eliteWeight + boss.pickup * bossWeight);
-        const basePower = clampScore(short.basePower * shortWeight + elite.basePower * eliteWeight + boss.basePower * bossWeight);
-        const need = clampScore(short.need * shortWeight + elite.need * eliteWeight + boss.need * bossWeight);
-        const fit = clampScore(short.fit * shortWeight + elite.fit * eliteWeight + boss.fit * bossWeight);
+        const pickup = clampScore(short.pickup * weights.short + elite.pickup * weights.elite + boss.pickup * weights.boss);
+        const basePower = clampScore(short.basePower * weights.short + elite.basePower * weights.elite + boss.basePower * weights.boss);
+        const need = clampScore(short.need * weights.short + elite.need * weights.elite + boss.need * weights.boss);
+        const fit = clampScore(short.fit * weights.short + elite.fit * weights.elite + boss.fit * weights.boss);
         const band = toPickupBand(pickup);
 
         return {
@@ -2191,6 +2363,9 @@
             fit,
             need,
             pickup,
+            shortPickup: short.pickup,
+            elitePickup: elite.pickup,
+            bossPickup: boss.pickup,
             band,
             reasons: short.reasons,
             synergy: short.synergy
@@ -2359,6 +2534,27 @@
             return action();
         } finally {
             deckState.pop();
+        }
+    }
+
+    function withSimulatedCards(cardKeys, action) {
+        const pushed = [];
+
+        (cardKeys || []).forEach(cardKey => {
+            const simulatedState = createCardState(cardKey, false);
+            if (simulatedState) {
+                deckState.push(simulatedState);
+                pushed.push(simulatedState);
+            }
+        });
+
+        try {
+            return action();
+        } finally {
+            while (pushed.length > 0) {
+                pushed.pop();
+                deckState.pop();
+            }
         }
     }
 
@@ -2710,26 +2906,96 @@
 
         if (comparisonState.length < 2) {
             pickAdvisorBanner.hidden = true;
+            activeOfferSnapshot = null;
             return;
         }
 
-        const deficits = getNeedDeficits(analyzeDeckHealth());
+        const deckScores = analyzeDeckHealth();
+        const deficits = getNeedDeficits(deckScores);
         const profile = getDeckSynergyProfile();
+        const context = getRunContext();
 
-        const scored = comparisonState.map((stateEntry, index) => {
+        const comparisonOptions = comparisonState.map((stateEntry, index) => {
             const key = getStateCardKey(stateEntry);
-            const ev = evaluateCardStrengthOverall(key, deficits, profile);
             const card = cardCatalog.get(key);
             return {
                 stateId: stateEntry?.id || `comparison-${index}`,
                 key,
-                label: card ? card.label : key,
-                pickup: ev.pickup,
-                reason: ev.reasons[0] || 'Neutral impact'
+                label: card ? card.label : key
             };
         });
 
-        scored.sort((a, b) => b.pickup - a.pickup);
+        const allPool = uniqueValues(allCardsGridItems().map(item => getStateCardKey(item.getAttribute('data-card-key'))).filter(Boolean));
+        const preRankedFollowups = allPool
+            .map(key => ({
+                key,
+                pickup: evaluateCardStrengthOverall(key, deficits, profile, context).pickup
+            }))
+            .sort((left, right) => right.pickup - left.pickup)
+            .slice(0, 24)
+            .map(entry => entry.key);
+
+        const estimateSkip = function () {
+            if (window.SpireRecommender?.estimateSkipBaseline) {
+                return window.SpireRecommender.estimateSkipBaseline(deckScores, deficits, context);
+            }
+
+            return clampScore(46 + (deckScores.overall - 50) * 0.2);
+        };
+
+        let scored = [];
+        let skipScore = estimateSkip();
+        let shouldSkipTop = false;
+
+        if (window.SpireRecommender?.rankOptions) {
+            const ranked = window.SpireRecommender.rankOptions(comparisonOptions, {
+                evaluateImmediate: function (cardKey) {
+                    const ev = evaluateCardStrengthOverall(cardKey, deficits, profile, context);
+                    return {
+                        pickup: ev.pickup,
+                        shortPickup: ev.shortPickup,
+                        elitePickup: ev.elitePickup,
+                        bossPickup: ev.bossPickup,
+                        reason: ev.reasons[0] || 'Neutral impact',
+                        reasons: ev.reasons
+                    };
+                },
+                evaluateWithSequence: function (sequence) {
+                    return withSimulatedCards(sequence, function () {
+                        const simulatedScores = analyzeDeckHealth();
+                        const simulatedDeficits = getNeedDeficits(simulatedScores);
+                        const simulatedProfile = getDeckSynergyProfile();
+                        const tail = sequence[sequence.length - 1];
+                        const ev = evaluateCardStrengthOverall(tail, simulatedDeficits, simulatedProfile, context);
+                        return {
+                            pickup: ev.pickup
+                        };
+                    });
+                },
+                estimateSkip,
+                followupPool: preRankedFollowups,
+                lookaheadDepth: 2
+            });
+
+            scored = ranked.ranked;
+            skipScore = ranked.decision.skipScore;
+            shouldSkipTop = ranked.decision.shouldSkip;
+        } else {
+            scored = comparisonOptions.map(option => {
+                const ev = evaluateCardStrengthOverall(option.key, deficits, profile, context);
+                return {
+                    ...option,
+                    score: ev.pickup,
+                    immediatePickup: ev.pickup,
+                    lookaheadPickup: ev.pickup,
+                    risk: 45,
+                    confidence: 55,
+                    marginVsSkip: ev.pickup - skipScore,
+                    reason: ev.reasons[0] || 'Neutral impact',
+                    reasons: ev.reasons
+                };
+            }).sort((a, b) => b.score - a.score);
+        }
 
         scored.forEach(({ key, stateId }) => {
             const item = comparisonGrid.querySelector(`.card-grid-item[data-state-id="${stateId}"]`) || comparisonGrid.querySelector(`.card-grid-item[data-card-key="${key}"]`);
@@ -2738,13 +3004,17 @@
             }
         });
 
+        recordOfferSnapshot(scored, skipScore);
+
         const verdictLabel = index => {
+            if (index === 0 && shouldSkipTop) return 'SKIP';
             if (index === 0) return 'TAKE';
             if (index === 1) return 'CONSIDER';
             return 'SKIP';
         };
 
         const verdictClass = index => {
+            if (index === 0 && shouldSkipTop) return 'pick-skip';
             if (index === 0) return 'pick-take';
             if (index === 1) return 'pick-consider';
             return 'pick-skip';
@@ -2754,9 +3024,18 @@
             <li class="pick-advisor-row ${verdictClass(i)}">
                 <span class="pick-verdict-label">${verdictLabel(i)}</span>
                 <span class="pick-card-name">${card.label}</span>
-                <span class="pick-score">${card.pickup}</span>
-                <span class="pick-reason">${card.reason}</span>
+                <span class="pick-score">${card.score}</span>
+                <span class="pick-reason">I ${card.immediatePickup} | L ${card.lookaheadPickup} | R ${card.risk} | C ${card.confidence} | ${card.reason}</span>
             </li>`).join('');
+
+        const skipHint = document.createElement('li');
+        skipHint.className = `pick-advisor-row ${shouldSkipTop ? 'pick-skip' : 'pick-consider'}`;
+        skipHint.innerHTML = `
+            <span class="pick-verdict-label">BASE</span>
+            <span class="pick-card-name">Skip baseline</span>
+            <span class="pick-score">${skipScore}</span>
+            <span class="pick-reason">Top pick should beat this unless deck quality already supports skipping.</span>`;
+        pickAdvisorList.appendChild(skipHint);
 
         pickAdvisorBanner.hidden = false;
     }
@@ -2788,6 +3067,7 @@
         }
 
         deckState.push(state);
+        recordPickedCard(normalized);
         await renderCollection(currentDeckGrid, deckState);
         updateCounts();
         if (comparisonState.length > 0) {
@@ -3255,6 +3535,9 @@
             await setUpgradeMode(true, true);
         });
     }
+
+    loadRunContext();
+    initRunContextControls();
 
     document.body.classList.remove('ui-preset-review');
     document.body.classList.add('ui-preset-focus');
