@@ -41,6 +41,7 @@
     const cardTraitsCache = new Map();
 
     let cardDescriptions = {};
+    let cardCanonical = {};
     let synergyMetadata = {
         packages: {},
         cards: {}
@@ -1638,30 +1639,47 @@
     }
 
     function summarizeCardFundamentals(cardKey, entry, upgradedText, traits) {
+        const canonical = cardCanonical[normalizeCardKey(cardKey)] || {};
         const baseText = `${entry?.description || ''} ${upgradedText || ''}`.toLowerCase();
         const costMatch = baseText.match(/costs?\s+([0-9x]+)/i);
-        const costLabel = costMatch ? costMatch[1].toUpperCase() : (traits.highCost ? '2+' : (traits.lowCost ? '0-1' : '1'));
-        const type = traits.attack && !traits.block
+        const fallbackCost = costMatch ? costMatch[1].toUpperCase() : (traits.highCost ? '2+' : (traits.lowCost ? '0-1' : '1'));
+        let canonicalCost = '';
+        if (typeof canonical.cost === 'string' && canonical.cost.trim()) {
+            canonicalCost = canonical.cost.trim();
+        }
+        if (typeof canonical.cost === 'number' && Number.isFinite(canonical.cost)) {
+            canonicalCost = String(canonical.cost);
+        }
+        const costLabel = canonicalCost || fallbackCost;
+        const fallbackType = traits.attack && !traits.block
             ? 'Attack'
             : (!traits.attack && (traits.block || traits.draw || traits.exhaust || traits.deckManipulation) ? 'Skill' : 'Mixed');
-        const flags = [];
-        if (baseText.includes('exhaust')) {
-            flags.push('Exhaust');
-        }
-        if (baseText.includes('ethereal')) {
-            flags.push('Ethereal');
-        }
-        if (baseText.includes('innate')) {
-            flags.push('Innate');
-        }
-        if (baseText.includes('retain')) {
-            flags.push('Retain');
+        const type = typeof canonical.type === 'string' && canonical.type.trim()
+            ? canonical.type
+            : fallbackType;
+        const flags = Array.isArray(canonical.keywords) && canonical.keywords.length > 0
+            ? canonical.keywords.filter(Boolean)
+            : [];
+
+        if (flags.length === 0) {
+            if (baseText.includes('exhaust')) {
+                flags.push('Exhaust');
+            }
+            if (baseText.includes('ethereal')) {
+                flags.push('Ethereal');
+            }
+            if (baseText.includes('innate')) {
+                flags.push('Innate');
+            }
+            if (baseText.includes('retain')) {
+                flags.push('Retain');
+            }
         }
 
         return {
             cost: costLabel,
             type,
-            rarity: 'Unknown',
+            rarity: typeof canonical.rarity === 'string' && canonical.rarity.trim() ? canonical.rarity : 'Unknown',
             flags
         };
     }
@@ -2235,6 +2253,21 @@
         }
     }
 
+    async function loadCanonicalCardData() {
+        try {
+            const response = await fetch('images/cards/ironclad_card_canonical.json', { cache: 'no-store' });
+            if (!response.ok) {
+                cardCanonical = {};
+                return;
+            }
+
+            const payload = await response.json();
+            cardCanonical = payload?.cards || {};
+        } catch {
+            cardCanonical = {};
+        }
+    }
+
     async function loadSynergyMetadata() {
         try {
             const response = await fetch('images/cards/ironclad_synergy_metadata.json', { cache: 'no-store' });
@@ -2414,7 +2447,7 @@
     setActiveRightPanel('comparison');
 
     Promise.resolve()
-        .then(() => Promise.all([loadDescriptions(), loadSynergyMetadata()]))
+        .then(() => Promise.all([loadDescriptions(), loadCanonicalCardData(), loadSynergyMetadata()]))
         .then(async () => {
             await refreshGridModeAndBadges(allCardsGrid);
             await renderCollection(currentDeckGrid, deckState);

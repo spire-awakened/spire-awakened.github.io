@@ -1,0 +1,728 @@
+﻿{
+    "schemaVersion":  "1.0",
+    "game":  "Slay the Spire 2",
+    "character":  "Ironclad",
+    "description":  "Authoritative card fundamentals for overlay rendering. Fill exact values as data is curated.",
+    "cards":  {
+                  "StS2_Ironclad-Bash":  {
+                                             "cost":  "2",
+                                             "type":  "Attack",
+                                             "rarity":  "Common",
+                                             "keywords":  [
+
+                                                          ]
+                                         },
+                  "StS2_Ironclad-Defend":  {
+                                               "cost":  "1",
+                                               "type":  "Skill",
+                                               "rarity":  "Common",
+                                               "keywords":  [
+
+                                                            ]
+                                           },
+                  "StS2_Ironclad-Strike":  {
+                                               "cost":  "1",
+                                               "type":  "Attack",
+                                               "rarity":  "Common",
+                                               "keywords":  [
+
+                                                            ]
+                                           },
+                  "StS2_Ironclad-Anger":  {
+                                              "cost":  "0",
+                                              "type":  "Attack",
+                                              "rarity":  "Common",
+                                              "keywords":  [
+
+                                                           ]
+                                          },
+                  "StS2_Ironclad-Armaments":  {
+                                                  "cost":  "1",
+                                                  "type":  "Skill",
+                                                  "rarity":  "Common",
+                                                  "keywords":  [
+
+                                                               ]
+                                              },
+                  "StS2_Ironclad-BloodWall":  {
+                                                  "cost":  "2",
+                                                  "type":  "Skill",
+                                                  "rarity":  "Common",
+                                                  "keywords":  [
+
+                                                               ]
+                                              },
+                  "StS2_Ironclad-Bloodletting":  {
+                                                     "cost":  "0",
+                                                     "type":  "Skill",
+                                                     "rarity":  "Uncommon",
+                                                     "keywords":  [
+
+                                                                  ]
+                                                 },
+                  "StS2_Ironclad-BodySlam":  {
+                                                 "cost":  "1",
+                                                 "type":  "Attack",
+                                                 "rarity":  "Common",
+                                                 "keywords":  [
+
+                                                              ]
+                                             },
+                  "StS2_Ironclad-Breakthrough":  {
+                                                     "cost":  "1",
+                                                     "type":  "Attack",
+                                                     "rarity":  "Common",
+                                                     "keywords":  [
+
+                                                                  ]
+                                                 },
+                  "StS2_Ironclad-Cinder":  {
+                                               "cost":  "1",
+                                               "type":  "Attack",
+                                               "rarity":  "Uncommon",
+                                               "keywords":  [
+                                                                "Exhaust"
+                                                            ]
+                                           },
+                  "StS2_Ironclad-Havoc":  {
+                                              "cost":  "1",
+                                              "type":  "Attack",
+                                              "rarity":  "Uncommon",
+                                              "keywords":  [
+                                                               "Exhaust"
+                                                           ]
+                                          },
+                  "StS2_Ironclad-Headbutt":  {
+                                                 "cost":  "1",
+                                                 "type":  "Attack",
+                                                 "rarity":  "Common",
+                                                 "keywords":  [
+
+                                                              ]
+                                             },
+                  "StS2_Ironclad-IronWave":  {
+                                                 "cost":  "1",
+                                                 "type":  "Attack",
+                                                 "rarity":  "Common",
+                                                 "keywords":  [
+
+                                                              ]
+                                             },
+                  "StS2_Ironclad-MoltenFist":  {
+                                                   "cost":  "2",
+                                                   "type":  "Attack",
+                                                   "rarity":  "Uncommon",
+                                                   "keywords":  [
+                                                                    "Exhaust"
+                                                                ]
+                                               },
+                  "StS2_Ironclad-PerfectedStrike":  {
+                                                        "cost":  "2",
+                                                        "type":  "Attack",
+                                                        "rarity":  "Uncommon",
+                                                        "keywords":  [
+
+                                                                     ]
+                                                    },
+                  "StS2_Ironclad-PommelStrike":  {
+                                                     "cost":  "1",
+                                                     "type":  "Attack",
+                                                     "rarity":  "Common",
+                                                     "keywords":  [
+
+                                                                  ]
+                                                 },
+                  "StS2_Ironclad-SetupStrike":  {
+                                                    "cost":  "1",
+                                                    "type":  "Attack",
+                                                    "rarity":  "Common",
+                                                    "keywords":  [
+
+                                                                 ]
+                                                },
+                  "StS2_Ironclad-ShrugItOff":  {
+                                                   "cost":  "1",
+                                                   "type":  "Skill",
+                                                   "rarity":  "Common",
+                                                   "keywords":  [
+
+                                                                ]
+                                               },
+                  "StS2_Ironclad-SwordBoomerang":  {
+                                                       "cost":  "1",
+                                                       "type":  "Attack",
+                                                       "rarity":  "Uncommon",
+                                                       "keywords":  [
+
+                                                                    ]
+                                                   },
+                  "StS2_Ironclad-Thunderclap":  {
+                                                    "cost":  "1",
+                                                    "type":  "Attack",
+                                                    "rarity":  "Uncommon",
+                                                    "keywords":  [
+
+                                                                 ]
+                                                },
+                  "StS2_Ironclad-Tremble":  {
+                                                "cost":  "1",
+                                                "type":  "Attack",
+                                                "rarity":  "Common",
+                                                "keywords":  [
+
+                                                             ]
+                                            },
+                  "StS2_Ironclad-TrueGrit":  {
+                                                 "cost":  "1",
+                                                 "type":  "Skill",
+                                                 "rarity":  "Common",
+                                                 "keywords":  [
+                                                                  "Exhaust"
+                                                              ]
+                                             },
+                  "StS2_Ironclad-TwinStrike":  {
+                                                   "cost":  "1",
+                                                   "type":  "Attack",
+                                                   "rarity":  "Common",
+                                                   "keywords":  [
+
+                                                                ]
+                                               },
+                  "StS2_Ironclad-AshenStrike":  {
+                                                    "cost":  "2",
+                                                    "type":  "Attack",
+                                                    "rarity":  "Uncommon",
+                                                    "keywords":  [
+                                                                     "Exhaust"
+                                                                 ]
+                                                },
+                  "StS2_Ironclad-BattleTrance":  {
+                                                     "cost":  "1",
+                                                     "type":  "Skill",
+                                                     "rarity":  "Uncommon",
+                                                     "keywords":  [
+
+                                                                  ]
+                                                 },
+                  "StS2_Ironclad-Bludgeon":  {
+                                                 "cost":  "2",
+                                                 "type":  "Attack",
+                                                 "rarity":  "Uncommon",
+                                                 "keywords":  [
+
+                                                              ]
+                                             },
+                  "StS2_Ironclad-Bully":  {
+                                              "cost":  "2",
+                                              "type":  "Attack",
+                                              "rarity":  "Uncommon",
+                                              "keywords":  [
+
+                                                           ]
+                                          },
+                  "StS2_Ironclad-BurningPact":  {
+                                                    "cost":  "1",
+                                                    "type":  "Skill",
+                                                    "rarity":  "Uncommon",
+                                                    "keywords":  [
+                                                                     "Exhaust"
+                                                                 ]
+                                                },
+                  "StS2_Ironclad-DemonicShield":  {
+                                                      "cost":  "2",
+                                                      "type":  "Skill",
+                                                      "rarity":  "Uncommon",
+                                                      "keywords":  [
+                                                                       "Exhaust"
+                                                                   ]
+                                                  },
+                  "StS2_Ironclad-Dismantle":  {
+                                                  "cost":  "1",
+                                                  "type":  "Attack",
+                                                  "rarity":  "Uncommon",
+                                                  "keywords":  [
+
+                                                               ]
+                                              },
+                  "StS2_Ironclad-Dominate":  {
+                                                 "cost":  "3",
+                                                 "type":  "Attack",
+                                                 "rarity":  "Rare",
+                                                 "keywords":  [
+                                                                  "Exhaust"
+                                                              ]
+                                             },
+                  "StS2_Ironclad-DrumofBattle":  {
+                                                     "cost":  "1",
+                                                     "type":  "Power",
+                                                     "rarity":  "Rare",
+                                                     "keywords":  [
+                                                                      "Exhaust"
+                                                                  ]
+                                                 },
+                  "StS2_Ironclad-EvilEye":  {
+                                                "cost":  "2",
+                                                "type":  "Attack",
+                                                "rarity":  "Rare",
+                                                "keywords":  [
+                                                                 "Exhaust"
+                                                             ]
+                                            },
+                  "StS2_Ironclad-ExpectaFight":  {
+                                                     "cost":  "0",
+                                                     "type":  "Power",
+                                                     "rarity":  "Uncommon",
+                                                     "keywords":  [
+
+                                                                  ]
+                                                 },
+                  "StS2_Ironclad-FeelNoPain":  {
+                                                   "cost":  "1",
+                                                   "type":  "Power",
+                                                   "rarity":  "Uncommon",
+                                                   "keywords":  [
+                                                                    "Exhaust"
+                                                                ]
+                                               },
+                  "StS2_Ironclad-FightMe":  {
+                                                "cost":  "1",
+                                                "type":  "Attack",
+                                                "rarity":  "Uncommon",
+                                                "keywords":  [
+
+                                                             ]
+                                            },
+                  "StS2_Ironclad-FlameBarrier":  {
+                                                     "cost":  "2",
+                                                     "type":  "Skill",
+                                                     "rarity":  "Uncommon",
+                                                     "keywords":  [
+
+                                                                  ]
+                                                 },
+                  "StS2_Ironclad-ForgottenRitual":  {
+                                                        "cost":  "0",
+                                                        "type":  "Power",
+                                                        "rarity":  "Rare",
+                                                        "keywords":  [
+                                                                         "Exhaust"
+                                                                     ]
+                                                    },
+                  "StS2_Ironclad-Grapple":  {
+                                                "cost":  "2",
+                                                "type":  "Attack",
+                                                "rarity":  "Uncommon",
+                                                "keywords":  [
+
+                                                             ]
+                                            },
+                  "StS2_Ironclad-Hemokinesis":  {
+                                                    "cost":  "1",
+                                                    "type":  "Attack",
+                                                    "rarity":  "Uncommon",
+                                                    "keywords":  [
+
+                                                                 ]
+                                                },
+                  "StS2_Ironclad-HowlfromBeyond":  {
+                                                       "cost":  "2",
+                                                       "type":  "Attack",
+                                                       "rarity":  "Rare",
+                                                       "keywords":  [
+                                                                        "Exhaust"
+                                                                    ]
+                                                   },
+                  "StS2_Ironclad-InfernalBlade":  {
+                                                      "cost":  "1",
+                                                      "type":  "Power",
+                                                      "rarity":  "Rare",
+                                                      "keywords":  [
+                                                                       "Exhaust"
+                                                                   ]
+                                                  },
+                  "StS2_Ironclad-Inferno":  {
+                                                "cost":  "2",
+                                                "type":  "Attack",
+                                                "rarity":  "Rare",
+                                                "keywords":  [
+
+                                                             ]
+                                            },
+                  "StS2_Ironclad-Inflame":  {
+                                                "cost":  "1",
+                                                "type":  "Power",
+                                                "rarity":  "Common",
+                                                "keywords":  [
+
+                                                             ]
+                                            },
+                  "StS2_Ironclad-Juggling":  {
+                                                 "cost":  "2",
+                                                 "type":  "Skill",
+                                                 "rarity":  "Uncommon",
+                                                 "keywords":  [
+                                                                  "Innate"
+                                                              ]
+                                             },
+                  "StS2_Ironclad-Pillage":  {
+                                                "cost":  "2",
+                                                "type":  "Attack",
+                                                "rarity":  "Uncommon",
+                                                "keywords":  [
+
+                                                             ]
+                                            },
+                  "StS2_Ironclad-Rage":  {
+                                             "cost":  "0",
+                                             "type":  "Skill",
+                                             "rarity":  "Common",
+                                             "keywords":  [
+
+                                                          ]
+                                         },
+                  "StS2_Ironclad-Rampage":  {
+                                                "cost":  "1",
+                                                "type":  "Attack",
+                                                "rarity":  "Uncommon",
+                                                "keywords":  [
+
+                                                             ]
+                                            },
+                  "StS2_Ironclad-Rupture":  {
+                                                "cost":  "1",
+                                                "type":  "Power",
+                                                "rarity":  "Uncommon",
+                                                "keywords":  [
+
+                                                             ]
+                                            },
+                  "StS2_Ironclad-SecondWind":  {
+                                                   "cost":  "1",
+                                                   "type":  "Skill",
+                                                   "rarity":  "Uncommon",
+                                                   "keywords":  [
+                                                                    "Exhaust"
+                                                                ]
+                                               },
+                  "StS2_Ironclad-Spite":  {
+                                              "cost":  "0",
+                                              "type":  "Attack",
+                                              "rarity":  "Uncommon",
+                                              "keywords":  [
+
+                                                           ]
+                                          },
+                  "StS2_Ironclad-Stampede":  {
+                                                 "cost":  "1",
+                                                 "type":  "Attack",
+                                                 "rarity":  "Uncommon",
+                                                 "keywords":  [
+
+                                                              ]
+                                             },
+                  "StS2_Ironclad-Stomp":  {
+                                              "cost":  "1",
+                                              "type":  "Attack",
+                                              "rarity":  "Uncommon",
+                                              "keywords":  [
+
+                                                           ]
+                                          },
+                  "StS2_Ironclad-StoneArmor":  {
+                                                   "cost":  "1",
+                                                   "type":  "Skill",
+                                                   "rarity":  "Uncommon",
+                                                   "keywords":  [
+
+                                                                ]
+                                               },
+                  "StS2_Ironclad-Taunt":  {
+                                              "cost":  "1",
+                                              "type":  "Skill",
+                                              "rarity":  "Common",
+                                              "keywords":  [
+
+                                                           ]
+                                          },
+                  "StS2_Ironclad-Unrelenting":  {
+                                                    "cost":  "1",
+                                                    "type":  "Attack",
+                                                    "rarity":  "Uncommon",
+                                                    "keywords":  [
+
+                                                                 ]
+                                                },
+                  "StS2_Ironclad-Uppercut":  {
+                                                 "cost":  "2",
+                                                 "type":  "Attack",
+                                                 "rarity":  "Common",
+                                                 "keywords":  [
+
+                                                              ]
+                                             },
+                  "StS2_Ironclad-Vicious":  {
+                                                "cost":  "1",
+                                                "type":  "Attack",
+                                                "rarity":  "Uncommon",
+                                                "keywords":  [
+
+                                                             ]
+                                            },
+                  "StS2_Ironclad-Whirlwind":  {
+                                                  "cost":  "2",
+                                                  "type":  "Attack",
+                                                  "rarity":  "Uncommon",
+                                                  "keywords":  [
+
+                                                               ]
+                                              },
+                  "StS2_Ironclad-Aggression":  {
+                                                   "cost":  "0",
+                                                   "type":  "Power",
+                                                   "rarity":  "Uncommon",
+                                                   "keywords":  [
+                                                                    "Innate"
+                                                                ]
+                                               },
+                  "StS2_Ironclad-Barricade":  {
+                                                  "cost":  "3",
+                                                  "type":  "Power",
+                                                  "rarity":  "Rare",
+                                                  "keywords":  [
+
+                                                               ]
+                                              },
+                  "StS2_Ironclad-Brand":  {
+                                              "cost":  "2",
+                                              "type":  "Power",
+                                              "rarity":  "Rare",
+                                              "keywords":  [
+                                                               "Exhaust"
+                                                           ]
+                                          },
+                  "StS2_Ironclad-Cascade":  {
+                                                "cost":  "1",
+                                                "type":  "Attack",
+                                                "rarity":  "Rare",
+                                                "keywords":  [
+
+                                                             ]
+                                            },
+                  "StS2_Ironclad-Colossus":  {
+                                                 "cost":  "2",
+                                                 "type":  "Attack",
+                                                 "rarity":  "Rare",
+                                                 "keywords":  [
+
+                                                              ]
+                                             },
+                  "StS2_Ironclad-Conflagration":  {
+                                                      "cost":  "1",
+                                                      "type":  "Power",
+                                                      "rarity":  "Rare",
+                                                      "keywords":  [
+
+                                                                   ]
+                                                  },
+                  "StS2_Ironclad-CrimsonMantle":  {
+                                                      "cost":  "1",
+                                                      "type":  "Power",
+                                                      "rarity":  "Rare",
+                                                      "keywords":  [
+
+                                                                   ]
+                                                  },
+                  "StS2_Ironclad-Cruelty":  {
+                                                "cost":  "3",
+                                                "type":  "Power",
+                                                "rarity":  "Rare",
+                                                "keywords":  [
+
+                                                             ]
+                                            },
+                  "StS2_Ironclad-DarkEmbrace":  {
+                                                    "cost":  "2",
+                                                    "type":  "Power",
+                                                    "rarity":  "Rare",
+                                                    "keywords":  [
+                                                                     "Exhaust"
+                                                                 ]
+                                                },
+                  "StS2_Ironclad-DemonForm":  {
+                                                  "cost":  "3",
+                                                  "type":  "Power",
+                                                  "rarity":  "Rare",
+                                                  "keywords":  [
+
+                                                               ]
+                                              },
+                  "StS2_Ironclad-Feed":  {
+                                             "cost":  "1",
+                                             "type":  "Attack",
+                                             "rarity":  "Rare",
+                                             "keywords":  [
+                                                              "Exhaust"
+                                                          ]
+                                         },
+                  "StS2_Ironclad-FiendFire":  {
+                                                  "cost":  "2",
+                                                  "type":  "Attack",
+                                                  "rarity":  "Rare",
+                                                  "keywords":  [
+                                                                   "Exhaust"
+                                                               ]
+                                              },
+                  "StS2_Ironclad-Hellraiser":  {
+                                                   "cost":  "2",
+                                                   "type":  "Attack",
+                                                   "rarity":  "Rare",
+                                                   "keywords":  [
+
+                                                                ]
+                                               },
+                  "StS2_Ironclad-Impervious":  {
+                                                   "cost":  "2",
+                                                   "type":  "Skill",
+                                                   "rarity":  "Rare",
+                                                   "keywords":  [
+                                                                    "Exhaust"
+                                                                ]
+                                               },
+                  "StS2_Ironclad-Juggernaut":  {
+                                                   "cost":  "2",
+                                                   "type":  "Power",
+                                                   "rarity":  "Rare",
+                                                   "keywords":  [
+
+                                                                ]
+                                               },
+                  "StS2_Ironclad-Mangle":  {
+                                               "cost":  "2",
+                                               "type":  "Attack",
+                                               "rarity":  "Rare",
+                                               "keywords":  [
+
+                                                            ]
+                                           },
+                  "StS2_Ironclad-Offering":  {
+                                                 "cost":  "0",
+                                                 "type":  "Skill",
+                                                 "rarity":  "Rare",
+                                                 "keywords":  [
+                                                                  "Exhaust"
+                                                              ]
+                                             },
+                  "StS2_Ironclad-One-TwoPunch":  {
+                                                     "cost":  "2",
+                                                     "type":  "Attack",
+                                                     "rarity":  "Rare",
+                                                     "keywords":  [
+
+                                                                  ]
+                                                 },
+                  "StS2_Ironclad-PactsEnd":  {
+                                                 "cost":  "0",
+                                                 "type":  "Attack",
+                                                 "rarity":  "Rare",
+                                                 "keywords":  [
+                                                                  "Exhaust"
+                                                              ]
+                                             },
+                  "StS2_Ironclad-PrimalForce":  {
+                                                    "cost":  "3",
+                                                    "type":  "Power",
+                                                    "rarity":  "Rare",
+                                                    "keywords":  [
+
+                                                                 ]
+                                                },
+                  "StS2_Ironclad-Pyre":  {
+                                             "cost":  "2",
+                                             "type":  "Power",
+                                             "rarity":  "Rare",
+                                             "keywords":  [
+
+                                                          ]
+                                         },
+                  "StS2_Ironclad-Stoke":  {
+                                              "cost":  "1",
+                                              "type":  "Skill",
+                                              "rarity":  "Rare",
+                                              "keywords":  [
+                                                               "Exhaust"
+                                                           ]
+                                          },
+                  "StS2_Ironclad-Tank":  {
+                                             "cost":  "1",
+                                             "type":  "Power",
+                                             "rarity":  "Uncommon",
+                                             "keywords":  [
+
+                                                          ]
+                                         },
+                  "StS2_Ironclad-TearAsunder":  {
+                                                    "cost":  "2",
+                                                    "type":  "Attack",
+                                                    "rarity":  "Rare",
+                                                    "keywords":  [
+
+                                                                 ]
+                                                },
+                  "StS2_Ironclad-Thrash":  {
+                                               "cost":  "1",
+                                               "type":  "Attack",
+                                               "rarity":  "Uncommon",
+                                               "keywords":  [
+                                                                "Exhaust"
+                                                            ]
+                                           },
+                  "StS2_Ironclad-Unmovable":  {
+                                                  "cost":  "0",
+                                                  "type":  "Power",
+                                                  "rarity":  "Rare",
+                                                  "keywords":  [
+
+                                                               ]
+                                              },
+                  "StS2_Ironclad-Break":  {
+                                              "cost":  "1",
+                                              "type":  "Attack",
+                                              "rarity":  "Uncommon",
+                                              "keywords":  [
+
+                                                           ]
+                                          },
+                  "StS2_Ironclad-Corruption":  {
+                                                   "cost":  "3",
+                                                   "type":  "Power",
+                                                   "rarity":  "Rare",
+                                                   "keywords":  [
+                                                                    "Exhaust"
+                                                                ]
+                                               },
+                  "StS2_Ironclad-Clash":  {
+                                              "cost":  "0",
+                                              "type":  "Attack",
+                                              "rarity":  "Uncommon",
+                                              "keywords":  [
+
+                                                           ]
+                                          },
+                  "StS2_Ironclad-DualWield":  {
+                                                  "cost":  "1",
+                                                  "type":  "Skill",
+                                                  "rarity":  "Rare",
+                                                  "keywords":  [
+
+                                                               ]
+                                              },
+                  "StS2_Ironclad-Entrench":  {
+                                                 "cost":  "2",
+                                                 "type":  "Skill",
+                                                 "rarity":  "Rare",
+                                                 "keywords":  [
+
+                                                              ]
+                                             }
+              }
+}
