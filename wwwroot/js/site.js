@@ -6,7 +6,6 @@
     const comparisonEmpty = document.getElementById('comparisonEmpty');
     const comparisonCountLabel = document.getElementById('comparisonCountLabel');
     const deckCountLabel = document.getElementById('deckCountLabel');
-    const strengthContextSelect = document.getElementById('strengthContextSelect');
     const deckHealthOverall = document.getElementById('deckHealthOverall');
     const metricFrontloadValue = document.getElementById('metricFrontloadValue');
     const metricBlockValue = document.getElementById('metricBlockValue');
@@ -41,7 +40,6 @@
     let toggleInProgress = false;
     let activeOverlayItem = null;
     let activeOverlayCardKey = '';
-    let strengthContext = 'short';
 
     const cardCatalog = new Map();
     const deckState = Array.from(currentDeckGrid.querySelectorAll('.card-grid-item'))
@@ -1475,6 +1473,36 @@
         };
     }
 
+    function evaluateCardStrengthOverall(cardKey, deficits, profile) {
+        // Adaptive weights: base 0.35/0.30/0.35, shifted by current deck deficits
+        let shortWeight = 0.35;
+        let bossWeight = 0.35;
+        shortWeight += Math.min((deficits.frontload || 0) / 60, 0.10);
+        bossWeight += Math.min((deficits.scaling || 0) / 60, 0.10);
+        const eliteWeight = Math.max(0, 1 - shortWeight - bossWeight);
+
+        const short = evaluateCardStrength(cardKey, deficits, profile, 'short');
+        const elite = evaluateCardStrength(cardKey, deficits, profile, 'elite');
+        const boss = evaluateCardStrength(cardKey, deficits, profile, 'boss');
+
+        const pickup = clampScore(short.pickup * shortWeight + elite.pickup * eliteWeight + boss.pickup * bossWeight);
+        const basePower = clampScore(short.basePower * shortWeight + elite.basePower * eliteWeight + boss.basePower * bossWeight);
+        const need = clampScore(short.need * shortWeight + elite.need * eliteWeight + boss.need * bossWeight);
+        const fit = clampScore(short.fit * shortWeight + elite.fit * eliteWeight + boss.fit * bossWeight);
+        const band = toPickupBand(pickup);
+
+        return {
+            traits: short.traits,
+            basePower,
+            fit,
+            need,
+            pickup,
+            band,
+            reasons: short.reasons,
+            synergy: short.synergy
+        };
+    }
+
     function ensureStrengthBlock(item) {
         const slot = item.querySelector('.comparison-strength-slot');
         const container = slot || item.querySelector('.card-body');
@@ -1531,7 +1559,7 @@
         slot.innerHTML = `
             <div class="card-strength-block">
                 <div class="card-strength-head comparison-strength-head">
-                    <span class="card-strength-score" data-strength-score title="Pickup score ${pickup} (${strengthContext})">${pickup}</span>
+                    <span class="card-strength-score" data-strength-score title="Pickup score ${pickup} (Overall)">${pickup}</span>
                     <span class="card-strength-band" data-strength-band>${data.band}</span>
                 </div>
                 <div class="card-strength-bars comparison-strength-bars">
@@ -1585,7 +1613,7 @@
             item.classList.remove('pickup-snap', 'pickup-strong', 'pickup-playable', 'pickup-niche', 'pickup-skip');
 
             const key = item.getAttribute('data-card-key') || '';
-            const evaluation = evaluateCardStrength(key, deficits, profile, strengthContext);
+            const evaluation = evaluateCardStrengthOverall(key, deficits, profile);
 
             item.classList.add(evaluation.band.className);
 
@@ -1611,8 +1639,7 @@
                 base: evaluation.basePower,
                 need: evaluation.need,
                 fit: evaluation.fit,
-                reasons: evaluation.reasons,
-                context: strengthContext
+                reasons: evaluation.reasons
             }) || ensureStrengthBlock(item);
             if (!block) {
                 return;
@@ -1643,7 +1670,7 @@
             }
 
             const key = item.getAttribute('data-card-key') || '';
-            const score = evaluateCardStrength(key, deficits, profile, strengthContext).synergy.score;
+            const score = evaluateCardStrengthOverall(key, deficits, profile).synergy.score;
 
             if (score >= 16) {
                 item.classList.add('synergy-high');
@@ -1868,14 +1895,6 @@
     if (clearComparisonBtn) {
         clearComparisonBtn.addEventListener('click', async function () {
             await clearComparison();
-        });
-    }
-
-    if (strengthContextSelect) {
-        strengthContext = strengthContextSelect.value || 'short';
-        strengthContextSelect.addEventListener('change', function () {
-            strengthContext = this.value || 'short';
-            renderCardStrengthSignals();
         });
     }
 
