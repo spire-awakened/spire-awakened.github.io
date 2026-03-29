@@ -73,16 +73,39 @@
     let activeRightPanel = 'comparison';
     let stateIdCounter = 0;
     let activeOfferSnapshot = null;
-    const runContextStorageKey = 'spire-helper-run-context-v2';
-    const runLogger = window.SpireRecommender?.createRunLogger('spire-helper-run-logs-v1') || null;
+    const runContextStorageKey = 'spire-helper-run-context-v3';
+    const runLogSchemaVersion = 2;
+    const runLogAppVersion = '2026-03-29';
+    const runLogger = window.SpireRecommender?.createRunLogger('spire-helper-run-logs-v2') || null;
     let runContext = {
         act: 1,
         floor: 1,
+        ascension: 0,
+        currentHp: 80,
+        maxHp: 80,
+        gold: 99,
+        relics: 1,
+        potions: 0,
+        nodeType: 'unknown',
+        seed: '',
         runId: ''
     };
 
     function clampRunFloor(value) {
         return Math.max(1, Math.min(60, Number.parseInt(value || '1', 10) || 1));
+    }
+
+    function clampAscension(value) {
+        return Math.max(0, Math.min(20, Number.parseInt(value || '0', 10) || 0));
+    }
+
+    function clampStatInt(value, fallback, min, max) {
+        const parsed = Number.parseInt(value, 10);
+        if (!Number.isFinite(parsed)) {
+            return fallback;
+        }
+
+        return Math.max(min, Math.min(max, parsed));
     }
 
     function createRunId() {
@@ -1324,6 +1347,17 @@
             const parsed = JSON.parse(raw);
             runContext.act = Math.max(1, Math.min(3, Number.parseInt(parsed.act || 1, 10) || 1));
             runContext.floor = clampRunFloor(parsed.floor || 1);
+            runContext.ascension = clampAscension(parsed.ascension || 0);
+            runContext.currentHp = clampStatInt(parsed.currentHp, runContext.currentHp, 1, 999);
+            runContext.maxHp = clampStatInt(parsed.maxHp, runContext.maxHp, 1, 999);
+            runContext.currentHp = Math.min(runContext.currentHp, runContext.maxHp);
+            runContext.gold = clampStatInt(parsed.gold, runContext.gold, 0, 9999);
+            runContext.relics = clampStatInt(parsed.relics, runContext.relics, 0, 99);
+            runContext.potions = clampStatInt(parsed.potions, runContext.potions, 0, 10);
+            runContext.nodeType = typeof parsed.nodeType === 'string' && parsed.nodeType.trim()
+                ? parsed.nodeType.trim()
+                : 'unknown';
+            runContext.seed = typeof parsed.seed === 'string' ? parsed.seed.trim() : '';
             runContext.runId = typeof parsed.runId === 'string' && parsed.runId.trim()
                 ? parsed.runId.trim()
                 : createRunId();
@@ -1331,6 +1365,14 @@
             runContext = {
                 act: 1,
                 floor: 1,
+                ascension: 0,
+                currentHp: 80,
+                maxHp: 80,
+                gold: 99,
+                relics: 1,
+                potions: 0,
+                nodeType: 'unknown',
+                seed: '',
                 runId: createRunId()
             };
         }
@@ -1352,8 +1394,37 @@
         return {
             act: runContext.act,
             floor: runContext.floor,
+            ascension: runContext.ascension,
+            currentHp: runContext.currentHp,
+            maxHp: runContext.maxHp,
+            gold: runContext.gold,
+            relics: runContext.relics,
+            potions: runContext.potions,
+            nodeType: runContext.nodeType,
+            seed: runContext.seed,
             runId: runContext.runId
         };
+    }
+
+    function recordDeckMutation(action, cardKey, details) {
+        if (!runLogger) {
+            return;
+        }
+
+        runLogger.append({
+            eventType: 'deckMutation',
+            schemaVersion: runLogSchemaVersion,
+            appVersion: runLogAppVersion,
+            id: `deck-${Date.now()}`,
+            timestampUtc: new Date().toISOString(),
+            runId: runContext.runId,
+            context: getRunContext(),
+            action,
+            cardKey: normalizeCardKey(cardKey),
+            deckSize: deckState.length,
+            deck: getDeckSnapshotKeys(),
+            ...details
+        });
     }
 
     function getDeckSnapshotKeys() {
@@ -1371,9 +1442,12 @@
 
         activeOfferSnapshot = {
             eventType: 'pickOffer',
+            schemaVersion: runLogSchemaVersion,
+            appVersion: runLogAppVersion,
             id: `offer-${Date.now()}`,
             timestampUtc: new Date().toISOString(),
             runId: runContext.runId,
+            eventSource: 'cardReward',
             context: getRunContext(),
             deck: getDeckSnapshotKeys(),
             skipScore,
@@ -1390,17 +1464,29 @@
         };
     }
 
-    function recordPickedCard(cardKey) {
+    function recordPickedCard(cardKey, source) {
         if (!runLogger || !activeOfferSnapshot) {
+            return;
+        }
+
+        if (source !== 'comparisonReward') {
             return;
         }
 
         const picked = normalizeCardKey(cardKey);
         const top = activeOfferSnapshot.offers[0] || null;
+        const chosenIndex = activeOfferSnapshot.offers.findIndex(option => option.key === picked);
+        if (chosenIndex < 0) {
+            activeOfferSnapshot = null;
+            return;
+        }
 
         runLogger.append({
             ...activeOfferSnapshot,
             picked,
+            pickedFromOffer: true,
+            chosenIndex,
+            offerCount: activeOfferSnapshot.offers.length,
             topRecommended: top ? top.key : '',
             matchedRecommendation: !!top && top.key === picked
         });
@@ -1416,12 +1502,15 @@
         const safeStatus = typeof status === 'string' && status.trim() ? status.trim() : 'ended';
         runLogger.append({
             eventType: 'runSummary',
+            schemaVersion: runLogSchemaVersion,
+            appVersion: runLogAppVersion,
             id: `run-summary-${Date.now()}`,
             timestampUtc: new Date().toISOString(),
             runId: runContext.runId,
             context: getRunContext(),
             finalFloor: runContext.floor,
             status: safeStatus,
+            outcome: safeStatus,
             deck: getDeckSnapshotKeys()
         });
     }
@@ -1437,6 +1526,24 @@
         const link = document.createElement('a');
         link.href = url;
         link.download = `spire-helper-run-logs-${Date.now()}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function exportCurrentRunLogs() {
+        if (!runLogger) {
+            return;
+        }
+
+        const filtered = runLogger.read().filter(entry => entry && entry.runId === runContext.runId);
+        const payload = JSON.stringify(filtered, null, 2);
+        const blob = new Blob([payload], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `spire-helper-run-${runContext.runId}-${Date.now()}.json`;
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -1483,10 +1590,60 @@
                         <button id="runFloorStepBtn" type="button" class="action-btn btn-compare" aria-label="Increase floor by one">+1 Floor</button>
                     </div>
                 </div>
+                <div>
+                    <label for="runAscensionInput">Ascension</label>
+                    <input id="runAscensionInput" type="number" min="0" max="20" step="1" class="form-control form-control-sm" aria-label="Ascension level" />
+                </div>
+                <div>
+                    <label for="runNodeTypeSelect">Node</label>
+                    <select id="runNodeTypeSelect" class="form-select form-select-sm" aria-label="Map node type">
+                        <option value="unknown">Unknown</option>
+                        <option value="normal">Normal</option>
+                        <option value="elite">Elite</option>
+                        <option value="boss">Boss</option>
+                        <option value="event">Event</option>
+                        <option value="shop">Shop</option>
+                        <option value="rest">Rest</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="runHpInput">HP</label>
+                    <div class="run-floor-row">
+                        <input id="runHpInput" type="number" min="1" max="999" step="1" class="form-control form-control-sm" aria-label="Current HP" />
+                        <span class="run-inline-separator">/</span>
+                        <input id="runMaxHpInput" type="number" min="1" max="999" step="1" class="form-control form-control-sm" aria-label="Max HP" />
+                    </div>
+                </div>
+                <div>
+                    <label for="runGoldInput">Gold</label>
+                    <input id="runGoldInput" type="number" min="0" max="9999" step="1" class="form-control form-control-sm" aria-label="Gold" />
+                </div>
+                <div>
+                    <label for="runRelicsInput">Relics</label>
+                    <input id="runRelicsInput" type="number" min="0" max="99" step="1" class="form-control form-control-sm" aria-label="Relic count" />
+                </div>
+                <div>
+                    <label for="runPotionsInput">Potions</label>
+                    <input id="runPotionsInput" type="number" min="0" max="10" step="1" class="form-control form-control-sm" aria-label="Potion count" />
+                </div>
+                <div>
+                    <label for="runSeedInput">Seed</label>
+                    <input id="runSeedInput" type="text" class="form-control form-control-sm" aria-label="Run seed" maxlength="40" />
+                </div>
+                <div>
+                    <label for="runOutcomeSelect">Run Outcome</label>
+                    <select id="runOutcomeSelect" class="form-select form-select-sm" aria-label="Run outcome">
+                        <option value="ended">Ended</option>
+                        <option value="victory">Victory</option>
+                        <option value="death">Death</option>
+                        <option value="abandon">Abandon</option>
+                    </select>
+                </div>
             </div>
             <div class="run-log-actions">
                 <button id="startNewRunBtn" type="button" class="action-btn btn-compare">New Run</button>
                 <button id="endRunBtn" type="button" class="action-btn btn-deck">End Run</button>
+                <button id="exportCurrentRunLogsBtn" type="button" class="action-btn btn-deck">Export Active Run</button>
                 <button id="exportRunLogsBtn" type="button" class="action-btn btn-compare">Export Logs</button>
                 <button id="clearRunLogsBtn" type="button" class="action-btn btn-remove">Clear Logs</button>
             </div>`;
@@ -1495,21 +1652,54 @@
         const actSelect = document.getElementById('runActSelect');
         const floorInput = document.getElementById('runFloorInput');
         const floorStepBtn = document.getElementById('runFloorStepBtn');
+        const ascensionInput = document.getElementById('runAscensionInput');
+        const nodeTypeSelect = document.getElementById('runNodeTypeSelect');
+        const hpInput = document.getElementById('runHpInput');
+        const maxHpInput = document.getElementById('runMaxHpInput');
+        const goldInput = document.getElementById('runGoldInput');
+        const relicsInput = document.getElementById('runRelicsInput');
+        const potionsInput = document.getElementById('runPotionsInput');
+        const seedInput = document.getElementById('runSeedInput');
+        const outcomeSelect = document.getElementById('runOutcomeSelect');
         const startNewRunBtn = document.getElementById('startNewRunBtn');
         const endRunBtn = document.getElementById('endRunBtn');
+        const exportCurrentRunBtn = document.getElementById('exportCurrentRunLogsBtn');
         const exportBtn = document.getElementById('exportRunLogsBtn');
         const clearBtn = document.getElementById('clearRunLogsBtn');
 
-        if (!actSelect || !floorInput || !floorStepBtn) {
+        if (!actSelect || !floorInput || !floorStepBtn || !ascensionInput || !nodeTypeSelect || !hpInput || !maxHpInput || !goldInput || !relicsInput || !potionsInput || !seedInput || !outcomeSelect) {
             return;
         }
 
         const syncContextInputs = function () {
             actSelect.value = String(runContext.act);
             floorInput.value = String(runContext.floor);
+            ascensionInput.value = String(runContext.ascension);
+            nodeTypeSelect.value = runContext.nodeType || 'unknown';
+            hpInput.value = String(runContext.currentHp);
+            maxHpInput.value = String(runContext.maxHp);
+            goldInput.value = String(runContext.gold);
+            relicsInput.value = String(runContext.relics);
+            potionsInput.value = String(runContext.potions);
+            seedInput.value = runContext.seed || '';
         };
 
         syncContextInputs();
+
+        const parseContextInputs = function () {
+            runContext.act = Math.max(1, Math.min(3, Number.parseInt(actSelect.value || '1', 10) || 1));
+            runContext.floor = clampRunFloor(floorInput.value || runContext.floor);
+            runContext.ascension = clampAscension(ascensionInput.value || runContext.ascension);
+            runContext.maxHp = clampStatInt(maxHpInput.value, runContext.maxHp, 1, 999);
+            runContext.currentHp = clampStatInt(hpInput.value, runContext.currentHp, 1, runContext.maxHp);
+            runContext.gold = clampStatInt(goldInput.value, runContext.gold, 0, 9999);
+            runContext.relics = clampStatInt(relicsInput.value, runContext.relics, 0, 99);
+            runContext.potions = clampStatInt(potionsInput.value, runContext.potions, 0, 10);
+            runContext.nodeType = typeof nodeTypeSelect.value === 'string' && nodeTypeSelect.value.trim()
+                ? nodeTypeSelect.value.trim()
+                : 'unknown';
+            runContext.seed = (seedInput.value || '').trim();
+        };
 
         const persistAndRender = function () {
             saveRunContext();
@@ -1518,22 +1708,33 @@
             refreshOverlayIfOpen();
         };
 
-        const onActChange = function () {
-            runContext.act = Math.max(1, Math.min(3, Number.parseInt(actSelect.value || '1', 10) || 1));
-            persistAndRender();
-        };
-
-        const onFloorInputChange = function () {
-            runContext.floor = clampRunFloor(floorInput.value || runContext.floor);
+        const onContextChange = function () {
+            parseContextInputs();
             syncContextInputs();
             persistAndRender();
         };
 
-        actSelect.addEventListener('change', onActChange);
-        floorInput.addEventListener('change', onFloorInputChange);
-        floorInput.addEventListener('blur', onFloorInputChange);
+        actSelect.addEventListener('change', onContextChange);
+        floorInput.addEventListener('change', onContextChange);
+        floorInput.addEventListener('blur', onContextChange);
+        ascensionInput.addEventListener('change', onContextChange);
+        ascensionInput.addEventListener('blur', onContextChange);
+        nodeTypeSelect.addEventListener('change', onContextChange);
+        hpInput.addEventListener('change', onContextChange);
+        hpInput.addEventListener('blur', onContextChange);
+        maxHpInput.addEventListener('change', onContextChange);
+        maxHpInput.addEventListener('blur', onContextChange);
+        goldInput.addEventListener('change', onContextChange);
+        goldInput.addEventListener('blur', onContextChange);
+        relicsInput.addEventListener('change', onContextChange);
+        relicsInput.addEventListener('blur', onContextChange);
+        potionsInput.addEventListener('change', onContextChange);
+        potionsInput.addEventListener('blur', onContextChange);
+        seedInput.addEventListener('change', onContextChange);
+        seedInput.addEventListener('blur', onContextChange);
         floorStepBtn.addEventListener('click', function () {
-            runContext.floor = clampRunFloor((Number.parseInt(floorInput.value || String(runContext.floor), 10) || runContext.floor) + 1);
+            parseContextInputs();
+            runContext.floor = clampRunFloor(runContext.floor + 1);
             syncContextInputs();
             persistAndRender();
         });
@@ -1543,6 +1744,14 @@
                 runContext = {
                     act: 1,
                     floor: 1,
+                    ascension: runContext.ascension,
+                    currentHp: runContext.maxHp,
+                    maxHp: runContext.maxHp,
+                    gold: 99,
+                    relics: 1,
+                    potions: 0,
+                    nodeType: 'unknown',
+                    seed: '',
                     runId: createRunId()
                 };
                 activeOfferSnapshot = null;
@@ -1553,11 +1762,15 @@
 
         if (endRunBtn) {
             endRunBtn.addEventListener('click', function () {
-                runContext.floor = clampRunFloor(floorInput.value || runContext.floor);
+                parseContextInputs();
                 syncContextInputs();
                 saveRunContext();
-                recordRunSummary('ended');
+                recordRunSummary(outcomeSelect.value || 'ended');
             });
+        }
+
+        if (exportCurrentRunBtn) {
+            exportCurrentRunBtn.addEventListener('click', exportCurrentRunLogs);
         }
 
         if (exportBtn) {
@@ -3159,7 +3372,7 @@
         });
     }
 
-    async function addToDeck(key, isUpgraded) {
+    async function addToDeck(key, isUpgraded, source) {
         const normalized = normalizeCardKey(key);
         if (!cardCatalog.has(normalized)) {
             return;
@@ -3170,8 +3383,15 @@
             return;
         }
 
+        const offerWasActive = !!activeOfferSnapshot;
         deckState.push(state);
-        recordPickedCard(normalized);
+        const safeSource = typeof source === 'string' && source ? source : 'manualDeckEdit';
+        recordPickedCard(normalized, safeSource);
+        recordDeckMutation('add', normalized, {
+            eventSource: safeSource,
+            isUpgraded: !!state.isUpgraded,
+            pickedFromOffer: safeSource === 'comparisonReward' && offerWasActive
+        });
         await renderCollection(currentDeckGrid, deckState);
         updateCounts();
         if (comparisonState.length > 0) {
@@ -3183,14 +3403,24 @@
     }
 
     async function removeFromDeck(stateIndex, cardKey, isUpgraded) {
+        const normalized = normalizeCardKey(cardKey);
+        let removed = null;
         if (Number.isInteger(stateIndex) && stateIndex >= 0 && stateIndex < deckState.length) {
+            removed = deckState[stateIndex];
             deckState.splice(stateIndex, 1);
         } else {
-            const normalized = normalizeCardKey(cardKey);
             const fallbackIndex = deckState.findLastIndex(entry => getStateCardKey(entry) === normalized && getStateUpgraded(entry) === !!isUpgraded);
             if (fallbackIndex >= 0) {
+                removed = deckState[fallbackIndex];
                 deckState.splice(fallbackIndex, 1);
             }
+        }
+
+        if (removed) {
+            recordDeckMutation('remove', normalized, {
+                eventSource: 'manualDeckEdit',
+                isUpgraded: !!removed.isUpgraded
+            });
         }
 
         await renderCollection(currentDeckGrid, deckState);
@@ -3204,14 +3434,24 @@
     }
 
     async function toggleDeckUpgrade(stateIndex, cardKey, isUpgraded) {
+        const normalized = normalizeCardKey(cardKey);
+        let toggled = null;
         if (Number.isInteger(stateIndex) && stateIndex >= 0 && stateIndex < deckState.length) {
             deckState[stateIndex].isUpgraded = !deckState[stateIndex].isUpgraded;
+            toggled = deckState[stateIndex];
         } else {
-            const normalized = normalizeCardKey(cardKey);
             const fallbackIndex = deckState.findLastIndex(entry => getStateCardKey(entry) === normalized && getStateUpgraded(entry) === !!isUpgraded);
             if (fallbackIndex >= 0) {
                 deckState[fallbackIndex].isUpgraded = !deckState[fallbackIndex].isUpgraded;
+                toggled = deckState[fallbackIndex];
             }
+        }
+
+        if (toggled) {
+            recordDeckMutation('toggleUpgrade', normalized, {
+                eventSource: 'manualDeckEdit',
+                isUpgraded: !!toggled.isUpgraded
+            });
         }
 
         await renderCollection(currentDeckGrid, deckState);
@@ -3378,7 +3618,7 @@
                 await addToComparison(cardKey, showPlus);
             }
             if (action === 'add-deck') {
-                await addToDeck(cardKey, showPlus);
+                await addToDeck(cardKey, showPlus, 'manualDeckEdit');
             }
             return;
         }
@@ -3400,7 +3640,7 @@
             const action = actionButton.getAttribute('data-action');
             const stateIndex = Number.parseInt(item.getAttribute('data-state-index') || '', 10);
             if (action === 'add-deck') {
-                await addToDeck(cardKey, itemIsUpgraded);
+                await addToDeck(cardKey, itemIsUpgraded, 'comparisonReward');
             }
             if (action === 'toggle-upgrade') {
                 await toggleComparisonUpgrade(stateIndex, cardKey, itemIsUpgraded);
@@ -3447,7 +3687,8 @@
         if (!activeOverlayCardKey) {
             return;
         }
-        await addToDeck(activeOverlayCardKey, activeOverlayIsUpgraded);
+        const source = activeOverlaySource === 'comparison' ? 'comparisonReward' : 'manualDeckEdit';
+        await addToDeck(activeOverlayCardKey, activeOverlayIsUpgraded, source);
     });
 
     const clearComparisonBtn = document.getElementById('clearComparisonBtn');
