@@ -73,11 +73,21 @@
     let activeRightPanel = 'comparison';
     let stateIdCounter = 0;
     let activeOfferSnapshot = null;
-    const runContextStorageKey = 'spire-helper-run-context-v1';
+    const runContextStorageKey = 'spire-helper-run-context-v2';
     const runLogger = window.SpireRecommender?.createRunLogger('spire-helper-run-logs-v1') || null;
     let runContext = {
-        act: 1
+        act: 1,
+        floor: 1,
+        runId: ''
     };
+
+    function clampRunFloor(value) {
+        return Math.max(1, Math.min(60, Number.parseInt(value || '1', 10) || 1));
+    }
+
+    function createRunId() {
+        return `run-${Date.now()}-${Math.floor(Math.random() * 1000000).toString(36)}`;
+    }
 
     const cardCatalog = new Map();
     const deckState = Array.from(currentDeckGrid.querySelectorAll('.card-grid-item'))
@@ -1305,15 +1315,28 @@
         try {
             const raw = localStorage.getItem(runContextStorageKey);
             if (!raw) {
+                if (!runContext.runId) {
+                    runContext.runId = createRunId();
+                }
                 return;
             }
 
             const parsed = JSON.parse(raw);
             runContext.act = Math.max(1, Math.min(3, Number.parseInt(parsed.act || 1, 10) || 1));
+            runContext.floor = clampRunFloor(parsed.floor || 1);
+            runContext.runId = typeof parsed.runId === 'string' && parsed.runId.trim()
+                ? parsed.runId.trim()
+                : createRunId();
         } catch {
             runContext = {
-                act: 1
+                act: 1,
+                floor: 1,
+                runId: createRunId()
             };
+        }
+
+        if (!runContext.runId) {
+            runContext.runId = createRunId();
         }
     }
 
@@ -1327,7 +1350,9 @@
 
     function getRunContext() {
         return {
-            act: runContext.act
+            act: runContext.act,
+            floor: runContext.floor,
+            runId: runContext.runId
         };
     }
 
@@ -1345,8 +1370,10 @@
         }
 
         activeOfferSnapshot = {
+            eventType: 'pickOffer',
             id: `offer-${Date.now()}`,
             timestampUtc: new Date().toISOString(),
+            runId: runContext.runId,
             context: getRunContext(),
             deck: getDeckSnapshotKeys(),
             skipScore,
@@ -1379,6 +1406,24 @@
         });
 
         activeOfferSnapshot = null;
+    }
+
+    function recordRunSummary(status) {
+        if (!runLogger) {
+            return;
+        }
+
+        const safeStatus = typeof status === 'string' && status.trim() ? status.trim() : 'ended';
+        runLogger.append({
+            eventType: 'runSummary',
+            id: `run-summary-${Date.now()}`,
+            timestampUtc: new Date().toISOString(),
+            runId: runContext.runId,
+            context: getRunContext(),
+            finalFloor: runContext.floor,
+            status: safeStatus,
+            deck: getDeckSnapshotKeys()
+        });
     }
 
     function exportRunLogs() {
@@ -1423,38 +1468,97 @@
         wrapper.innerHTML = `
             <label for="runActSelect">Run Context</label>
             <div class="run-context-grid">
-                <select id="runActSelect" class="form-select form-select-sm" aria-label="Act selector">
-                    <option value="1">Act 1</option>
-                    <option value="2">Act 2</option>
-                    <option value="3">Act 3</option>
-                </select>
+                <div>
+                    <label for="runActSelect">Act</label>
+                    <select id="runActSelect" class="form-select form-select-sm" aria-label="Act selector">
+                        <option value="1">Act 1</option>
+                        <option value="2">Act 2</option>
+                        <option value="3">Act 3</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="runFloorStepBtn">Total Floor</label>
+                    <div class="run-floor-row">
+                        <input id="runFloorInput" type="number" min="1" max="60" step="1" class="form-control form-control-sm run-floor-value" aria-label="Total floor" />
+                        <button id="runFloorStepBtn" type="button" class="action-btn btn-compare" aria-label="Increase floor by one">+1 Floor</button>
+                    </div>
+                </div>
             </div>
             <div class="run-log-actions">
+                <button id="startNewRunBtn" type="button" class="action-btn btn-compare">New Run</button>
+                <button id="endRunBtn" type="button" class="action-btn btn-deck">End Run</button>
                 <button id="exportRunLogsBtn" type="button" class="action-btn btn-compare">Export Logs</button>
                 <button id="clearRunLogsBtn" type="button" class="action-btn btn-remove">Clear Logs</button>
             </div>`;
         searchBox.appendChild(wrapper);
 
         const actSelect = document.getElementById('runActSelect');
+        const floorInput = document.getElementById('runFloorInput');
+        const floorStepBtn = document.getElementById('runFloorStepBtn');
+        const startNewRunBtn = document.getElementById('startNewRunBtn');
+        const endRunBtn = document.getElementById('endRunBtn');
         const exportBtn = document.getElementById('exportRunLogsBtn');
         const clearBtn = document.getElementById('clearRunLogsBtn');
 
-        if (!actSelect) {
+        if (!actSelect || !floorInput || !floorStepBtn) {
             return;
         }
 
-        actSelect.value = String(runContext.act);
+        const syncContextInputs = function () {
+            actSelect.value = String(runContext.act);
+            floorInput.value = String(runContext.floor);
+        };
 
-        const onContextChange = function () {
-            runContext.act = Math.max(1, Math.min(3, Number.parseInt(actSelect.value || '1', 10) || 1));
+        syncContextInputs();
 
+        const persistAndRender = function () {
             saveRunContext();
             renderCardStrengthSignals();
             renderDeckHealth();
             refreshOverlayIfOpen();
         };
 
-        actSelect.addEventListener('change', onContextChange);
+        const onActChange = function () {
+            runContext.act = Math.max(1, Math.min(3, Number.parseInt(actSelect.value || '1', 10) || 1));
+            persistAndRender();
+        };
+
+        const onFloorInputChange = function () {
+            runContext.floor = clampRunFloor(floorInput.value || runContext.floor);
+            syncContextInputs();
+            persistAndRender();
+        };
+
+        actSelect.addEventListener('change', onActChange);
+        floorInput.addEventListener('change', onFloorInputChange);
+        floorInput.addEventListener('blur', onFloorInputChange);
+        floorStepBtn.addEventListener('click', function () {
+            runContext.floor = clampRunFloor((Number.parseInt(floorInput.value || String(runContext.floor), 10) || runContext.floor) + 1);
+            syncContextInputs();
+            persistAndRender();
+        });
+
+        if (startNewRunBtn) {
+            startNewRunBtn.addEventListener('click', function () {
+                runContext = {
+                    act: 1,
+                    floor: 1,
+                    runId: createRunId()
+                };
+                activeOfferSnapshot = null;
+                syncContextInputs();
+                persistAndRender();
+            });
+        }
+
+        if (endRunBtn) {
+            endRunBtn.addEventListener('click', function () {
+                runContext.floor = clampRunFloor(floorInput.value || runContext.floor);
+                syncContextInputs();
+                saveRunContext();
+                recordRunSummary('ended');
+            });
+        }
 
         if (exportBtn) {
             exportBtn.addEventListener('click', exportRunLogs);

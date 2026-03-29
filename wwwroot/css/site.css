@@ -102,7 +102,7 @@ body {
 
 .run-context-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.45rem;
 }
 
@@ -110,15 +110,29 @@ body {
     margin-top: 0.45rem;
     display: flex;
     gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.run-floor-row {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.run-floor-value {
+    max-width: 6rem;
+    text-align: center;
+    font-weight: 700;
+    color: #ecf2ff;
+    background: rgba(15, 23, 40, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 0.5rem;
+    padding: 0.26rem 0.45rem;
 }
 
 @media (max-width: 992px) {
     .run-context-grid {
         grid-template-columns: 1fr;
-    }
-
-    .run-log-actions {
-        flex-wrap: wrap;
     }
 }
 
