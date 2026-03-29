@@ -106,6 +106,15 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.24);
 }
 
+.strength-context-row input:disabled,
+.strength-context-row select:disabled,
+.strength-context-row input[readonly] {
+    background: rgba(15, 23, 40, 0.95) !important;
+    color: #ecf2ff !important;
+    opacity: 1;
+    -webkit-text-fill-color: #ecf2ff;
+}
+
 .run-context-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -141,9 +150,237 @@ body {
     color: #9fb6df;
 }
 
+.journey-flow {
+    margin-top: 0.55rem;
+    border: 1px solid rgba(121, 178, 255, 0.35);
+    background: rgba(14, 24, 44, 0.72);
+    border-radius: 0.65rem;
+    padding: 0.55rem;
+}
+
+.journey-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.journey-chip {
+    border-radius: 999px;
+    border: 1px solid rgba(148, 174, 219, 0.38);
+    background: rgba(31, 44, 66, 0.8);
+    color: #b7c8e8;
+    font-size: 0.68rem;
+    letter-spacing: 0.3px;
+    padding: 0.15rem 0.55rem;
+    font-weight: 700;
+}
+
+.journey-chip.is-active {
+    border-color: rgba(103, 198, 255, 0.78);
+    color: #eaf6ff;
+    background: rgba(33, 87, 144, 0.72);
+}
+
+.journey-status {
+    margin: 0.4rem 0 0;
+    color: #d4e6ff;
+    font-size: 0.74rem;
+}
+
+.journey-actions {
+    margin-top: 0.4rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+body[data-journey-step="context"] .card-columns {
+    grid-template-columns: 1fr;
+    height: calc(100vh - 120px);
+}
+
+body[data-journey-step="context"] .right-panels,
+body[data-journey-step="context"] .all-cards-section > h2,
+body[data-journey-step="context"] .all-cards-section > #allCardsPanel,
+body[data-journey-step="context"] .search-topline,
+body[data-journey-step="context"] #cardSearchInput,
+body[data-journey-step="context"] #uiHelpPanel {
+    display: none;
+}
+
+body[data-journey-step="context"] .all-cards-section {
+    display: flex;
+    min-height: 100%;
+}
+
+body[data-journey-step="context"] .all-cards-section .search-box {
+    min-height: 100%;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 1180px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    border-radius: 1rem;
+    border-color: rgba(126, 185, 255, 0.45);
+    background: linear-gradient(165deg, rgba(12, 22, 40, 0.92) 0%, rgba(18, 30, 52, 0.88) 100%);
+    box-shadow: 0 20px 70px rgba(1, 7, 18, 0.45), inset 0 0 0 1px rgba(141, 187, 255, 0.12);
+}
+
+body[data-journey-step="context"] #journeyFlowControls {
+    margin-top: auto;
+}
+
+body[data-journey-step="context"] .journey-actions {
+    justify-content: flex-end;
+}
+
+body[data-journey-step="context"] #runContextControls {
+    margin-top: 0;
+}
+
+body[data-journey-step="context"] #runContextControls > label,
+body[data-journey-step="context"] #journeyFlowControls .journey-status {
+    font-size: 0.9rem;
+}
+
+body[data-journey-step="context"] #runContextControls .run-context-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+
+body[data-journey-step="context"] #runContextControls input,
+body[data-journey-step="context"] #runContextControls select {
+    min-height: 2.7rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+body[data-journey-step="context"] #runContextControls .run-floor-value {
+    max-width: 7.6rem;
+}
+
+body[data-journey-step="context"] #runContextControls .run-log-actions {
+    margin-top: 0.75rem;
+}
+
+body[data-journey-step="context"] #runContextControls .run-log-actions .action-btn {
+    min-height: 2.45rem;
+    font-size: 0.82rem;
+    padding: 0.45rem 0.85rem;
+}
+
+body[data-journey-step="context"] #journeyFlowControls {
+    margin-top: 0.8rem;
+    border-radius: 0.9rem;
+    border-color: rgba(138, 193, 255, 0.56);
+    background: linear-gradient(165deg, rgba(20, 44, 74, 0.7) 0%, rgba(14, 33, 57, 0.75) 100%);
+}
+
+body[data-journey-step="context"] #journeyFlowControls .journey-chip {
+    font-size: 0.76rem;
+    padding: 0.24rem 0.72rem;
+}
+
+body[data-journey-step="context"] #journeyFlowControls .journey-actions {
+    margin-top: 0.7rem;
+    justify-content: flex-end;
+}
+
+body[data-journey-step="context"] #journeyFlowControls .journey-actions .action-btn {
+    min-height: 2.8rem;
+    font-size: 0.9rem;
+    padding: 0.55rem 1.1rem;
+}
+
+body[data-journey-step="context"] #journeyToRewardBtn {
+    min-width: min(460px, 100%);
+}
+
+body[data-journey-step="reward"] .right-panel-tabs,
+body[data-journey-step="reward"] .deck-panel,
+body[data-journey-step="reward"] #runContextControls {
+    display: none;
+}
+
+body[data-journey-step="reward"] .panel-split {
+    grid-template-rows: 1fr;
+}
+
+body[data-journey-step="reward"] .card-columns {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    height: calc(100vh - 120px);
+}
+
+body[data-journey-step="decision"] .right-panel-tabs,
+body[data-journey-step="decision"] .deck-panel,
+body[data-journey-step="decision"] #runContextControls {
+    display: none;
+}
+
+body[data-journey-step="decision"] .all-cards-section > h2,
+body[data-journey-step="decision"] .all-cards-section > #allCardsPanel,
+body[data-journey-step="decision"] .search-topline,
+body[data-journey-step="decision"] #cardSearchInput,
+body[data-journey-step="decision"] #uiHelpPanel {
+    display: none;
+}
+
+body[data-journey-step="decision"] .all-cards-section {
+    display: flex;
+    min-height: 0;
+}
+
+body[data-journey-step="decision"] .all-cards-section .search-box {
+    margin: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+
+body[data-journey-step="decision"] .card-columns {
+    grid-template-columns: 1fr;
+    height: calc(100vh - 120px);
+}
+
+body[data-journey-step="decision"] .right-panels,
+body[data-journey-step="decision"] .panel-split,
+body[data-journey-step="decision"] .comparison-panel,
+body[data-journey-step="decision"] #comparisonPanel {
+    height: 100%;
+}
+
 @media (max-width: 992px) {
     .run-context-grid {
         grid-template-columns: 1fr;
+    }
+
+    body[data-journey-step="context"] .card-columns {
+        height: auto;
+        min-height: calc(100vh - 95px);
+    }
+
+    body[data-journey-step="context"] .all-cards-section .search-box {
+        justify-content: flex-start;
+        min-height: calc(100vh - 120px);
+    }
+
+    body[data-journey-step="context"] #runContextControls .run-context-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body[data-journey-step="context"] #journeyFlowControls .journey-actions,
+    body[data-journey-step="context"] .journey-actions {
+        justify-content: stretch;
+    }
+
+    body[data-journey-step="context"] #journeyFlowControls .journey-actions .action-btn,
+    body[data-journey-step="context"] #journeyToRewardBtn {
+        width: 100%;
+        min-width: 0;
     }
 }
 
