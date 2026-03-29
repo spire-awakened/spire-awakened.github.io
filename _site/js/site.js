@@ -95,37 +95,8 @@
         return Math.max(1, Math.min(60, Number.parseInt(value || '1', 10) || 1));
     }
 
-    function deriveActFromFloor(floorValue) {
-        const floor = clampRunFloor(floorValue);
-        if (floor <= 16) {
-            return 1;
-        }
-        if (floor <= 32) {
-            return 2;
-        }
-
-        return 3;
-    }
-
-    function setFloorFromAct(targetAct) {
-        const safeAct = Math.max(1, Math.min(3, Number.parseInt(targetAct || '1', 10) || 1));
-        const floorInAct = Math.max(1, Math.min(16, ((clampRunFloor(runContext.floor) - 1) % 16) + 1));
-        runContext.floor = ((safeAct - 1) * 16) + floorInAct;
-        syncActFromFloor();
-    }
-
-    function syncActFromFloor() {
-        runContext.floor = clampRunFloor(runContext.floor);
-        runContext.act = deriveActFromFloor(runContext.floor);
-    }
-
-    function advanceRunFloor() {
-        runContext.floor = clampRunFloor(runContext.floor + 1);
-        syncActFromFloor();
-    }
-
     function clampAscension(value) {
-        return Math.max(0, Math.min(10, Number.parseInt(value || '0', 10) || 0));
+        return Math.max(0, Math.min(20, Number.parseInt(value || '0', 10) || 0));
     }
 
     function clampStatInt(value, fallback, min, max) {
@@ -146,117 +117,6 @@
         .map(item => createCardState(item.getAttribute('data-card-key'), false))
         .filter(Boolean);
     const comparisonState = [];
-    let journeyStep = 'context';
-
-    function getJourneyStatusText(step) {
-        if (step === 'reward') {
-            return 'Step 2: Choose exactly 3 reward cards using Compare.';
-        }
-
-        if (step === 'decision') {
-            return 'Step 3: Pick one of those cards or press Skip Reward.';
-        }
-
-        return 'Step 1: Enter floor and run context first, then continue to reward setup.';
-    }
-
-    function setJourneyStatusText(message) {
-        const status = document.getElementById('journeyStatusText');
-        if (!status) {
-            return;
-        }
-
-        status.textContent = message || getJourneyStatusText(journeyStep);
-    }
-
-    async function handleSkipRewardAction(reason) {
-        const logged = recordSkippedReward(reason || 'userSkip');
-        await clearComparison();
-        if (logged) {
-            advanceRunFloor();
-            saveRunContext();
-            refreshRunContextControlValues();
-        }
-        setJourneyStep('context', logged
-            ? 'Reward skipped and logged. Floor advanced by 1; adjust floor manually if needed.'
-            : 'No active reward snapshot found. Build reward choices first.');
-    }
-
-    function syncJourneyUI() {
-        const wrapper = document.getElementById('journeyFlowControls');
-        if (!wrapper) {
-            return;
-        }
-
-        wrapper.setAttribute('data-step', journeyStep);
-
-        const contextChip = document.getElementById('journeyChipContext');
-        const rewardChip = document.getElementById('journeyChipReward');
-        const decisionChip = document.getElementById('journeyChipDecision');
-        const toRewardBtn = document.getElementById('journeyToRewardBtn');
-        const toDecisionBtn = document.getElementById('journeyToDecisionBtn');
-        const rewardResetBtn = document.getElementById('journeyResetRewardBtn');
-        const decisionBackBtn = document.getElementById('journeyBackToRewardBtn');
-        const decisionSkipBtn = document.getElementById('journeySkipRewardBtn');
-        const inlineSkipBtn = document.getElementById('journeySkipInlineBtn');
-
-        [contextChip, rewardChip, decisionChip].forEach(chip => {
-            if (chip) {
-                chip.classList.remove('is-active');
-            }
-        });
-
-        if (journeyStep === 'context' && contextChip) {
-            contextChip.classList.add('is-active');
-        }
-        if (journeyStep === 'reward' && rewardChip) {
-            rewardChip.classList.add('is-active');
-        }
-        if (journeyStep === 'decision' && decisionChip) {
-            decisionChip.classList.add('is-active');
-        }
-
-        if (toRewardBtn) {
-            toRewardBtn.hidden = journeyStep !== 'context';
-        }
-
-        if (toDecisionBtn) {
-            toDecisionBtn.hidden = journeyStep !== 'reward';
-            toDecisionBtn.disabled = comparisonState.length !== 3;
-        }
-
-        if (rewardResetBtn) {
-            rewardResetBtn.hidden = journeyStep !== 'reward';
-        }
-
-        if (decisionBackBtn) {
-            decisionBackBtn.hidden = journeyStep !== 'decision';
-        }
-
-        if (decisionSkipBtn) {
-            decisionSkipBtn.hidden = journeyStep !== 'decision';
-            decisionSkipBtn.disabled = comparisonState.length !== 3;
-        }
-
-        if (inlineSkipBtn) {
-            inlineSkipBtn.hidden = journeyStep !== 'decision';
-            inlineSkipBtn.disabled = comparisonState.length !== 3;
-        }
-    }
-
-    function setJourneyStep(step, message) {
-        if (step === 'reward' && journeyStep === 'context') {
-            setActiveRightPanel('comparison');
-        }
-
-        journeyStep = step === 'reward' || step === 'decision' ? step : 'context';
-        document.body.setAttribute('data-journey-step', journeyStep);
-        if (journeyStep === 'reward' || journeyStep === 'decision') {
-            setActiveRightPanel('comparison');
-        }
-        syncJourneyUI();
-        setJourneyStatusText(message || getJourneyStatusText(journeyStep));
-    }
 
     function createCardState(cardKey, isUpgraded) {
         const normalized = normalizeCardKey(cardKey);
@@ -646,7 +506,6 @@
         comparisonEmpty.hidden = comparisonState.length > 0;
         renderDeckHealth();
         renderSynergyHighlights();
-        syncJourneyUI();
     }
 
     function clampScore(value) {
@@ -1502,7 +1361,6 @@
             runContext.runId = typeof parsed.runId === 'string' && parsed.runId.trim()
                 ? parsed.runId.trim()
                 : createRunId();
-            syncActFromFloor();
         } catch {
             runContext = {
                 act: 1,
@@ -1517,14 +1375,11 @@
                 seed: '',
                 runId: createRunId()
             };
-            syncActFromFloor();
         }
 
         if (!runContext.runId) {
             runContext.runId = createRunId();
         }
-
-        syncActFromFloor();
     }
 
     function saveRunContext() {
@@ -1549,42 +1404,6 @@
             seed: runContext.seed,
             runId: runContext.runId
         };
-    }
-
-    function refreshRunContextControlValues() {
-        const actSelect = document.getElementById('runActSelect');
-        const floorInput = document.getElementById('runFloorInput');
-        const floorStepBtn = document.getElementById('runFloorStepBtn');
-        const ascensionInput = document.getElementById('runAscensionInput');
-        const nodeTypeSelect = document.getElementById('runNodeTypeSelect');
-        const hpInput = document.getElementById('runHpInput');
-        const maxHpInput = document.getElementById('runMaxHpInput');
-        const goldInput = document.getElementById('runGoldInput');
-        const relicsInput = document.getElementById('runRelicsInput');
-        const potionsInput = document.getElementById('runPotionsInput');
-        const seedInput = document.getElementById('runSeedInput');
-
-        if (!actSelect || !floorInput || !floorStepBtn || !ascensionInput || !nodeTypeSelect || !hpInput || !maxHpInput || !goldInput || !relicsInput || !potionsInput || !seedInput) {
-            return;
-        }
-
-        syncActFromFloor();
-        actSelect.value = String(runContext.act);
-        floorInput.value = String(runContext.floor);
-        ascensionInput.value = String(runContext.ascension);
-        nodeTypeSelect.value = runContext.nodeType || 'unknown';
-        hpInput.value = String(runContext.currentHp);
-        maxHpInput.value = String(runContext.maxHp);
-        goldInput.value = String(runContext.gold);
-        relicsInput.value = String(runContext.relics);
-        potionsInput.value = String(runContext.potions);
-        seedInput.value = runContext.seed || '';
-
-        actSelect.disabled = false;
-        floorInput.readOnly = false;
-        floorStepBtn.hidden = true;
-        floorStepBtn.disabled = true;
-        ascensionInput.disabled = runContext.floor > 1;
     }
 
     function recordDeckMutation(action, cardKey, details) {
@@ -1647,11 +1466,11 @@
 
     function recordPickedCard(cardKey, source) {
         if (!runLogger || !activeOfferSnapshot) {
-            return false;
+            return;
         }
 
         if (source !== 'comparisonReward') {
-            return false;
+            return;
         }
 
         const picked = normalizeCardKey(cardKey);
@@ -1659,7 +1478,7 @@
         const chosenIndex = activeOfferSnapshot.offers.findIndex(option => option.key === picked);
         if (chosenIndex < 0) {
             activeOfferSnapshot = null;
-            return false;
+            return;
         }
 
         runLogger.append({
@@ -1673,29 +1492,6 @@
         });
 
         activeOfferSnapshot = null;
-        return true;
-    }
-
-    function recordSkippedReward(reason) {
-        if (!runLogger || !activeOfferSnapshot) {
-            return false;
-        }
-
-        const top = activeOfferSnapshot.offers[0] || null;
-        runLogger.append({
-            ...activeOfferSnapshot,
-            picked: 'SKIP',
-            skipped: true,
-            skipReason: reason || 'userSkip',
-            pickedFromOffer: false,
-            chosenIndex: -1,
-            offerCount: activeOfferSnapshot.offers.length,
-            topRecommended: top ? top.key : '',
-            matchedRecommendation: false
-        });
-
-        activeOfferSnapshot = null;
-        return true;
     }
 
     function recordRunSummary(status) {
@@ -1796,7 +1592,7 @@
                 </div>
                 <div>
                     <label for="runAscensionInput">Ascension</label>
-                    <input id="runAscensionInput" type="number" min="0" max="10" step="1" class="form-control form-control-sm" aria-label="Ascension level" />
+                    <input id="runAscensionInput" type="number" min="0" max="20" step="1" class="form-control form-control-sm" aria-label="Ascension level" />
                 </div>
                 <div>
                     <label for="runNodeTypeSelect">Node</label>
@@ -1876,22 +1672,24 @@
         }
 
         const syncContextInputs = function () {
-            refreshRunContextControlValues();
+            actSelect.value = String(runContext.act);
+            floorInput.value = String(runContext.floor);
+            ascensionInput.value = String(runContext.ascension);
+            nodeTypeSelect.value = runContext.nodeType || 'unknown';
+            hpInput.value = String(runContext.currentHp);
+            maxHpInput.value = String(runContext.maxHp);
+            goldInput.value = String(runContext.gold);
+            relicsInput.value = String(runContext.relics);
+            potionsInput.value = String(runContext.potions);
+            seedInput.value = runContext.seed || '';
         };
 
         syncContextInputs();
 
         const parseContextInputs = function () {
+            runContext.act = Math.max(1, Math.min(3, Number.parseInt(actSelect.value || '1', 10) || 1));
             runContext.floor = clampRunFloor(floorInput.value || runContext.floor);
-            const selectedAct = Math.max(1, Math.min(3, Number.parseInt(actSelect.value || String(runContext.act), 10) || runContext.act));
-            if (selectedAct !== deriveActFromFloor(runContext.floor)) {
-                setFloorFromAct(selectedAct);
-            } else {
-                syncActFromFloor();
-            }
-            if (runContext.floor <= 1) {
-                runContext.ascension = clampAscension(ascensionInput.value || runContext.ascension);
-            }
+            runContext.ascension = clampAscension(ascensionInput.value || runContext.ascension);
             runContext.maxHp = clampStatInt(maxHpInput.value, runContext.maxHp, 1, 999);
             runContext.currentHp = clampStatInt(hpInput.value, runContext.currentHp, 1, runContext.maxHp);
             runContext.gold = clampStatInt(goldInput.value, runContext.gold, 0, 9999);
@@ -1935,7 +1733,10 @@
         seedInput.addEventListener('change', onContextChange);
         seedInput.addEventListener('blur', onContextChange);
         floorStepBtn.addEventListener('click', function () {
-            // Floor progression is automatic after reward decisions.
+            parseContextInputs();
+            runContext.floor = clampRunFloor(runContext.floor + 1);
+            syncContextInputs();
+            persistAndRender();
         });
 
         if (startNewRunBtn) {
@@ -1953,7 +1754,6 @@
                     seed: '',
                     runId: createRunId()
                 };
-                syncActFromFloor();
                 activeOfferSnapshot = null;
                 syncContextInputs();
                 persistAndRender();
@@ -1979,100 +1779,6 @@
         if (clearBtn) {
             clearBtn.addEventListener('click', clearRunLogs);
         }
-    }
-
-    function initJourneyFlowControls() {
-        const searchBox = document.querySelector('.search-box');
-        if (!searchBox || document.getElementById('journeyFlowControls')) {
-            return;
-        }
-
-        const wrapper = document.createElement('div');
-        wrapper.id = 'journeyFlowControls';
-        wrapper.className = 'journey-flow';
-        wrapper.innerHTML = `
-            <div class="journey-steps" role="list" aria-label="Reward workflow steps">
-                <span id="journeyChipContext" class="journey-chip is-active" role="listitem">1. Floor and Context</span>
-                <span id="journeyChipReward" class="journey-chip" role="listitem">2. Reward Setup</span>
-                <span id="journeyChipDecision" class="journey-chip" role="listitem">3. Pick or Skip</span>
-            </div>
-            <p id="journeyStatusText" class="journey-status"></p>
-            <div class="journey-actions">
-                <button id="journeyToRewardBtn" type="button" class="action-btn btn-compare">Continue to Reward Setup</button>
-                <button id="journeyToDecisionBtn" type="button" class="action-btn btn-deck" hidden>Continue to Decision</button>
-                <button id="journeyResetRewardBtn" type="button" class="action-btn btn-remove" hidden>Reset Reward Choices</button>
-                <button id="journeyBackToRewardBtn" type="button" class="action-btn btn-compare" hidden>Back to Reward Setup</button>
-                <button id="journeySkipRewardBtn" type="button" class="action-btn btn-remove" hidden>Skip Reward</button>
-            </div>`;
-        searchBox.appendChild(wrapper);
-
-        const toRewardBtn = document.getElementById('journeyToRewardBtn');
-        const toDecisionBtn = document.getElementById('journeyToDecisionBtn');
-        const resetRewardBtn = document.getElementById('journeyResetRewardBtn');
-        const backToRewardBtn = document.getElementById('journeyBackToRewardBtn');
-        const skipRewardBtn = document.getElementById('journeySkipRewardBtn');
-        const clearComparisonBtn = document.getElementById('clearComparisonBtn');
-
-        if (clearComparisonBtn && !document.getElementById('journeySkipInlineBtn')) {
-            const inlineSkipBtn = document.createElement('button');
-            inlineSkipBtn.id = 'journeySkipInlineBtn';
-            inlineSkipBtn.type = 'button';
-            inlineSkipBtn.className = 'action-btn btn-remove';
-            inlineSkipBtn.textContent = 'Skip Reward';
-            inlineSkipBtn.hidden = true;
-            inlineSkipBtn.disabled = true;
-            inlineSkipBtn.style.fontSize = '0.75rem';
-            inlineSkipBtn.style.padding = '0.25rem 0.6rem';
-            inlineSkipBtn.style.whiteSpace = 'nowrap';
-            clearComparisonBtn.insertAdjacentElement('afterend', inlineSkipBtn);
-        }
-
-        const inlineSkipBtn = document.getElementById('journeySkipInlineBtn');
-
-        if (toRewardBtn) {
-            toRewardBtn.addEventListener('click', function () {
-                setJourneyStep('reward');
-            });
-        }
-
-        if (toDecisionBtn) {
-            toDecisionBtn.addEventListener('click', function () {
-                if (comparisonState.length !== 3) {
-                    setJourneyStatusText('Select exactly 3 reward cards before moving to decision.');
-                    return;
-                }
-
-                renderCardStrengthSignals();
-                setJourneyStep('decision');
-            });
-        }
-
-        if (resetRewardBtn) {
-            resetRewardBtn.addEventListener('click', async function () {
-                await clearComparison();
-                setJourneyStatusText('Reward choices reset. Choose exactly 3 cards.');
-            });
-        }
-
-        if (backToRewardBtn) {
-            backToRewardBtn.addEventListener('click', function () {
-                setJourneyStep('reward');
-            });
-        }
-
-        if (skipRewardBtn) {
-            skipRewardBtn.addEventListener('click', async function () {
-                await handleSkipRewardAction('userSkip');
-            });
-        }
-
-        if (inlineSkipBtn) {
-            inlineSkipBtn.addEventListener('click', async function () {
-                await handleSkipRewardAction('inlineSkip');
-            });
-        }
-
-        setJourneyStep('context');
     }
 
     function getCardLabel(cardKey) {
@@ -3677,20 +3383,10 @@
             return;
         }
 
-        const safeSource = typeof source === 'string' && source ? source : 'manualDeckEdit';
-        if (safeSource === 'comparisonReward' && journeyStep !== 'decision') {
-            setJourneyStatusText('Move to Step 3 before finalizing a reward pick.');
-            return;
-        }
-
-        if (safeSource === 'comparisonReward' && comparisonState.length !== 3) {
-            setJourneyStatusText('Step 3 requires exactly 3 reward cards in comparison.');
-            return;
-        }
-
         const offerWasActive = !!activeOfferSnapshot;
         deckState.push(state);
-        const pickedLogged = recordPickedCard(normalized, safeSource);
+        const safeSource = typeof source === 'string' && source ? source : 'manualDeckEdit';
+        recordPickedCard(normalized, safeSource);
         recordDeckMutation('add', normalized, {
             eventSource: safeSource,
             isUpgraded: !!state.isUpgraded,
@@ -3704,16 +3400,6 @@
         renderCardStrengthSignals();
         refreshOverlayIfOpen();
         requestAnimationFrame(() => renderCardStrengthSignals());
-
-        if (safeSource === 'comparisonReward') {
-            await clearComparison();
-            advanceRunFloor();
-            setJourneyStep('context', pickedLogged
-                ? 'Reward pick logged. Floor advanced by 1; adjust floor manually if needed.'
-                : 'Card added but pick was not logged as a valid reward choice.');
-            saveRunContext();
-            refreshRunContextControlValues();
-        }
     }
 
     async function removeFromDeck(stateIndex, cardKey, isUpgraded) {
@@ -3779,16 +3465,6 @@
     }
 
     async function addToComparison(key, isUpgraded) {
-        if (journeyStep !== 'reward') {
-            setJourneyStatusText('Enter Step 2 Reward Setup before adding comparison cards.');
-            return;
-        }
-
-        if (comparisonState.length >= 3) {
-            setJourneyStatusText('Reward setup already has 3 cards. Continue to decision or reset.');
-            return;
-        }
-
         const normalized = normalizeCardKey(key);
         if (!cardCatalog.has(normalized)) {
             return;
@@ -3805,12 +3481,6 @@
         renderCardStrengthSignals();
         refreshOverlayIfOpen();
         requestAnimationFrame(() => renderCardStrengthSignals());
-
-        if (comparisonState.length === 3) {
-            setJourneyStatusText('Reward setup complete. Continue to decision.');
-        } else {
-            setJourneyStatusText(`Reward setup: ${comparisonState.length}/3 cards selected.`);
-        }
     }
 
     async function clearComparison() {
@@ -3820,23 +3490,6 @@
         renderCardStrengthSignals();
         refreshOverlayIfOpen();
         requestAnimationFrame(() => renderCardStrengthSignals());
-    }
-
-    async function pickComparisonByIndex(index) {
-        if (journeyStep !== 'decision') {
-            return;
-        }
-
-        if (!Number.isInteger(index) || index < 0 || index >= comparisonState.length) {
-            return;
-        }
-
-        const stateEntry = comparisonState[index];
-        if (!stateEntry) {
-            return;
-        }
-
-        await addToDeck(getStateCardKey(stateEntry), getStateUpgraded(stateEntry), 'comparisonReward');
     }
 
     async function toggleComparisonUpgrade(stateIndex, cardKey, isUpgraded) {
@@ -4230,7 +3883,6 @@
 
     loadRunContext();
     initRunContextControls();
-    initJourneyFlowControls();
 
     document.body.classList.remove('ui-preset-review');
     document.body.classList.add('ui-preset-focus');
@@ -4257,23 +3909,6 @@
         if (pressedKey === toggleKey) {
             event.preventDefault();
             await setUpgradeMode(!showPlus, true);
-            return;
-        }
-
-        if (journeyStep === 'decision' && ['1', '2', '3'].includes(pressedKey)) {
-            event.preventDefault();
-            await pickComparisonByIndex(Number.parseInt(pressedKey, 10) - 1);
-            return;
-        }
-
-        if (journeyStep === 'decision' && pressedKey === 's') {
-            event.preventDefault();
-            await handleSkipRewardAction('hotkeySkip');
-            return;
-        }
-
-        if (journeyStep === 'context' && pressedKey === 'n') {
-            // Floor progression is automatic after reward decisions.
         }
     });
 })();
